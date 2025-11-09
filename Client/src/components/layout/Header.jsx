@@ -9,25 +9,25 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-2xl font-bold text-primary">
+        <Link to="/" className="text-2xl font-bold text-primary">
           AuctionHub
         </Link>
 
         <nav className="hidden md:flex gap-8">
           <Link
-            href="/browse"
+            to="/browse"
             className="text-sm font-medium hover:text-primary transition"
           >
             Browse
           </Link>
           <Link
-            href="/selling"
+            to="/selling"
             className="text-sm font-medium hover:text-primary transition"
           >
             Sell
           </Link>
           <Link
-            href="/my-bids"
+            to="/my-bids"
             className="text-sm font-medium hover:text-primary transition"
           >
             My Bids
