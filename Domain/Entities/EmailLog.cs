@@ -6,7 +6,7 @@ namespace Domain.Entities
         public string Description { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
 
-        public int ReceiverId { get; set; }
+        public Guid ReceiverId { get; set; }
         public User Receiver { get; set; } = null!;
     }
 }

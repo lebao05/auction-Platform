@@ -4,12 +4,12 @@ namespace Domain.Entities
 {
     public class AutomatedBidding : BaseEntity
     {
-        public decimal MaxBidAmount { get; set; }
+        public long MaxBidAmount { get; set; }
 
-        public int ProductId { get; set; }
+        public Guid ProductId { get; set; }
         public Product Product { get; set; } = null!;
 
-        public int BidderId { get; set; }
+        public Guid BidderId { get; set; }
         public User Bidder { get; set; } = null!;
     }
 }

@@ -1,13 +1,14 @@
 ﻿using Domain.Common;
+using Domain.Enums;
 
 namespace Domain.Entities 
 {
-    internal class SellerRequest :BaseEntity
+    public class SellerRequest :BaseEntity
     {
         public DateTime CreatedAt { get; set; }
         public RequestStatus Status { get; set; }
 
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public User User { get; set; } = null!;
     }
 }
