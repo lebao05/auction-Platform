@@ -53,11 +53,11 @@ namespace Infraestructure.Persistence.Contexts
             builder.Entity<IdentityUserClaim<Guid>>().ToTable("AspNetUserClaims");
             builder.Entity<IdentityUserLogin<Guid>>().ToTable("AspNetUserLogins");
             builder.Entity<IdentityRoleClaim<Guid>>().ToTable("AspNetRoleClaims");
-            builder.Entity<IdentityUserToken<Guid>>().ToTable("AspNetUserTokens"); 
+            builder.Entity<IdentityUserToken<Guid>>().ToTable("AspNetUserTokens");
             builder.Entity<IdentityRole<Guid>>().HasData(
-                new IdentityRole<Guid> { Id = Guid.NewGuid(), Name = "Bidder", NormalizedName = "BIDDER" },
-                new IdentityRole<Guid> { Id = Guid.NewGuid(), Name = "Seller", NormalizedName = "SELLER" },
-                new IdentityRole<Guid> { Id = Guid.NewGuid(), Name = "Admin", NormalizedName = "ADMIN" }
+                new IdentityRole<Guid> { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "Bidder", NormalizedName = "BIDDER" },
+                new IdentityRole<Guid> { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), Name = "Seller", NormalizedName = "SELLER" },
+                new IdentityRole<Guid> { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Name = "Admin", NormalizedName = "ADMIN" }
             );
             builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }

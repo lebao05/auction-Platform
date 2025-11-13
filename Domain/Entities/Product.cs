@@ -5,16 +5,13 @@ namespace Domain.Entities
     {
         public string Name { get; set; } = string.Empty;
         public long? BuyNowPrice { get; set; }
-        public bool MultipleBidIncrement { get; set; }
+        public bool AllowAll { get; set; } = true;
         public int BiddingCount { get; set; } = 0;
         public long CurrentMaxBidAmount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public bool IsAutomaticallyRenewed { get; set; }
-
         public Guid SellerId { get; set; }
         public User Seller { get; set; } = null!;
-
         public Guid CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 

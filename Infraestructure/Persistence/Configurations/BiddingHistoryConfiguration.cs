@@ -14,7 +14,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasOne(bh => bh.Product)
                 .WithMany(p => p.BiddingHistories)
                 .HasForeignKey(bh => bh.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(bh => bh.Bidder)
                 .WithMany(u => u.BiddingHistories)

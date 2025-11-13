@@ -37,7 +37,7 @@ namespace Infraestructure.Persistence.Configurations
             builder.HasMany(p => p.BiddingHistories)
                 .WithOne(bh => bh.Product)
                 .HasForeignKey(bh => bh.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(p => p.Comments)
                 .WithOne(c => c.Product)
@@ -47,7 +47,7 @@ namespace Infraestructure.Persistence.Configurations
             builder.HasMany(p => p.Blacklists)
                 .WithOne(b => b.Product)
                 .HasForeignKey(b => b.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }
