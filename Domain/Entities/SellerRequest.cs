@@ -5,7 +5,6 @@ namespace Domain.Entities
 {
     public class SellerRequest :BaseEntity
     {
-        public DateTime CreatedAt { get; set; }
         public RequestStatus Status { get; set; }
 
         public Guid UserId { get; set; }

@@ -16,10 +16,12 @@ namespace Domain.Entities
         public ICollection<Rating> RatingsGiven { get; set; } = new List<Rating>();
         public ICollection<Rating> RatingsReceived { get; set; } = new List<Rating>();
         public ICollection<Comment> CommentsAsReplier { get;set; } = new List<Comment>();
+        public ICollection<ConversationParticipant> ConversationParticipants { get; set; } = new List<ConversationParticipant>();
         //public ICollection<Blacklist> BlacklistedIn { get; set; } = new List<Blacklist>();
         //public ICollection<OrderCompletion> OrdersAsSeller { get; set; } = new List<OrderCompletion>();
         //public ICollection<OrderCompletion> OrdersAsBuyer { get; set; } = new List<OrderCompletion>();
         //public ICollection<OrderChatMessage> SentMessages { get; set; } = new List<OrderChatMessage>();
         public SellerRequest? SellerRequest { get; set; }
+
     }
 }
