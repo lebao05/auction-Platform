@@ -1,11 +1,13 @@
 ﻿using Application.Abstractions;
 using Application.Abstractions.Messaging;
+using Domain.Entities;
 using Domain.Shared;
+using MediatR;
 
 namespace Application.User.Commands.Create
 {
     public sealed class RegisterCommandHandler
-        : ICommandHandler<RegisterCommand,Guid>
+        : ICommandHandler<RegisterCommand, Guid>
     {
         private readonly IUserHelper _userHelper;
 
@@ -14,22 +16,23 @@ namespace Application.User.Commands.Create
             _userHelper = userHelper;
         }
 
-        public async Task<Result> Handle(RegisterCommand request, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
-            var identityResult = await _userHelper.CreateUserAsync(
-                request.fullname,
+            var user = new AppUser
+            (
+                request.username,
                 request.email,
-                request.password
+                request.email
             );
+            var identityResult = await _userHelper.CreateUserAsync(user, request.password);
 
             if (identityResult.Succeeded)
             {
-                return Result.Success();
+                return Result.Success(user.Id);
             }
 
-            // Convert IdentityErrors → Domain Result failure
-            var errors = identityResult.Errors.Select(e => e.Description).ToArray();
-            return Result.Failure(errors);
+            var error = identityResult.Errors.Select(e => e.Description).FirstOrDefault() ?? "Unknown error";
+            return Result.Failure<Guid>(new Domain.Shared.Error("AppUser.CreatingAccount", error)) ;
         }
     }
 }

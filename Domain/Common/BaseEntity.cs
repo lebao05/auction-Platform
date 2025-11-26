@@ -5,6 +5,14 @@
         public Guid Id { get; protected init; }
         public DateTime CreatedAt { get; set; } 
         public DateTime? UpdatedAt { get; set; }
+        protected BaseEntity()
+        {
+            
+        }
+        protected BaseEntity(Guid id)
+        {
+            Id = id;
+        }
         public bool Equals(BaseEntity? other)
         {
             if (other is null) return false;

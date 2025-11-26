@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace Application.Abstractions
 {
     public interface IUserHelper
     {
-        public Task<IdentityResult> CreateUserAsync(string fullname, string email, string password);
+        public Task<IdentityResult> CreateUserAsync(AppUser user, string password);
     }
 }

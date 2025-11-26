@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Persistence.Contexts
 {
-    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+    public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -37,7 +37,7 @@ namespace Infraestructure.Persistence.Contexts
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfiguration(new UserConfiguration());
+            builder.ApplyConfiguration(new AppUserConfiguration());
             builder.ApplyConfiguration(new ProductConfiguration());
             builder.ApplyConfiguration(new ProductImageConfiguration());
             builder.ApplyConfiguration(new ProductDescriptionHistoryConfiguration());
@@ -51,7 +51,7 @@ namespace Infraestructure.Persistence.Contexts
             builder.ApplyConfiguration(new EmailLogConfiguration());
             builder.ApplyConfiguration(new SellerRequestConfiguration());
             base.OnModelCreating(builder); 
-            builder.Entity<User>().ToTable("AspNetUsers");
+            builder.Entity<AppUser>().ToTable("AspNetUsers");
             builder.Entity<IdentityRole<Guid>>().ToTable("AspNetRoles");
             builder.Entity<IdentityUserRole<Guid>>().ToTable("AspNetUserRoles");
             builder.Entity<IdentityUserClaim<Guid>>().ToTable("AspNetUserClaims");
@@ -80,7 +80,7 @@ namespace Infraestructure.Persistence.Contexts
                 }
             }
 
-            foreach (var entry in ChangeTracker.Entries<User>())
+            foreach (var entry in ChangeTracker.Entries<AppUser>())
             {
                 switch (entry.State)
                 {

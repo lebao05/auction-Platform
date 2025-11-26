@@ -8,9 +8,9 @@ namespace Domain.Entities
         public Product Product { get; set; } = null!;
 
         public Guid SellerId { get; set; }
-        public User Seller { get; set; } = null!;
+        public AppUser Seller { get; set; } = null!;
 
         public Guid BidderId { get; set; }
-        public User Bidder { get; set; } = null!;
+        public AppUser Bidder { get; set; } = null!;
     }
 }

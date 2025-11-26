@@ -6,22 +6,14 @@ namespace Infraestructure.Identity
 {
     public class UserHelper : IUserHelper
     {
-        private readonly UserManager<User> _userManager;
-        public UserHelper(UserManager<User> userManager)
+        private readonly UserManager<AppUser> _userManager;
+        public UserHelper(UserManager<AppUser> userManager)
         {
             _userManager = userManager;
         }
-        public async Task<IdentityResult> CreateUserAsync(string fullname, string email, string password)
+        public async Task<IdentityResult> CreateUserAsync(AppUser user,string password)
         {
-            var user = new User
-            {
-                UserName = email,
-                Email = email,
-                FullName = fullname,
-            };
-
             var result = await _userManager.CreateAsync(user, password);
-
             return result;
         }
     }

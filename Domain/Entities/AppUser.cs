@@ -3,8 +3,18 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Entities
 {
-    public class User : IdentityUser<Guid>
+    public class AppUser : IdentityUser<Guid>
     {
+        public AppUser()
+        {
+            
+        }
+        public AppUser(string fullname,string email,string username)
+        {
+            UserName = username;
+            FullName = fullname;
+            Email = email;
+        }
         public string FullName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string AvatarUrl { get; set; } = string.Empty;

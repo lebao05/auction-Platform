@@ -8,9 +8,9 @@ namespace Domain.Entities
         public string Comment { get; set; } = string.Empty;
 
         public Guid RaterId { get; set; }
-        public User Rater { get; set; } = null!;
+        public AppUser Rater { get; set; } = null!;
 
         public Guid RatedUserId { get; set; }
-        public User RatedUser { get; set; } = null!;
+        public AppUser RatedUser { get; set; } = null!;
     }
 }

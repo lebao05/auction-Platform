@@ -13,7 +13,7 @@ namespace Domain.Entities
         public ICollection<Comment> Replies { get; set; } = new List<Comment>();
 
         public Guid UserId { get; set; }
-        public User User { get; set; } = null!;
+        public AppUser User { get; set; } = null!;
 
         public Guid ProductId { get; set; }
         public Product Product { get; set; } = null!;

@@ -11,7 +11,7 @@ namespace Domain.Entities
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public Guid SellerId { get; set; }
-        public User Seller { get; set; } = null!;
+        public AppUser Seller { get; set; } = null!;
         public Guid CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 
