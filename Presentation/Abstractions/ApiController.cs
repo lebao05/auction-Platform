@@ -1,5 +1,8 @@
-﻿using MediatR;
+﻿using Domain.Shared;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Common;
 
 namespace Presentation.Abstractions
 {
@@ -12,5 +15,24 @@ namespace Presentation.Abstractions
         {
             _sender = sender;
         }
+
+        protected IActionResult HandleFailure(Result result) =>
+        result switch
+        {
+            { IsSuccess: true } => throw new InvalidOperationException(),
+            IValidationResult validationResult =>
+                BadRequest(
+                    new CustomProblemDetails(
+                        "Validation Error", StatusCodes.Status400BadRequest,
+                        result.Error,
+                        validationResult.Errors)),
+            _ =>
+                BadRequest(
+                    new CustomProblemDetails(
+                        "Bad Request",
+                        StatusCodes.Status400BadRequest,
+                        result.Error))
+        };
+
     }
 }

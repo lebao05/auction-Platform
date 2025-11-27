@@ -9,7 +9,7 @@ namespace Application
         {
             var assembly = typeof(DependencyInjection).Assembly;
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
-            services.AddValidatorsFromAssemblies(new[] { assembly });
+            services.AddValidatorsFromAssemblies(new[] { assembly }, includeInternalTypes:true);
             return services;
         }
     }

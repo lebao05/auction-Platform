@@ -23,9 +23,9 @@ namespace Presentation.Controllers
             Result<Guid> result = await _sender.Send(command, cancellationToken);
             if (result.IsFailure)
             {
-                return BadRequest(result.Error);
+                return HandleFailure(result);
             }
-            return new OkResult();
+            return Ok(result.Value);
         }
     }
 }
