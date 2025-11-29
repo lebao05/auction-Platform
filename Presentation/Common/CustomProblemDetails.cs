@@ -6,7 +6,7 @@ namespace Presentation.Common
 {
     public class CustomProblemDetails : ProblemDetails
     {
-        public IDictionary<string, object?> Extensions { get; } = new Dictionary<string, object?>();
+        public new IDictionary<string, object?> Extensions { get; } = new Dictionary<string, object?>();
 
         public CustomProblemDetails(
             string title,

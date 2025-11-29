@@ -1,4 +1,4 @@
-﻿namespace Presentation.Contracts
+﻿namespace Presentation.Contracts.User
 {
     public sealed record class RegisterUserRequest(
     string fullname,

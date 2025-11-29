@@ -1,9 +1,10 @@
 ﻿using Application.User.Commands.Create;
+using Application.User.Commands.Login;
 using Domain.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Abstractions;
-using Presentation.Contracts;
+using Presentation.Contracts.User;
 
 namespace Presentation.Controllers
 {
@@ -20,11 +21,22 @@ namespace Presentation.Controllers
                 request.fullname,
                 request.email,
                 request.password);
-            Result<Guid> result = await _sender.Send(command, cancellationToken);
+            Result<string> result = await _sender.Send(command, cancellationToken);
             if (result.IsFailure)
             {
                 return HandleFailure(result);
             }
+            return Ok(result.Value);
+        }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginUserRequest request,CancellationToken cancellationToken)
+        {
+            var command = new LoginCommand(
+                request.email,
+                request.password);
+            Result<string> result = await _sender.Send(command, cancellationToken);
+            if( result.IsFailure)
+                return HandleFailure(result);
             return Ok(result.Value);
         }
     }

@@ -1,6 +1,6 @@
 ﻿namespace Domain.Abstractions
 {
-    internal class IUnitOfWork
+    public class IUnitOfWork
     {
     }
 }

@@ -61,6 +61,7 @@ namespace Infraestructure.Persistence.Contexts
             builder.Entity<IdentityRole<Guid>>().HasData(
                 new IdentityRole<Guid> { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "Bidder", NormalizedName = "BIDDER" },
                 new IdentityRole<Guid> { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), Name = "Seller", NormalizedName = "SELLER" },
+                new IdentityRole<Guid> { Id = Guid.Parse("22222222-2222-2222-3333-222222222222"), Name = "User", NormalizedName = "User" },
                 new IdentityRole<Guid> { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Name = "Admin", NormalizedName = "ADMIN" }
             );
             builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);

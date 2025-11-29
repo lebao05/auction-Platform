@@ -1,6 +1,6 @@
 ﻿namespace Domain.Abstractions
 {
-    internal class IGenericRepository
+    public class IGenericRepository
     {
     }
 }

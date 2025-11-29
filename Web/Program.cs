@@ -1,15 +1,18 @@
 using Application;
 using Application.Behaviors;
 using Domain.Entities;
-using FluentValidation;
 using Infraestructure;
 using Infraestructure.Persistence.Contexts;
 using MediatR;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using Presentation;
 using Serilog;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,13 +22,35 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 
 // Configure MediatR and Pipeline Behaviors
-builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>)); 
+builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
 
+// JWT beear authentication can be configured here 
+
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+
+// Add JWT auth
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
 
 // Add controllers (including external assembly)
 builder.Services
     .AddControllers()
     .AddApplicationPart(typeof(Presentation.Controllers.AuthController).Assembly);
+
 
 // Configure Identity
 builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
@@ -38,8 +63,41 @@ builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
+
+
+//Add Swagger services
 builder.Services.AddEndpointsApiExplorer(); // add api explore 
-builder.Services.AddSwaggerGen(); // add service for document generator
+builder.Services.AddSwaggerGen(options =>
+{
+    //Add the security definition for Bearer
+
+   options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+   {
+       Name = "Authorization",
+       Type = SecuritySchemeType.Http,
+       Scheme = "bearer",
+       BearerFormat = "JWT",
+       In = ParameterLocation.Header,
+       Description = "Enter 'Bearer' [space] and then your token.\nExample: \"Bearer eyJhbGci...\""
+   });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+
+});
+
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -47,6 +105,8 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 builder.Host.UseSerilog();
 
+//Add Authorization services
+builder.Services.AddAuthorization();
 
 
 // Add your custom dependency injections
@@ -77,6 +137,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets(); // if you have static assets

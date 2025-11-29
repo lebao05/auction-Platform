@@ -17,22 +17,21 @@ namespace Presentation.Abstractions
         }
 
         protected IActionResult HandleFailure(Result result) =>
-        result switch
-        {
-            { IsSuccess: true } => throw new InvalidOperationException(),
-            IValidationResult validationResult =>
-                BadRequest(
-                    new CustomProblemDetails(
-                        "Validation Error", StatusCodes.Status400BadRequest,
-                        result.Error,
-                        validationResult.Errors)),
-            _ =>
-                BadRequest(
-                    new CustomProblemDetails(
-                        "Bad Request",
-                        StatusCodes.Status400BadRequest,
-                        result.Error))
-        };
-
+            result switch
+            {
+                { IsSuccess: true } => throw new InvalidOperationException(),
+                IValidationResult validationResult =>
+                    BadRequest(
+                        new CustomProblemDetails(
+                            "Validation Error", StatusCodes.Status400BadRequest,
+                            result.Error,
+                            validationResult.Errors)),
+                _ =>
+                    BadRequest(
+                        new CustomProblemDetails(
+                            "Bad Request",
+                            StatusCodes.Status400BadRequest,
+                            result.Error))
+            };
     }
 }
