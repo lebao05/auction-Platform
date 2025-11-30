@@ -1,15 +1,9 @@
 "use client";
 import { Card, CardContent } from "../../../components/ui/Card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../../components/ui/Tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/Tabs";
 import { Badge } from "../../../components/ui/Badge";
 import { Button } from "../../../components/ui/Button";
 import { Trophy } from "lucide-react";
-import { Header } from "../../../components/layout/Header";
 
 const participatingAuctions = [
   {
@@ -72,14 +66,14 @@ const sellingAuctions = [
 export function ProfileAuctions() {
   return (
     <div className="space-y-6">
-      <Tabs value="participating" className="w-full">
+      <Tabs defaultValue="participating">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="participating">Đang Tham Gia</TabsTrigger>
           <TabsTrigger value="won">Đã Thắng</TabsTrigger>
           <TabsTrigger value="selling">Đang Bán</TabsTrigger>
         </TabsList>
 
-        {/* Participating Auctions */}
+        {/* Participating */}
         <TabsContent value="participating" className="space-y-4">
           {participatingAuctions.map((auction) => (
             <Card key={auction.id}>
@@ -87,55 +81,39 @@ export function ProfileAuctions() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-foreground">
-                        {auction.name}
-                      </h3>
+                      <h3 className="font-semibold">{auction.name}</h3>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Giá hiện tại: {auction.currentBid}
                       </p>
                     </div>
-                    <Badge
-                      variant={
-                        auction.status === "leading" ? "default" : "secondary"
-                      }
-                    >
+                    <Badge variant={auction.status === "leading" ? "default" : "secondary"}>
                       {auction.status === "leading" ? "✓ Dẫn đầu" : "✗ Bị vượt"}
                     </Badge>
                   </div>
+
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-xs text-muted-foreground">
-                        Lượt đấu giá
-                      </p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {auction.bidCount}
-                      </p>
+                      <p className="text-xs text-muted-foreground">Lượt đấu giá</p>
+                      <p className="font-semibold">{auction.bidCount}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">
-                        Giá của bạn
-                      </p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {auction.myBid}
-                      </p>
+                      <p className="text-xs text-muted-foreground">Giá của bạn</p>
+                      <p className="font-semibold">{auction.myBid}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Kết thúc</p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {auction.endTime}
-                      </p>
+                      <p className="font-semibold">{auction.endTime}</p>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full bg-transparent">
-                    Đặt Giá Cao Hơn
-                  </Button>
+
+                  <Button variant="outline" className="w-full">Đặt Giá Cao Hơn</Button>
                 </div>
               </CardContent>
             </Card>
           ))}
         </TabsContent>
 
-        {/* Won Auctions */}
+        {/* Won */}
         <TabsContent value="won" className="space-y-4">
           {wonAuctions.map((auction) => (
             <Card key={auction.id}>
@@ -143,7 +121,7 @@ export function ProfileAuctions() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-foreground flex items-center gap-2">
+                      <h3 className="font-semibold flex items-center gap-2">
                         <Trophy className="h-4 w-4 text-yellow-500" />
                         {auction.name}
                       </h3>
@@ -151,78 +129,60 @@ export function ProfileAuctions() {
                         Giá thắng: {auction.winPrice}
                       </p>
                     </div>
-                    <Badge
-                      variant={
-                        auction.status === "completed" ? "default" : "secondary"
-                      }
-                    >
-                      {auction.status === "completed"
-                        ? "Hoàn tất"
-                        : "Chờ thanh toán"}
+
+                    <Badge variant={auction.status === "completed" ? "default" : "secondary"}>
+                      {auction.status === "completed" ? "Hoàn tất" : "Chờ thanh toán"}
                     </Badge>
                   </div>
+
                   <p className="text-xs text-muted-foreground">
-                    Ngày thắng:{" "}
-                    {new Date(auction.winDate).toLocaleDateString("vi-VN")}
+                    Ngày thắng: {new Date(auction.winDate).toLocaleDateString("vi-VN")}
                   </p>
-                  <Button variant="outline" className="w-full bg-transparent">
-                    Xem Chi Tiết Đơn Hàng
-                  </Button>
+
+                  <Button variant="outline" className="w-full">Xem Chi Tiết Đơn Hàng</Button>
                 </div>
               </CardContent>
             </Card>
           ))}
         </TabsContent>
 
-        {/* Selling Auctions */}
+        {/* Selling */}
         <TabsContent value="selling" className="space-y-4">
           {sellingAuctions.map((auction) => (
             <Card key={auction.id}>
               <CardContent className="pt-6">
                 <div className="space-y-4">
+
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-foreground">
-                        {auction.name}
-                      </h3>
+                      <h3 className="font-semibold">{auction.name}</h3>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {auction.status === "ended" && auction.winner
+                        {auction.status === "ended"
                           ? `Người thắng: ${auction.winner}`
                           : `Giá hiện tại: ${auction.currentBid}`}
                       </p>
                     </div>
-                    <Badge
-                      variant={
-                        auction.status === "active" ? "default" : "secondary"
-                      }
-                    >
-                      {auction.status === "active"
-                        ? "Đang diễn ra"
-                        : "Đã kết thúc"}
+
+                    <Badge variant={auction.status === "active" ? "default" : "secondary"}>
+                      {auction.status === "active" ? "Đang diễn ra" : "Đã kết thúc"}
                     </Badge>
                   </div>
+
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-xs text-muted-foreground">
-                        Lượt đấu giá
-                      </p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {auction.bidCount}
-                      </p>
+                      <p className="text-xs text-muted-foreground">Lượt đấu giá</p>
+                      <p className="font-semibold">{auction.bidCount}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Giá</p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {auction.currentBid}
-                      </p>
+                      <p className="font-semibold">{auction.currentBid}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Kết thúc</p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {auction.endTime}
-                      </p>
+                      <p className="font-semibold">{auction.endTime}</p>
                     </div>
                   </div>
+
                   {auction.status === "ended" && (
                     <Button className="w-full">Xem Giao Dịch Hoàn Tất</Button>
                   )}

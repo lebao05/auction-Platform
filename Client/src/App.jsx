@@ -12,6 +12,7 @@ import { MainLayout } from "./components/layout/MainLayout";
 import SearchPage from "./features/Home/pages/SearchPage";
 import CategoryPage from "./features/Home/pages/CategoryPage";
 import HomePage from "./features/Home/pages/HomePage";
+import AdminPage from "./features/Admin/pages/AdminPage";
 
 function App() {
   return (
@@ -30,7 +31,9 @@ function App() {
             <Route path="/" element={<HomePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
+          <Route path="admin" element={<AdminPage />}></Route>
         </Routes>
+
       </Router>
     </>
   );
