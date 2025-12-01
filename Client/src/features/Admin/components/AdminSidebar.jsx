@@ -1,5 +1,5 @@
 import { LayoutDashboard, Grid, Package, Users, LogOut } from "lucide-react";
-import { Button } from "../../../components/ui/Button"; 
+import { Button } from "../../../components/ui/Button";
 
 export function AdminSidebar({ activeSection, onSectionChange }) {
     const navItems = [
@@ -22,22 +22,23 @@ export function AdminSidebar({ activeSection, onSectionChange }) {
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     return (
-                        <button
+                        <Button
                             key={item.id}
+                            variant="customize"
                             onClick={() => onSectionChange(item.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === item.id
-                                    ? "bg-primary text-primary-foreground"
-                                    : "text-foreground hover:bg-accent"
+                            className={`w-full flex bg-black hover:bg-gray-400 items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeSection === item.id
+                                ? "bg-white text-black text-primary-foreground"
+                                : "text-foreground text-white"
                                 }`}
                         >
                             <Icon className="h-5 w-5" />
                             <span className="text-sm font-medium">{item.label}</span>
-                        </button>
+                        </Button>
                     );
                 })}
             </nav>
 
-            <div className="border-t border-border p-3 absolute bottom-0 w-64">
+            <div className="border-t boder-gray border-border p-3 absolute bottom-0 w-64">
                 <Button variant="outline" className="w-full justify-start gap-2 bg-transparent">
                     <LogOut className="h-4 w-4" />
                     Đăng Xuất

@@ -45,7 +45,7 @@ const initialProducts = [
 export function AdminProducts() {
     const [products, setProducts] = useState(initialProducts)
     const [deleteAlertOpen, setDeleteAlertOpen] = useState(false)
-    const [productToDelete, setProductToDelete] = useState < number | null > (null)
+    const [productToDelete, setProductToDelete] = useState(null);
 
     const handleDelete = () => {
         if (productToDelete) {
@@ -62,7 +62,7 @@ export function AdminProducts() {
                     <h2 className="text-2xl font-bold text-foreground">Quản Lý Sản Phẩm</h2>
                     <p className="text-sm text-muted-foreground mt-1">Xem, thêm, sửa, xóa sản phẩm đấu giá</p>
                 </div>
-                <Button className="gap-2">
+                <Button className="gap-2 bg-blue-500 text-white hover:bg-blue-400">
                     <Plus className="h-4 w-4" />
                     Thêm Sản Phẩm
                 </Button>

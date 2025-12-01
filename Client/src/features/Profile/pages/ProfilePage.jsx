@@ -60,6 +60,8 @@ export default function ProfilePage() {
           <div className="mt-6">
             <TabsContent value="info">
               <ProfileInfo />
+              <ProfileAuctions />
+
             </TabsContent>
             <TabsContent value="ratings">
               <ProfileRatings />

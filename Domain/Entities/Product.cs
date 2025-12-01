@@ -14,6 +14,7 @@ namespace Domain.Entities
         public AppUser Seller { get; set; } = null!;
         public Guid CategoryId { get; set; }
         public Category Category { get; set; } = null!;
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation Properties
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();

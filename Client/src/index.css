@@ -2,4 +2,19 @@
   font-family: system-ui, sans-serif;
   background-color: #ffffff;
   color: #000000;
+  --border: 180 3% 80%;
+  /* Light gray border */
+  --card: 0 0% 100%;
+  /* White card background */
+  --background: 0 0% 98%;
+  /* Slight gray background */
+
+  --foreground: 220 5% 15%;
+  /* Dark gray text */
+  --muted-foreground: 220 5% 45%;
+  /* Medium gray */
+
+  --primary: 220 5% 30%;
+  /* Optional: gray primary (icons) */
+
 }

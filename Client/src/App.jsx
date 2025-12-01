@@ -13,6 +13,7 @@ import SearchPage from "./features/Home/pages/SearchPage";
 import CategoryPage from "./features/Home/pages/CategoryPage";
 import HomePage from "./features/Home/pages/HomePage";
 import AdminPage from "./features/Admin/pages/AdminPage";
+import ProductPage from "./features/Product/pages/ProductPage";
 
 function App() {
   return (
@@ -26,6 +27,9 @@ function App() {
           </Route>
           <Route element={<MainLayout />}>
             <Route path="/search" element={<SearchPage />} />
+          </Route>
+          <Route element={<MainLayout />}>
+            <Route path="/product" element={<ProductPage />} />
           </Route>
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />

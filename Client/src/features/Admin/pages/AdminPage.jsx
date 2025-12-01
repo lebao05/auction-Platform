@@ -65,6 +65,24 @@ export default function AdminPage() {
                                         <p className="text-3xl font-bold text-primary">8</p>
                                     </CardContent>
                                 </Card>
+                            </div> <div className="bg-card border border-border rounded-lg p-6">
+                                <h2 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h2>
+                                <div className="space-y-3">
+                                    {[
+                                        { action: "New product listed", user: "John Doe", time: "2 hours ago" },
+                                        { action: "Seller upgrade approved", user: "Jane Smith", time: "5 hours ago" },
+                                        { action: "Auction ended", product: "iPhone 14 Pro", time: "8 hours ago" },
+                                        { action: "New category added", category: "Electronics", time: "1 day ago" },
+                                    ].map((item, idx) => (
+                                        <div key={idx} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                                            <div>
+                                                <p className="text-sm font-medium text-foreground">{item.action}</p>
+                                                <p className="text-xs text-muted-foreground">{item.user || item.product || item.category}</p>
+                                            </div>
+                                            <span className="text-xs text-muted-foreground">{item.time}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     )}
