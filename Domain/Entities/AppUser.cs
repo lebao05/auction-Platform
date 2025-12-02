@@ -9,11 +9,12 @@ namespace Domain.Entities
         {
             
         }
-        public AppUser(string fullname,string email,string username)
+        public AppUser(string fullname,string email,string username,string address)
         {
             UserName = username;
             FullName = fullname;
             Email = email;
+            Address = address;
         }
         public string FullName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;

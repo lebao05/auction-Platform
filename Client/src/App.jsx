@@ -14,6 +14,11 @@ import CategoryPage from "./features/Home/pages/CategoryPage";
 import HomePage from "./features/Home/pages/HomePage";
 import AdminPage from "./features/Admin/pages/AdminPage";
 import ProductPage from "./features/Product/pages/ProductPage";
+import { ProfileSettings } from "./features/Profile/components/ProfileSettings";
+import SettingPage from "./features/Profile/pages/SettingPage";
+import WishlistPage from "./features/Profile/pages/WishListPage";
+import PostProductPage from "./features/Product/pages/PostProductPage";
+import OrderPage from "./features/Order/pages/OrderPage";
 
 function App() {
   return (
@@ -28,11 +33,24 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/search" element={<SearchPage />} />
           </Route>
+          // project
           <Route element={<MainLayout />}>
             <Route path="/product" element={<ProductPage />} />
           </Route>
           <Route element={<MainLayout />}>
+            <Route path="/product/create" element={<PostProductPage />} />
+          </Route>
+          <Route element={<MainLayout />}>
+            <Route path="/user/wishlist" element={<WishlistPage />} />
+          </Route>
+          <Route element={<MainLayout />}>
+            <Route path="/order" element={<OrderPage />} />
+          </Route>
+          <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
+          </Route>
+          <Route element={<MainLayout />}>
+            <Route path="/user/setting" element={<SettingPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
           <Route path="admin" element={<AdminPage />}></Route>

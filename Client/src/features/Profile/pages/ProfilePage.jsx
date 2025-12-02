@@ -1,83 +1,70 @@
-import { useState } from "react";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../../components/ui/Tabs";
-import { ProfileInfo } from "../components/ProfileInfo";
-import { ProfileRatings } from "../components/ProfileRatings";
-import { ProfileWishlist } from "../components/ProfileWishlist";
-import { ProfileAuctions } from "../components/ProfileAuction";
-import { ProfileSettings } from "../components/ProfileSettings";
-import { UserIcon, Star, Heart, Gavel, Settings } from "lucide-react";
-import { Header } from "../../../components/layout/Header";
+"use client"
+
+import { useState } from "react"
+import { ProfileInfo } from "../components/ProfileInfo"
+import { ProfileRatings } from "../components/ProfileRatings"
+import { ProfileWishlist } from "../components/ProfileWishlist"
+import { ProfileAuctions } from "../components/ProfileAuction"
+import { UserIcon, Star, Heart, Gavel, Settings } from "lucide-react"
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState("info");
+  const [activeSection, setActiveSection] = useState("info")
+
+  const menuItems = [
+    { id: "info", label: "Thông tin", icon: <UserIcon className="h-5 w-5" /> },
+    { id: "ratings", label: "Đánh giá", icon: <Star className="h-5 w-5" /> },
+    { id: "wishlist", label: "Yêu thích", icon: <Heart className="h-5 w-5" /> },
+    { id: "auctions", label: "Đấu giá", icon: <Gavel className="h-5 w-5" /> },
+  ]
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case "info":
+        return <ProfileInfo />
+      case "ratings":
+        return <ProfileRatings />
+      case "wishlist":
+        return <ProfileWishlist />
+      case "auctions":
+        return <ProfileAuctions />
+      default:
+        return null
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-6xl px-4">
-        {/* Profile Header */}
-        <div className="mb-8 flex items-center gap-4 rounded-lg bg-white p-6 shadow">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-500">
-            <UserIcon className="h-10 w-10 text-white" />
+      <div className="mx-auto max-w-6xl px-4 flex gap-6">
+        {/* Sidebar */}
+        <aside className="w-64 bg-white rounded-lg shadow p-4 flex flex-col gap-2">
+          <div className="flex flex-col items-center mb-6">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-500">
+              <UserIcon className="h-10 w-10 text-white" />
+            </div>
+            <h2 className="mt-2 text-lg font-bold text-gray-900">Hồ Sơ Cá Nhân</h2>
+            <p className="text-gray-500 text-sm text-center">Quản lý thông tin và hoạt động đấu giá của bạn</p>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Hồ Sơ Cá Nhân</h1>
-            <p className="text-gray-500">
-              Quản lý thông tin và hoạt động đấu giá của bạn
-            </p>
-          </div>
-        </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 gap-2 bg-white p-2 shadow rounded">
-            <TabsTrigger value="info" className="flex items-center gap-2">
-              <UserIcon className="h-4 w-4" />{" "}
-              <span className="hidden sm:inline">Thông tin</span>
-            </TabsTrigger>
-            <TabsTrigger value="ratings" className="flex items-center gap-2">
-              <Star className="h-4 w-4" />{" "}
-              <span className="hidden sm:inline">Đánh giá</span>
-            </TabsTrigger>
-            <TabsTrigger value="wishlist" className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />{" "}
-              <span className="hidden sm:inline">Yêu thích</span>
-            </TabsTrigger>
-            <TabsTrigger value="auctions" className="flex items-center gap-2">
-              <Gavel className="h-4 w-4" />{" "}
-              <span className="hidden sm:inline">Đấu giá</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />{" "}
-              <span className="hidden sm:inline">Cài đặt</span>
-            </TabsTrigger>
-          </TabsList>
+          <nav className="flex flex-col gap-2">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                className={`flex items-center gap-2 p-2 rounded-md w-full text-left transition ${activeSection === item.id
+                    ? "bg-blue-100 text-blue-700 font-semibold"
+                    : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                onClick={() => setActiveSection(item.id)}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
 
-          <div className="mt-6">
-            <TabsContent value="info">
-              <ProfileInfo />
-              <ProfileAuctions />
-
-            </TabsContent>
-            <TabsContent value="ratings">
-              <ProfileRatings />
-            </TabsContent>
-            <TabsContent value="wishlist">
-              <ProfileWishlist />
-            </TabsContent>
-            <TabsContent value="auctions">
-              <ProfileAuctions />
-            </TabsContent>
-            <TabsContent value="settings">
-              <ProfileSettings />
-            </TabsContent>
-          </div>
-        </Tabs>
+        {/* Content */}
+        <div className="flex-1 bg-white rounded-lg shadow p-6">{renderContent()}</div>
       </div>
     </div>
-  );
+  )
 }

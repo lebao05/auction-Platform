@@ -21,6 +21,9 @@ namespace Application.User.Commands.Create
                 .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter.")
                 .Matches("[0-9]").WithMessage("Password must contain at least one digit.")
                 .Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character.");
+            RuleFor(x => x.address)
+                .NotEmpty().WithMessage("Address is required.")
+                .MaximumLength(200).WithMessage("Address must not exceed 200 characters.");
         }
     }
 }

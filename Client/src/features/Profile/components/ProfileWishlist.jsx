@@ -24,6 +24,27 @@ const wishlistItems = [
     endTime: "5 ngày",
     image:
       "https://tse1.explicit.bing.net/th/id/OIP.C-nhxYGA7YvDWYOx0XybegHaFb?rs=1&pid=ImgDetMain&o=7&rm=3",
+  }, {
+    id: 3,
+    name: 'MacBook Pro 16"',
+    currentBid: "25,000,000 VND",
+    endTime: "5 ngày",
+    image:
+      "https://tse1.explicit.bing.net/th/id/OIP.C-nhxYGA7YvDWYOx0XybegHaFb?rs=1&pid=ImgDetMain&o=7&rm=3",
+  }, {
+    id: 4,
+    name: 'MacBook Pro 16"',
+    currentBid: "25,000,000 VND",
+    endTime: "5 ngày",
+    image:
+      "https://tse1.explicit.bing.net/th/id/OIP.C-nhxYGA7YvDWYOx0XybegHaFb?rs=1&pid=ImgDetMain&o=7&rm=3",
+  }, {
+    id: 5,
+    name: 'MacBook Pro 16"',
+    currentBid: "25,000,000 VND",
+    endTime: "5 ngày",
+    image:
+      "https://tse1.explicit.bing.net/th/id/OIP.C-nhxYGA7YvDWYOx0XybegHaFb?rs=1&pid=ImgDetMain&o=7&rm=3",
   },
 ];
 
@@ -35,41 +56,45 @@ export function ProfileWishlist() {
           <CardTitle>Danh Sách Yêu Thích</CardTitle>
           <CardDescription>Các sản phẩm bạn đang quan tâm</CardDescription>
         </CardHeader>
-        <CardContent>
+
+        <CardContent className="space-y-4">
           {wishlistItems.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {wishlistItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-lg border border-border bg-card p-4"
-                >
-                  <div className="mb-4 h-40 overflow-hidden rounded-lg bg-muted">
-                    <img
-                      src={item.image || "/placeholder.svg"}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-semibold text-foreground line-clamp-2">
+            wishlistItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center gap-4 rounded-lg border border-border bg-card p-4"
+              >
+                {/* Image */}
+                <div className="h-20 w-20 overflow-hidden rounded-lg bg-muted flex-shrink-0">
+                  <img
+                    src={item.image || "/placeholder.svg"}
+                    alt={item.name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                {/* Info */}
+                <div className="flex-1">
+                  <h3 className="font-semibold text-foreground">
                     {item.name}
                   </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Giá hiện tại: {item.currentBid}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Kết thúc trong: {item.endTime}
                   </p>
-                  <div className="mt-4 flex gap-2">
-                    <Button className="flex-1" size="sm">
-                      Xem Chi Tiết
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Heart className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
                 </div>
-              ))}
-            </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Button size="sm">Xem Chi Tiết</Button>
+                  <Button variant="outline" size="sm">
+                    <Heart className="h-4 w-4 text-red-500" />
+                  </Button>
+                </div>
+              </div>
+            ))
           ) : (
             <div className="flex flex-col items-center justify-center py-12">
               <Heart className="mb-4 h-12 w-12 text-muted-foreground" />

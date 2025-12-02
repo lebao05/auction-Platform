@@ -20,7 +20,8 @@ namespace Presentation.Controllers
             var command = new RegisterCommand(
                 request.fullname,
                 request.email,
-                request.password);
+                request.password,
+                request.address);
             Result<string> result = await _sender.Send(command, cancellationToken);
             if (result.IsFailure)
             {

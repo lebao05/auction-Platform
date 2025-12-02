@@ -24,7 +24,8 @@ namespace Application.User.Commands.Create
             (
                 request.username,
                 request.email,
-                request.email
+                request.email,
+                request.address
             );
 
             var existingUser = await _userManager.FindByEmailAsync(request.email);

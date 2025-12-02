@@ -1,6 +1,6 @@
 ﻿namespace Domain.Repositories
 {
-    public class IProductRepository
+    public interface IProductRepository
     {
     }
 }
