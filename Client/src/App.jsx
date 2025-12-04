@@ -19,6 +19,7 @@ import SettingPage from "./features/Profile/pages/SettingPage";
 import WishlistPage from "./features/Profile/pages/WishListPage";
 import PostProductPage from "./features/Product/pages/PostProductPage";
 import OrderPage from "./features/Order/pages/OrderPage";
+import SellerProductsPage from "./features/ProductManagement/pages/SellerProductPage";
 
 function App() {
   return (
@@ -39,6 +40,12 @@ function App() {
           </Route>
           <Route element={<MainLayout />}>
             <Route path="/product/create" element={<PostProductPage />} />
+          </Route>          
+          <Route element={<MainLayout />}>
+            <Route path="/product/manage" element={<SellerProductsPage />} />
+          </Route>
+          <Route element={<MainLayout />}>
+            <Route path="/product/mage" element={<SellerProductsPage />} />
           </Route>
           <Route element={<MainLayout />}>
             <Route path="/user/wishlist" element={<WishlistPage />} />

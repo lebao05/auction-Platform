@@ -12,6 +12,7 @@
         protected BaseEntity(Guid id)
         {
             Id = id;
+            CreatedAt = DateTime.UtcNow;
         }
         public bool Equals(BaseEntity? other)
         {

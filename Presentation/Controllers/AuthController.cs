@@ -8,6 +8,7 @@ using Presentation.Contracts.User;
 
 namespace Presentation.Controllers
 {
+    [Route("api/auth")]
     public class AuthController : ApiController
     {
         public AuthController(ISender sender) : base(sender)

@@ -13,25 +13,18 @@ import { Input } from "../../../components/ui/Input";
 import { Label } from "../../../components/ui/Label";
 import { Edit2, Save, X } from "lucide-react";
 
-export function ProfileInfo() {
+export function ProfileInfo({ user, updateInfo }) {
   const [isEditing, setIsEditing] = useState(false);
-
-  const [formData, setFormData] = useState({
-    name: "Nguyễn Văn A",
-    email: "nguyenvana@email.com",
-    birthDate: "1990-05-15",
-    phone: "+84912345678",
-    address: "123 Đường ABC, TP. Hồ Chí Minh",
-  });
-
-  const [tempData, setTempData] = useState(formData);
+  const [tempData, setTempData] = useState(user);
 
   const handleEdit = () => setIsEditing(true);
-  const handleCancel = () => setIsEditing(false);
+  const handleCancel = () => {
+    setTempData(user);
+    setIsEditing(false)
+  };
   const handleSave = () => {
-    setFormData(tempData);
+    updateInfo(tempData);
     setIsEditing(false);
-    alert("Thông tin cá nhân đã được cập nhật"); // simple toast replacement
   };
 
   const handleChange = (field, value) => {
@@ -62,12 +55,12 @@ export function ProfileInfo() {
               {isEditing ? (
                 <Input
                   id="name"
-                  value={tempData.name}
-                  onChange={(e) => handleChange("name", e.target.value)}
+                  value={tempData.fullName}
+                  onChange={(e) => handleChange("fullName", e.target.value)}
                 />
               ) : (
                 <p className="mt-2 text-sm font-medium text-gray-900">
-                  {formData.name}
+                  {user.fullName}
                 </p>
               )}
             </div>
@@ -83,7 +76,7 @@ export function ProfileInfo() {
                 />
               ) : (
                 <p className="mt-2 text-sm font-medium text-gray-900">
-                  {formData.email}
+                  {user.email}
                 </p>
               )}
             </div>
@@ -95,12 +88,15 @@ export function ProfileInfo() {
                   id="birthDate"
                   type="date"
                   value={tempData.birthDate}
-                  onChange={(e) => handleChange("birthDate", e.target.value)}
+                  onChange={(e) => handleChange("dateOfBirth", e.target.value)}
                 />
               ) : (
                 <p className="mt-2 text-sm font-medium text-gray-900">
-                  {new Date(formData.birthDate).toLocaleDateString("vi-VN")}
+                  {user.dateOfBirth
+                    ? new Date(user.dateOfBirth).toLocaleDateString("vi-VN")
+                    : "Chưa cập nhật"}
                 </p>
+
               )}
             </div>
 
@@ -109,12 +105,12 @@ export function ProfileInfo() {
               {isEditing ? (
                 <Input
                   id="phone"
-                  value={tempData.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
+                  value={tempData.phoneNumber}
+                  onChange={(e) => handleChange("phoneNumber", e.target.value)}
                 />
               ) : (
                 <p className="mt-2 text-sm font-medium text-gray-900">
-                  {formData.phone}
+                  {user.phoneNumber || "Chưa cập nhật"}
                 </p>
               )}
             </div>
@@ -129,7 +125,7 @@ export function ProfileInfo() {
                 />
               ) : (
                 <p className="mt-2 text-sm font-medium text-gray-900">
-                  {formData.address}
+                  {user.address}
                 </p>
               )}
             </div>

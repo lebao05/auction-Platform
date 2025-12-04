@@ -9,5 +9,15 @@ namespace Domain.Entities
 
         public Guid UserId { get; set; }
         public AppUser User { get; set; } = null!;
+        public SellerRequest CreateaSellerRequest(Guid sellerRequestId,Guid userId)
+        {
+            SellerRequest request = new SellerRequest
+            {
+                UserId = userId,
+                Id = sellerRequestId,
+                CreatedAt = DateTime.UtcNow,
+            };
+            return request;
+        }
     }
 }

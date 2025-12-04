@@ -1,17 +1,23 @@
+// ----------------------
+// ALL IMPORTS MUST BE FIRST
+// ----------------------
 import React from "react";
 import ReactDOM from "react-dom";
 
+// ----------------------
+// DIALOG COMPONENTS
+// ----------------------
 export function Dialog({ open, onOpenChange, children }) {
     if (!open) return null;
 
     return ReactDOM.createPortal(
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-            onClick={() => onOpenChange(false)} // close on overlay click
+            onClick={() => onOpenChange(false)}  // close when clicking overlay
         >
             <div
                 className="bg-white rounded-lg shadow-lg w-full max-w-md p-6"
-                onClick={(e) => e.stopPropagation()} // prevent overlay click from closing
+                onClick={(e) => e.stopPropagation()}  // prevent click inside from closing
             >
                 {children}
             </div>

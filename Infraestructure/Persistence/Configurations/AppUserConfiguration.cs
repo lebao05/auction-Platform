@@ -45,9 +45,9 @@ namespace Infraestructure.Persistence.Configurations
                 .HasForeignKey(r => r.RatedUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(u => u.SellerRequest)
+            builder.HasMany(u => u.SellerRequests)
                 .WithOne(sr => sr.User)
-                .HasForeignKey<SellerRequest>(sr => sr.UserId);
+                .HasForeignKey(sr => sr.UserId);
 
             //builder.HasMany(u => u.OrdersAsSeller)
             //    .WithOne(o => o.Seller)

@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Shared;
 
 namespace Domain.Entities
 {
@@ -11,14 +12,24 @@ namespace Domain.Entities
         public ICollection<Product> Products { get; set; } = new List<Product>();
         public IReadOnlyCollection<Category> GetChildrens() => (IReadOnlyCollection<Category>)Children;
         public IReadOnlyCollection<Product> GetProducts() => (IReadOnlyCollection<Product>)Products;
-        public Category CreateCateGory(string name, Guid? parentId = null)
+        public static Category CreateCategory(string name, Guid? parentId = null)
         {
             return new Category
             {
                 Id = Guid.NewGuid(),
                 Name = name,
-                ParentId = parentId
+                ParentId = parentId,
+                CreatedAt = DateTime.UtcNow
             };
+        }
+        public Result Update(string Name,Guid? parentId = null)
+        {
+            if( string.IsNullOrWhiteSpace(Name) )
+                return Result.Failure(new Error("Category.Update", "Category name can not be empty"));
+            this.Name = Name;
+            this.ParentId = parentId;
+            this.UpdatedAt = DateTime.UtcNow;
+            return Result.Success();
         }
     }
 }

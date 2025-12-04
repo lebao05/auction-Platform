@@ -37,7 +37,6 @@ namespace Infraestructure.Persistence.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("AvatarUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -496,6 +495,9 @@ namespace Infraestructure.Persistence.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -627,8 +629,7 @@ namespace Infraestructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("SellerRequests", (string)null);
                 });
@@ -1071,8 +1072,8 @@ namespace Infraestructure.Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.SellerRequest", b =>
                 {
                     b.HasOne("Domain.Entities.AppUser", "User")
-                        .WithOne("SellerRequest")
-                        .HasForeignKey("Domain.Entities.SellerRequest", "UserId")
+                        .WithMany("SellerRequests")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1144,7 +1145,7 @@ namespace Infraestructure.Persistence.Migrations
 
                     b.Navigation("RatingsReceived");
 
-                    b.Navigation("SellerRequest");
+                    b.Navigation("SellerRequests");
                 });
 
             modelBuilder.Entity("Domain.Entities.Category", b =>

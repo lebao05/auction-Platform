@@ -15,8 +15,8 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(sr => sr.CreatedAt).IsRequired();
 
             builder.HasOne(sr => sr.User)
-                .WithOne(u => u.SellerRequest)
-                .HasForeignKey<SellerRequest>(sr => sr.UserId)
+                .WithMany(u => u.SellerRequests)
+                .HasForeignKey(sr => sr.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

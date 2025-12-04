@@ -6,7 +6,9 @@ using Infraestructure.Persistence.Contexts;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
@@ -24,27 +26,67 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Configure MediatR and Pipeline Behaviors
 builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
 
+
+var ClientUrl = builder.Configuration["ClientUrl"];
+Console.WriteLine($"Client Url {ClientUrl}");
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:5125",   // Backend or Swagger UI
+                 ClientUrl!    // Vite frontend
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 // JWT beear authentication can be configured here 
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
 // Add JWT auth
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateIssuerSigningKey = true,
-            ValidateLifetime = true,
+// Force JWT as the only auth scheme
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme =
+    options.DefaultChallengeScheme =
+    options.DefaultForbidScheme =
+    options.DefaultScheme =
+    options.DefaultSignInScheme =
+    options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    var jwtSettings = builder.Configuration.GetSection("Jwt");
+    var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(key)
-        };
-    });
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+        ValidateLifetime = true,
+
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+
+    // Prevent redirect from cookies
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            context.HandleResponse();
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        }
+    };
+});
+
 
 // Add controllers (including external assembly)
 builder.Services
@@ -53,7 +95,7 @@ builder.Services
 
 
 // Configure Identity
-builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
+builder.Services.AddIdentityCore<AppUser>(options =>
 {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
@@ -61,7 +103,8 @@ builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
     options.Password.RequiredLength = 6;
     options.User.RequireUniqueEmail = true;
 })
-.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddRoles<IdentityRole<Guid>>()                  // add role support
+.AddEntityFrameworkStores<ApplicationDbContext>() // EF Core store
 .AddDefaultTokenProviders();
 
 
@@ -115,6 +158,7 @@ builder.Services.AddApplicationDependencies()
                 .AddPresentationDependencies();
 
 var app = builder.Build();
+app.UseCors("AllowLocalhost"); 
 
 // Middleware
 app.UseSerilogRequestLogging();
@@ -129,14 +173,15 @@ if (app.Environment.IsDevelopment())
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
         options.RoutePrefix = string.Empty; // optional: serve UI at root "/"
     }); // indicate path for ui and json
+    app.UseHttpsRedirection();
 }
 else
 {
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

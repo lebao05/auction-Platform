@@ -12,7 +12,25 @@ namespace Infraestructure.Persistence.Repositories
         {
             _context = context;
         }
+
+        public void AddSellerRequest(SellerRequest request)
+        {
+            _context.SellerRequests.Add(request);
+        }
+
+        public async Task<AppUser?> GetUserByEmail(string email, CancellationToken cancellationToken = default)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        }
+
+
         public async Task<AppUser?> GetUserById(Guid id, CancellationToken cancellationToken = default)
         => await _context.Users.FirstOrDefaultAsync( u=> u.Id == id , cancellationToken);
+
+        public async Task<AppUser?> GetUserWithSellerRequest(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Users.Include(u => u.SellerRequests).FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        }
+
     }
 }

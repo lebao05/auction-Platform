@@ -1,14 +1,18 @@
 // src/pages/SigninPage.tsx
 import { useState } from "react";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const { login, user } = useAuth();
+  const navigate = useNavigate();
+  if (user)
+    navigate("/");
   const handleSubmit = (e) => {
     e.preventDefault();
-    // handle login logic here
-    console.log("Email:", email, "Password:", password);
+    login(email, password);
   };
 
   return (

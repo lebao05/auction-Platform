@@ -24,6 +24,8 @@ namespace Application.User.Queries.GetProfile
                 FullName = user.FullName,
                 Email = user.Email!,
                 Address = user.Address,
+                PhoneNumber = user.PhoneNumber,
+                DateOfBirth = user.DateOfBirth,
             };
             return Result.Success<GetProfileResponseDto?>(responseDtoNoRatings);
         }
