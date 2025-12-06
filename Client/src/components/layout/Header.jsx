@@ -28,12 +28,14 @@ export function Header() {
   const [openChat, setOpenChat] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
   const [requestModal, setRequestModal] = useState(false);
+
+  const { sellerRequest } = useAuth();
   const toggleProfile = () => {
     setOpenProfile(!openProfile);
     setOpenNotif(false);
     setOpenChat(false);
   };
-
+  console.log(sellerRequest);
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm font-sans">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
@@ -165,17 +167,46 @@ export function Header() {
                     <p className="px-4 py-1 text-xs font-semibold text-gray-400 uppercase">Dịch vụ trả phí</p>
                     <div className="px-3 mt-2 mb-1">
                       <button className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm group">
-                        <div className="flex items-center gap-3" onClick={() => setRequestModal(true)}>
-                          <Store className="w-4 h-4 text-gray-500" />
-                          <span className="text-sm font-medium text-gray-700">Đăng kí trở thành Seller</span>
-                        </div>
-                        <span className="bg-gray-100 text-[10px] font-semibold px-2 py-1 rounded text-gray-600 group-hover:bg-gray-200">Tạo ngay</span>
-                      </button>             <button className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm group">
-                        <div className="flex items-center gap-3" onClick={() => setRequestModal(true)}>
-                          <Store className="w-4 h-4 text-gray-500" />
-                          <span className="text-sm font-medium text-gray-700">Quản lí sản phẩm đăng</span>
-                        </div>
+                        {
+                          (!sellerRequest) && (
+                            (
+                              <div className="flex items-center gap-3" onClick={() => setRequestModal(true)}>
+                                <Store className="w-4 h-4 text-gray-500" />
+                                <span className="text-sm font-medium text-gray-700">Đăng kí trở thành Seller</span>
+                              </div>
+                            )
+                          )
+                        }
+                        {
+                          sellerRequest?.status == 0 && (
+                            (
+                              <div className="flex items-center gap-3" >
+                                <span className="text-sm font-medium text-gray-700">Đang chờ duyệt Seller</span>
+                              </div>
+                            )
+                          )
+                        }
+                        {
+                          (sellerRequest?.status == 2 && (DateTime.UtcNow - sellerRequest.CreatedAt).TotalDays >= 14) && (
+                            (
+                              <div className="flex items-center gap-3" onClick={() => setRequestModal(true)}>
+                                <Store className="w-4 h-4 text-gray-500" />
+                                <span className="text-sm font-medium text-gray-700">Đăng kí trở thành Seller</span>
+                              </div>
+                            )
+                          )
+                        }
                       </button>
+                      {
+                        sellerRequest?.status == 1 && (
+                          <button className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm group">
+                            <div className="flex items-center gap-3" onClick={() => setRequestModal(true)}>
+                              <Store className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm font-medium text-gray-700">Quản lí sản phẩm đăng</span>
+                            </div>
+                          </button>
+                        )
+                      }
                     </div>
                   </div>
 

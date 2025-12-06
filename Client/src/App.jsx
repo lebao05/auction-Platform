@@ -31,6 +31,8 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
+
+          
           <Route element={<MainLayout />}>
             <Route path="/search" element={<SearchPage />} />
           </Route>
@@ -50,6 +52,8 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/user/wishlist" element={<WishlistPage />} />
           </Route>
+
+
           <Route element={<MainLayout />}>
             <Route path="/order" element={<OrderPage />} />
           </Route>

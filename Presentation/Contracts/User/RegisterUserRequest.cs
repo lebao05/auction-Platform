@@ -4,7 +4,5 @@
     string fullname,
     string email,
     string password,
-    string address,
-    string avatarUrl);
-
+    string address);
 }

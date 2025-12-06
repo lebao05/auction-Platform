@@ -3,6 +3,7 @@ using Application.Category.Commands.Delete;
 using Application.Category.Commands.Update;
 using Application.Category.Queries.GetAll;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Abstractions;
 using Presentation.Contracts.Category;
@@ -15,6 +16,7 @@ namespace Presentation.Controllers
         {
         }
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest rq, CancellationToken cancellationToken)
         {
             var command = new CreateCategoryCommand(rq.Name, rq.ParentId);
@@ -25,6 +27,7 @@ namespace Presentation.Controllers
             }
             return Ok(result.Value);
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllCategory(CancellationToken cancellationToken)
         {
@@ -37,6 +40,7 @@ namespace Presentation.Controllers
             return Ok(result.Value);
         }
         [HttpPut("{categoryId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCategory([FromRoute] Guid categoryId, [FromBody] UpdateCategoryRequest rq, CancellationToken cancellationToken)
         {
             var command = new UpdateCategoryCommand(categoryId,rq.Name,rq.ParentId);
@@ -48,6 +52,7 @@ namespace Presentation.Controllers
             return Ok();
         }
         [HttpDelete("{categoryId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid categoryId, CancellationToken cancellationToken)
         {
             var command = new DeleteCategoryCommand(categoryId);

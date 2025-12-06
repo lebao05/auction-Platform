@@ -1,4 +1,5 @@
-﻿using Application.Abstractions.Messaging;
+﻿using Application.Abstractions;
+using Application.Abstractions.Messaging;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Repositories;
@@ -12,8 +13,12 @@ namespace Application.User.Commands.RequestSeller
     public class RequestSellerCommandHandler : ICommandHandler<RequestSellerCommand>
     {
         private readonly IUserRepository _userRepository;
-        public RequestSellerCommandHandler(IUserRepository userRepository)
+        private readonly IUnitOfWork _unitOfWork;
+        public RequestSellerCommandHandler(
+            IUserRepository userRepository,
+            IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
             _userRepository = userRepository;
         }
         public async Task<Result> Handle(RequestSellerCommand request, CancellationToken cancellationToken)
@@ -50,6 +55,9 @@ namespace Application.User.Commands.RequestSeller
                 }
             }
 
+            SellerRequest newRequest = new SellerRequest().CreateaSellerRequest(Guid.NewGuid(), request.userId);
+            _userRepository.AddSellerRequest(newRequest);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
     }

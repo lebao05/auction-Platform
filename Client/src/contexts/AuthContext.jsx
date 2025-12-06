@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { getUserProfileApi, updateUserProfileApi } from "../services/user.service";
+import { getMySellerRequestApi, getUserProfileApi, requestSellerApi, updateUserProfileApi } from "../services/user.service";
 import { loginApi } from "../services/auth.service";
 
 const AuthContext = createContext(null);
@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const [sellerRequest, setSellerRequest] = useState({});
 
     // Load token on first run
     useEffect(() => {
@@ -22,6 +22,41 @@ export function AuthProvider({ children }) {
             setLoading(false);
         }
     }, []);
+
+    useEffect(() => {
+        if (user == null) return;
+        getSellerRequest();
+    }, [user])
+    const requestSeller = async () => {
+        try {
+            setLoading(true);
+            await requestSellerApi();
+            const res = await getMySellerRequestApi();
+            setSellerRequest(res);
+        }
+        catch (err) {
+            console.error(err);
+        }
+        finally {
+            setLoading(false);
+        }
+
+    }
+    const getSellerRequest = async () => {
+        if (user == null) return;
+        try {
+            setLoading(true);
+            const res = await getMySellerRequestApi();
+            setSellerRequest(res);
+        }
+        catch (err) {
+            console.error(err);
+        }
+        finally {
+            setLoading(false);
+        }
+
+    }
 
     // -------------------------
     // LOGIN
@@ -90,7 +125,7 @@ export function AuthProvider({ children }) {
 
     return (
         <AuthContext.Provider
-            value={{ user, token, loading, login, logout, refreshProfile, updateInfo }}>
+            value={{ user, token, loading, sellerRequest, login, logout, refreshProfile, updateInfo, requestSeller, getMySellerRequestApi }}>
             {children}
         </AuthContext.Provider>
     );

@@ -183,8 +183,16 @@ else
 app.UseRouting();
 
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated ?? false)
+    {
+        var claims = context.User.Claims.Select(c => $"{c.Type}:{c.Value}");
+        Log.Information("Authenticated user claims: {Claims}", string.Join(", ", claims));
+    }
+    await next();
+});
 app.UseAuthorization();
-
 app.MapStaticAssets(); // if you have static assets
 app.MapControllers();   // map API controllers
 

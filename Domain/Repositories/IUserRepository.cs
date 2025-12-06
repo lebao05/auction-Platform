@@ -10,6 +10,9 @@ namespace Domain.Repositories
         Task <AppUser?> GetUserById(Guid id, CancellationToken cancellationToken = default);
         Task <AppUser?> GetUserWithSellerRequest(Guid guid, CancellationToken cancellationToken = default);
         Task <AppUser?> GetUserByEmail(string email, CancellationToken cancellationToken = default);
+        Task <SellerRequest?> GetSellerRequest(Guid userId, CancellationToken cancellationToken = default);
+        Task <SellerRequest?> GetSellerRequestById(Guid rqId, CancellationToken cancellationToken = default);
+        Task <List<SellerRequest>> GetSellerRequestsWithQuery(string[] userNames, int pageNumber, int pageSize, bool createdAtDecesding , CancellationToken cancellationToken = default);
         void AddSellerRequest(SellerRequest request);
     }
 }
