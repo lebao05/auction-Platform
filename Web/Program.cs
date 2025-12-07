@@ -2,15 +2,13 @@ using Application;
 using Application.Behaviors;
 using Domain.Entities;
 using Infraestructure;
+using Infraestructure.BackgroundServices;
 using Infraestructure.Persistence.Contexts;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Presentation;
 using Serilog;
@@ -25,6 +23,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Configure MediatR and Pipeline Behaviors
 builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
+
+// Outbox processor
+builder.Services.AddHostedService<OutboxProcessor>();
 
 
 var ClientUrl = builder.Configuration["ClientUrl"];
@@ -158,10 +159,13 @@ builder.Services.AddApplicationDependencies()
                 .AddPresentationDependencies();
 
 var app = builder.Build();
-app.UseCors("AllowLocalhost"); 
+app.UseCors("AllowLocalhost");
+
+
+app.UseSerilogRequestLogging();
+app.UseStaticFiles(); // <-- place here
 
 // Middleware
-app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {

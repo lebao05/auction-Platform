@@ -483,7 +483,7 @@ namespace Infraestructure.Persistence.Migrations
                     b.Property<long?>("BuyNowPrice")
                         .HasColumnType("bigint");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid?>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -492,8 +492,15 @@ namespace Infraestructure.Persistence.Migrations
                     b.Property<long>("CurrentMaxBidAmount")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsAutoRenewal")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -509,6 +516,12 @@ namespace Infraestructure.Persistence.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<long>("StartPrice")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("StepPrice")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -521,32 +534,6 @@ namespace Infraestructure.Persistence.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.ProductDescriptionHistory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductDescriptionHistories", (string)null);
-                });
-
             modelBuilder.Entity("Domain.Entities.ProductImage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -557,9 +544,11 @@ namespace Infraestructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
@@ -659,6 +648,38 @@ namespace Infraestructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SystemSettings", (string)null);
+                });
+
+            modelBuilder.Entity("Infraestructure.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("OccurredOnUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PayLoad")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ProcessedOnUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProcessedOnUtc");
+
+                    b.ToTable("OutboxMessages", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -1014,8 +1035,7 @@ namespace Infraestructure.Persistence.Migrations
                     b.HasOne("Domain.Entities.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Domain.Entities.AppUser", "Seller")
                         .WithMany("ProductsAsSeller")
@@ -1026,17 +1046,6 @@ namespace Infraestructure.Persistence.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Seller");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ProductDescriptionHistory", b =>
-                {
-                    b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("DescriptionHistories")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductImage", b =>
@@ -1182,8 +1191,6 @@ namespace Infraestructure.Persistence.Migrations
                     b.Navigation("Blacklists");
 
                     b.Navigation("Comments");
-
-                    b.Navigation("DescriptionHistories");
 
                     b.Navigation("Images");
                 });

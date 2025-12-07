@@ -3,7 +3,6 @@ using Application.Abstractions.Messaging;
 using Domain.Entities;
 using Domain.Shared;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace Application.User.Commands.Login
 {
     public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, string>

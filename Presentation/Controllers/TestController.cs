@@ -41,5 +41,30 @@ namespace Presentation.Controllers
 
             return Ok(new { message = "User assigned as admin successfully." });
         }
+        [HttpPut("assign-seller")]
+        public async Task<IActionResult> AssignSeller([FromBody] Guid userId)
+        {
+            // Find the user by Id
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+
+            // Check if user is already an admin
+            if (await _userManager.IsInRoleAsync(user, "Seller"))
+            {
+                return BadRequest(new { message = "User is already an Seller." });
+            }
+
+            // Assign Admin role
+            var result = await _userManager.AddToRoleAsync(user, "Seller");
+            if (!result.Succeeded)
+            {
+                return StatusCode(500, new { message = "Failed to assign Seller role.", errors = result.Errors });
+            }
+
+            return Ok(new { message = "User assigned as Seller successfully." });
+        }
     }
 }

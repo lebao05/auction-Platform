@@ -27,7 +27,7 @@ namespace Presentation.Controllers
             }
             return Ok(result.Value);
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllCategory(CancellationToken cancellationToken)
         {

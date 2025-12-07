@@ -1,141 +1,61 @@
-import { useState } from "react"
-import { Plus } from "lucide-react"
+"use client";
 
-// đổi lại import theo React thuần
-import { Button } from "../../../components/ui/Button"
-import ProductCard from "../components/ProductCard"
-import ProductSidebar from "../components/ProductSidebar"
+import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 
-const MOCK_PRODUCTS = [
-    {
-        id: 1,
-        name: "iPhone 13 Pro",
-        category: "Điện tử",
-        startPrice: 15000000,
-        buyNowPrice: 18000000,
-        stepPrice: 500000,
-        description: "Điện thoại iPhone 13 Pro đen, như mới, đầy đủ box",
-        images: ["/modern-smartphone.png"],
-        status: "active",
-        bids: 12,
-        currentPrice: 16500000,
-        endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-        createdDate: new Date(),
-    },
-    {
-        id: 2,
-        name: 'MacBook Pro 14"',
-        category: "Điện tử",
-        startPrice: 30000000,
-        buyNowPrice: 35000000,
-        stepPrice: 1000000,
-        description: "MacBook Pro 14 inch M1 Max, Silver, tình trạng tốt",
-        images: ["/silver-macbook-on-desk.png"],
-        status: "active",
-        bids: 8,
-        currentPrice: 31500000,
-        endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-        createdDate: new Date(),
-    }, {
-        id: 4,
-        name: 'MacBook Pro 14"',
-        category: "Điện tử",
-        startPrice: 30000000,
-        buyNowPrice: 35000000,
-        stepPrice: 1000000,
-        description: "MacBook Pro 14 inch M1 Max, Silver, tình trạng tốt",
-        images: ["/silver-macbook-on-desk.png"],
-        status: "active",
-        bids: 8,
-        currentPrice: 31500000,
-        endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-        createdDate: new Date(),
-    }, {
-        id: 5,
-        name: 'MacBook Pro 14"',
-        category: "Điện tử",
-        startPrice: 30000000,
-        buyNowPrice: 35000000,
-        stepPrice: 1000000,
-        description: "MacBook Pro 14 inch M1 Max, Silver, tình trạng tốt",
-        images: ["/silver-macbook-on-desk.png"],
-        status: "active",
-        bids: 8,
-        currentPrice: 31500000,
-        endDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-        createdDate: new Date(),
-    },
-    {
-        id: 3,
-        name: "Đồng hồ Rolex",
-        category: "Thời trang",
-        startPrice: 50000000,
-        buyNowPrice: 60000000,
-        stepPrice: 2000000,
-        description: "Rolex Submariner chính hãng, bảo hành còn",
-        images: ["/wrist-watch-close-up.png"],
-        status: "ended",
-        bids: 25,
-        currentPrice: 58000000,
-        endDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-        createdDate: new Date(),
-    },
-]
+import { Button } from "../../../components/ui/Button";
+import ProductCard from "../components/ProductCard";
+import ProductSidebar from "../components/ProductSidebar";
+import { useProduct } from "../../../contexts/ProductMagementContext";
 
 export default function SellerProductsPage() {
-    const [products, setProducts] = useState(MOCK_PRODUCTS)
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [editingProduct, setEditingProduct] = useState(null)
-    const [selectedFilter, setSelectedFilter] = useState("all")
+    const { products: apiProducts, loadSellerProducts } = useProduct();
 
-    const handleAddProduct = () => {
-        setEditingProduct(null)
-        setIsModalOpen(true)
-    }
+    const [products, setProducts] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null);
+    const [selectedFilter, setSelectedFilter] = useState("all");
 
+    useEffect(() => {
+        loadSellerProducts();
+    }, []);
+
+    useEffect(() => {
+        if (!apiProducts) return;
+        const normalized = apiProducts.map(normalizeProduct);
+        setProducts(normalized);
+    }, [apiProducts]);
+
+    const normalizeProduct = (p) => ({
+        id: p.id,
+        name: p.name,
+        category: p.categoryName || "Danh mục",
+        startPrice: p.startPrice,
+        buyNowPrice: p.buyNowPrice,
+        stepPrice: p.stepPrice,
+        bids: p.biddingCount,
+        currentPrice: p.currentMaxBidAmount,
+        endDate: new Date(p.endDate),
+        createdDate: new Date(p.startDate),
+        images: [p.mainImageUrl],
+        status: new Date(p.endDate) > new Date() ? "active" : "ended",
+    });
     const handleEditProduct = (product) => {
-        setEditingProduct(product)
-        setIsModalOpen(true)
-    }
+
+    };
 
     const handleDeleteProduct = (id) => {
-        if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-            setProducts(products.filter((p) => p.id !== id))
-        }
-    }
+    };
 
-    const handleSaveProduct = (product) => {
-        if (editingProduct) {
-            setProducts(
-                products.map((p) =>
-                    p.id === editingProduct.id
-                        ? { ...product, id: editingProduct.id, createdDate: editingProduct.createdDate }
-                        : p
-                )
-            )
-        } else {
-            setProducts([
-                ...products,
-                {
-                    ...product,
-                    id: Math.max(...products.map((p) => p.id), 0) + 1,
-                    createdDate: new Date(),
-                },
-            ])
-        }
-        setIsModalOpen(false)
-        setEditingProduct(null)
-    }
-
-    const activeProducts = products.filter((p) => p.status === "active")
-    const endedProducts = products.filter((p) => p.status === "ended")
+    const activeProducts = products.filter((p) => p.status === "active");
+    const endedProducts = products.filter((p) => p.status === "ended");
 
     const filteredProducts =
         selectedFilter === "active"
             ? activeProducts
             : selectedFilter === "ended"
                 ? endedProducts
-                : products
+                : products;
 
     return (
         <div className="min-h-screen bg-white">
@@ -159,13 +79,7 @@ export default function SellerProductsPage() {
                             </p>
                         </div>
 
-                        <Button
-                            onClick={handleAddProduct}
-                            className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Đăng sản phẩm
-                        </Button>
+
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -188,5 +102,5 @@ export default function SellerProductsPage() {
                 </div>
             </div>
         </div>
-    )
+    );
 }

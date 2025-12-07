@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
             setSellerRequest(res);
         }
         catch (err) {
-            console.error(err);
+            // console.error(err);
         }
         finally {
             setLoading(false);
@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
             setSellerRequest(res);
         }
         catch (err) {
-            console.error(err);
+            // console.error(err);
         }
         finally {
             setLoading(false);

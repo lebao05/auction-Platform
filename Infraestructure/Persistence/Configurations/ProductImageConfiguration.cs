@@ -10,7 +10,7 @@ namespace Infrastructure.Persistence.Configurations
         {
             builder.ToTable("ProductImages");
             builder.HasKey(pi => pi.Id);
-            builder.Property(pi => pi.ImageUrl).IsRequired().HasMaxLength(500);
+            builder.Property(pi => pi.ImageUrl).HasMaxLength(500);
 
             builder.HasOne(pi => pi.Product)
                 .WithMany(p => p.Images)

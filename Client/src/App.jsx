@@ -10,14 +10,12 @@ import { Signup } from "./features/Authentication/pages/SignupPage";
 import ProfilePage from "./features/Profile/pages/ProfilePage";
 import { MainLayout } from "./components/layout/MainLayout";
 import SearchPage from "./features/Home/pages/SearchPage";
-import CategoryPage from "./features/Home/pages/CategoryPage";
 import HomePage from "./features/Home/pages/HomePage";
 import AdminPage from "./features/Admin/pages/AdminPage";
 import ProductPage from "./features/Product/pages/ProductPage";
-import { ProfileSettings } from "./features/Profile/components/ProfileSettings";
 import SettingPage from "./features/Profile/pages/SettingPage";
 import WishlistPage from "./features/Profile/pages/WishListPage";
-import PostProductPage from "./features/Product/pages/PostProductPage";
+import PostProductPage from "./features/ProductManagement/pages/PostProductPage";
 import OrderPage from "./features/Order/pages/OrderPage";
 import SellerProductsPage from "./features/ProductManagement/pages/SellerProductPage";
 

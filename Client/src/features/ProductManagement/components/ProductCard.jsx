@@ -37,11 +37,10 @@ export default function ProductCard({ product, onEdit, onDelete }) {
         {/* Status Badge */}
         <div className="mb-3">
           <span
-            className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
-              product.status === "active"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
+            className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${product.status === "active"
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+              }`}
           >
             {product.status === "active" ? "Đang diễn ra" : "Đã kết thúc"}
           </span>
@@ -53,7 +52,7 @@ export default function ProductCard({ product, onEdit, onDelete }) {
         {/* Price Box */}
         <div className="bg-gray-100 rounded p-3 mb-4">
           <p className="text-xs text-gray-500 mb-1">Giá hiện tại</p>
-          <p className="text-lg font-bold text-blue-600">{formatPrice(product.currentPrice)}</p>
+          <p className="text-lg font-bold text-blue-600">{product.bids == 0 ? "Chưa có người tham gia" : formatPrice(product.currentPrice)}</p>
           <p className="text-xs text-gray-400 mt-1">
             Khởi: {formatPrice(product.startPrice)}
           </p>
@@ -75,36 +74,45 @@ export default function ProductCard({ product, onEdit, onDelete }) {
               <p className="text-xs text-gray-500">Thời gian</p>
             </div>
             <p
-              className={`font-bold text-sm ${
-                product.status === "active" ? "text-green-600" : "text-gray-500"
-              }`}
+              className={`font-bold text-sm ${product.status === "active" ? "text-green-600" : "text-gray-500"
+                }`}
             >
               {getTimeRemaining(product.endDate)}
             </p>
           </div>
         </div>
-
-        {/* Actions */}
         <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
+          {/* Button xem chi tiết */}
+          <button
             onClick={() => onEdit(product)}
-            className="flex-1 text-blue-600 hover:text-blue-500 hover:bg-blue-100"
+            className="
+      flex-1 flex items-center justify-center gap-2
+      text-blue-600 bg-blue-50
+      hover:bg-blue-100 hover:text-blue-700
+      font-medium text-sm
+      py-2 rounded-md
+      cursor-pointer transition-all
+    "
           >
-            <Edit2 className="w-4 h-4 mr-2" />
-            Sửa
-          </Button>
+            <Edit2 className="w-4 h-4" />
+            Xem chi tiết
+          </button>
 
-          <Button
-            variant="ghost"
-            size="sm"
+          {/* Button Xóa – warning style */}
+          <button
             onClick={() => onDelete(product.id)}
-            className="flex-1 text-red-600 hover:text-red-500 hover:bg-red-100"
+            className="
+      flex-1 flex items-center justify-center gap-2
+      text-white bg-red-600
+      hover:bg-red-700
+      font-medium text-sm
+      py-2 rounded-md
+      cursor-pointer transition-all shadow-sm
+    "
           >
-            <Trash2 className="w-4 h-4 mr-2" />
+            <Trash2 className="w-4 h-4" />
             Xóa
-          </Button>
+          </button>
         </div>
       </div>
     </div>

@@ -29,11 +29,6 @@ namespace Infraestructure.Persistence.Configurations
                 .HasForeignKey(pi => pi.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(p => p.DescriptionHistories)
-                .WithOne(dh => dh.Product)
-                .HasForeignKey(dh => dh.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             builder.HasMany(p => p.BiddingHistories)
                 .WithOne(bh => bh.Product)
                 .HasForeignKey(bh => bh.ProductId)

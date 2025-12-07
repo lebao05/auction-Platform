@@ -1,10 +1,23 @@
-﻿namespace Domain.Common
+﻿using MediatR;
+
+namespace Domain.Common
 {
     public abstract class BaseEntity : IEquatable<BaseEntity>
     {
         public Guid Id { get; protected init; }
         public DateTime CreatedAt { get; set; } 
         public DateTime? UpdatedAt { get; set; }
+
+        private readonly List<IDomainEvent> _domainEvents = new();
+
+        public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents;
+
+        public void AddDomainEvent(IDomainEvent eventItem)
+            => _domainEvents.Add(eventItem);
+
+        public void ClearDomainEvents()
+            => _domainEvents.Clear();
+
         protected BaseEntity()
         {
             

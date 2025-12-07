@@ -35,7 +35,6 @@ export function Header() {
     setOpenNotif(false);
     setOpenChat(false);
   };
-  console.log(sellerRequest);
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm font-sans">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
@@ -48,7 +47,9 @@ export function Header() {
 
         {/* Icons Area */}
         <div className="relative flex items-center gap-4">
-          <Button variant="customized" className="bg-yellow-500 hover:bg-yellow-400 cursor-pointer text-white md:text-black font-medium" size="icon">
+          <Button variant="customized"
+            onClick={() => navigate("/product/create")}
+            className="bg-yellow-500 hover:bg-yellow-400 cursor-pointer text-white md:text-black font-medium" size="icon">
             Đăng sản phẩm
           </Button>
 

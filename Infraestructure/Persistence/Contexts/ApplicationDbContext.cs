@@ -1,10 +1,12 @@
 ﻿using Domain.Common;
 using Domain.Entities;
+using Infraestructure.Outbox;
 using Infraestructure.Persistence.Configurations;
 using Infrastructure.Persistence.Configurations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace Infraestructure.Persistence.Contexts
 {
@@ -25,12 +27,12 @@ namespace Infraestructure.Persistence.Contexts
         public DbSet<SystemSetting> SystemSettings { get; set; }
         public DbSet<EmailLog> EmailLogs { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
-        public DbSet<ProductDescriptionHistory> ProductDescriptionHistories { get; set; }
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<ConversationParticipant> ConversationParticipants { get; set; }
         public DbSet<MessageAttachment> MessageAttachments { get; set; }
         public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
+        public DbSet<OutboxMessage> OutboxMessages { get; set; }
         //public DbSet<OrderCompletion> OrderCompletions { get; set; }
         //public DbSet<OrderChatMessage> OrderChatMessages { get; set; }
         //public DbSet<OrderActivityLog> OrderActivityLogs { get; set; }
@@ -40,7 +42,6 @@ namespace Infraestructure.Persistence.Contexts
             builder.ApplyConfiguration(new AppUserConfiguration());
             builder.ApplyConfiguration(new ProductConfiguration());
             builder.ApplyConfiguration(new ProductImageConfiguration());
-            builder.ApplyConfiguration(new ProductDescriptionHistoryConfiguration());
             builder.ApplyConfiguration(new CategoryConfiguration());
             builder.ApplyConfiguration(new BiddingHistoryConfiguration());
             builder.ApplyConfiguration(new AutomatedBiddingConfiguration());
@@ -50,7 +51,7 @@ namespace Infraestructure.Persistence.Contexts
             builder.ApplyConfiguration(new SystemSettingConfiguration());
             builder.ApplyConfiguration(new EmailLogConfiguration());
             builder.ApplyConfiguration(new SellerRequestConfiguration());
-            base.OnModelCreating(builder); 
+            base.OnModelCreating(builder);
             builder.Entity<AppUser>().ToTable("AspNetUsers");
             builder.Entity<IdentityRole<Guid>>().ToTable("AspNetRoles");
             builder.Entity<IdentityUserRole<Guid>>().ToTable("AspNetUserRoles");
@@ -90,7 +91,28 @@ namespace Infraestructure.Persistence.Contexts
                         break;
                 }
             }
+            var domainEvents = ChangeTracker
+                  .Entries<BaseEntity>()
+                  .Where(e => e.Entity.DomainEvents.Any())
+                  .SelectMany(e => e.Entity.DomainEvents)
+                  .ToList();
 
+            // Convert domain events into Outbox messages
+            foreach (var domainEvent in domainEvents)
+            {
+                var type = domainEvent.GetType().AssemblyQualifiedName!;
+                var payload = JsonConvert.SerializeObject(domainEvent);
+
+                OutboxMessages.Add(new OutboxMessage
+                {
+                    Type = type,
+                    PayLoad = payload
+                });
+            }
+
+            // Clear domain events from entities
+            foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+                entry.Entity.ClearDomainEvents();
             return base.SaveChangesAsync(cancellationToken);
         }
     }
