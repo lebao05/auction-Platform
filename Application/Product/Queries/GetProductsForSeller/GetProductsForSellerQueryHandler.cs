@@ -23,13 +23,12 @@ namespace Application.Product.Queries.GetProductsForSeller
                 StartPrice = p.StartPrice,
                 StepPrice = p.StepPrice,
                 BiddingCount = p.BiddingCount,
-                CurrentMaxBidAmount = p.CurrentMaxBidAmount,
+                CurrentMaxBidAmount = p.BiddingHistories.OrderByDescending( b => b.BidAmount).ThenBy( b=>b.CreatedAt).FirstOrDefault()?.BidAmount ?? 0,
                 StartDate = p.StartDate,
                 EndDate = p.EndDate,
                 SellerId = p.SellerId,
                 CategoryName = p.Category?.Name ?? string.Empty,
 
-                // Filter image here
                 MainImageUrl = p.Images
                            .Where(i => i.IsMain)
                            .Select(i => i.ImageUrl)

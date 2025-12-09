@@ -44,6 +44,10 @@ namespace Infraestructure.Persistence.Configurations
                 .HasForeignKey(b => b.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasMany(p=>p.AutomatedBiddings)
+                .WithOne(b => b.Product)
+                .HasForeignKey(b => b.ProductId) .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

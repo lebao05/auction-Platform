@@ -10,7 +10,6 @@ namespace Domain.Entities
         public long StepPrice { get; set; }
         public bool AllowAll { get; set; } = true;
         public int BiddingCount { get; set; } = 0;
-        public long CurrentMaxBidAmount { get; set; }
         public bool IsAutoRenewal { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -24,6 +23,7 @@ namespace Domain.Entities
         // Navigation Properties
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public ICollection<BiddingHistory> BiddingHistories { get; set; } = new List<BiddingHistory>();
+        public ICollection<AutomatedBidding> AutomatedBiddings { get; set; } = new List<AutomatedBidding>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<BlackList> Blacklists { get; set; } = new List<BlackList>();
         public static Product Create(

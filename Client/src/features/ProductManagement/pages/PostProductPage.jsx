@@ -366,7 +366,7 @@ export default function PostProductPage() {
 
                         {/* Submit */}
                         <div className="flex gap-4 pt-6 border-t">
-                            <button type="submit" className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center">
+                            <button type="submit" className="flex-1 cursor-pointer bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center">
                                 <Check className="w-5 h-5 mr-2" /> Đăng sản phẩm
                             </button>
                             <button type="button" onClick={() => {
@@ -386,7 +386,7 @@ export default function PostProductPage() {
                                     setDuration({ days: 0, hours: 0 });
                                     setErrors({});
                                 }
-                            }} className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                            }} className="px-6 py-3 cursor-pointer border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
                                 Hủy
                             </button>
                         </div>

@@ -1,6 +1,5 @@
 ﻿using Application.Abstractions;
 using Application.Abstractions.Messaging;
-using Domain.Entities;
 using Domain.Repositories;
 using Domain.Shared;
 
@@ -52,7 +51,7 @@ namespace Application.Product.Commands.CreateProduct
                 request.AllowAll,
                 request.IsAutoRenewal,
                 request.StartPrice,
-                request.StartPrice,
+                request.StepPrice,
                 request.Description,
                 request.Hours,
                 seller,

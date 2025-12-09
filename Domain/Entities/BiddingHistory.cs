@@ -11,5 +11,11 @@ namespace Domain.Entities
 
         public Guid BidderId { get; set; }
         public AppUser Bidder { get; set; } = null!;
+        public BiddingHistory(long bidAmount,Guid productId,Guid bidderId)
+        {
+            BidAmount = bidAmount;
+            ProductId = productId;
+            BidderId = bidderId;
+        }
     }
 }

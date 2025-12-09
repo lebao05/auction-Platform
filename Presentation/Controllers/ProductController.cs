@@ -1,4 +1,6 @@
 ﻿using Application.Product.Commands.CreateProduct;
+using Application.Product.Commands.PlaceBid;
+using Application.Product.Queries.GetProductDetails;
 using Application.Product.Queries.GetProductsForSeller;
 using Infraestructure.Extensions;
 using MediatR;
@@ -24,7 +26,6 @@ namespace Presentation.Controllers
         public async Task<IActionResult> CreateProduct([FromForm] CreateProductRequest rq, CancellationToken cancellationToken)
         {
             var userId = ClaimsPrincipalExtensions.GetUserId(User);
-         
             if (rq.Images == null || rq.Images.Count < 3)
                 return BadRequest("A product must have at least 3 images.");
 
@@ -80,6 +81,26 @@ namespace Presentation.Controllers
             if( result.IsFailure )
                 return HandleFailure(result);
             return Ok(result.Value);
+        }
+        [HttpGet("{productId}")]
+        public async Task<IActionResult> GetProductDetails([FromRoute] Guid productId, CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var query = new GetProductDetailsQuery(userId == string.Empty ? null : Guid.Parse(userId), productId);
+            var result = await _sender.Send(query, cancellationToken);
+            if( result.IsFailure )
+                return HandleFailure(result);   
+            return Ok(result.Value);
+        }
+        [HttpPost("place/{productId}")]
+        public async Task<IActionResult> PlaceBid([FromRoute] Guid productId, [FromBody] PlaceBidRequest request,CancellationToken cancellationToken)
+        {
+            var userid = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new PlaceBidCommand(Guid.Parse(userid), productId, request.MaxBidAmount);
+            var result = await _sender.Send(command, cancellationToken);
+            if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok();
         }
     }
 }

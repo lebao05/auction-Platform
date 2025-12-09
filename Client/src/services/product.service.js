@@ -40,3 +40,13 @@ export async function getProductsForSellerApi() {
     const response = await axios.get("/product/seller");
     return response.data;
 }
+
+export async function getProductDetailsApi({ productId }) {
+    const response = await axios.get(`/product/${productId}`);
+    return response.data;
+}
+
+export async function placeBidApi({ productId, maxBidAmount }) {
+    const response = await axios.post(`/product/place/${productId}`, { maxBidAmount });
+    return response.data;
+}

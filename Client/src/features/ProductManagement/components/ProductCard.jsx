@@ -52,7 +52,7 @@ export default function ProductCard({ product, onEdit, onDelete }) {
         {/* Price Box */}
         <div className="bg-gray-100 rounded p-3 mb-4">
           <p className="text-xs text-gray-500 mb-1">Giá hiện tại</p>
-          <p className="text-lg font-bold text-blue-600">{product.bids == 0 ? "Chưa có người tham gia" : formatPrice(product.currentPrice)}</p>
+          <p className="text-lg font-bold text-blue-600">{product.bids == 0 ? "Không có lượt ra giá" : formatPrice(product.currentPrice)}</p>
           <p className="text-xs text-gray-400 mt-1">
             Khởi: {formatPrice(product.startPrice)}
           </p>

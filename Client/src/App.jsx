@@ -36,11 +36,11 @@ function App() {
           </Route>
           // project
           <Route element={<MainLayout />}>
-            <Route path="/product" element={<ProductPage />} />
+            <Route path="/product/:productId" element={<ProductPage />} />
           </Route>
           <Route element={<MainLayout />}>
             <Route path="/product/create" element={<PostProductPage />} />
-          </Route>          
+          </Route>
           <Route element={<MainLayout />}>
             <Route path="/product/manage" element={<SellerProductsPage />} />
           </Route>

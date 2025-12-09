@@ -20,7 +20,7 @@ namespace Domain.Common
 
         protected BaseEntity()
         {
-            
+            Id = Guid.NewGuid();   
         }
         protected BaseEntity(Guid id)
         {
