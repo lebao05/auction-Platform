@@ -3,6 +3,7 @@ using Application.Behaviors;
 using Domain.Entities;
 using Infraestructure;
 using Infraestructure.BackgroundServices;
+using Infraestructure.Options;
 using Infraestructure.Persistence.Contexts;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -107,6 +108,10 @@ builder.Services.AddIdentityCore<AppUser>(options =>
 .AddRoles<IdentityRole<Guid>>()                  // add role support
 .AddEntityFrameworkStores<ApplicationDbContext>() // EF Core store
 .AddDefaultTokenProviders();
+
+//Options
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
 
 
 //Add Swagger services

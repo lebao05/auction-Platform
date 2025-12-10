@@ -37,6 +37,7 @@
         public List<BiddingHistoryDto> BiddingHistories { get; set; } = new();
         // Comments
         public List<CommentDto> Comments { get; set; } = new();
+        public List<BlackListDto> BlackList { get; set; } = new();
     }
 
     public class ProductImageDto
@@ -59,7 +60,13 @@
         public long BidAmount { get; set; }
         public DateTime CreatedAt { get; set; }
     }
-
+    public class BlackListDto
+    {
+        public Guid Id { get; set; }
+        public Guid SellerId { get; set; }
+        public string BidderName { get; set; } = null!;
+        public DateTime CreatedAt { get; set; }
+    }
     public class CommentDto
     {
         public Guid Id { get; set; }

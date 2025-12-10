@@ -1,4 +1,6 @@
-﻿using Application.Product.Commands.CreateProduct;
+﻿using Application.Product.Commands.AddToBlackList;
+using Application.Product.Commands.CreateProduct;
+using Application.Product.Commands.DeleteFromBlackList;
 using Application.Product.Commands.PlaceBid;
 using Application.Product.Queries.GetProductDetails;
 using Application.Product.Queries.GetProductsForSeller;
@@ -99,6 +101,30 @@ namespace Presentation.Controllers
             var command = new PlaceBidCommand(Guid.Parse(userid), productId, request.MaxBidAmount);
             var result = await _sender.Send(command, cancellationToken);
             if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok();
+        }
+        [HttpPost("blacklist")]
+        [Authorize]
+        public async Task<IActionResult> AddToBlackList([FromBody] AddToBlackListRequest request
+            ,CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new AddToBlackListCommand(Guid.Parse(userId), request.BidderId, request.ProductId);
+            var result = await _sender.Send(command, cancellationToken);
+            if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok(result.Value);
+        }
+        [HttpDelete("{blacklistId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteFromBLackList([FromRoute] Guid blacklistId,CancellationToken 
+            cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new DeleteFromBlackListCommand(blacklistId, Guid.Parse(userId));
+            var result = await _sender.Send(command, cancellationToken);
+            if( result.IsFailure)
                 return HandleFailure(result);
             return Ok();
         }

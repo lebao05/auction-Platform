@@ -12,5 +12,15 @@ namespace Domain.Entities
 
         public Guid BidderId { get; set; }
         public AppUser Bidder { get; set; } = null!;
+        private BlackList()
+        {
+            
+        }
+        public BlackList(Guid productId, Guid sellerId, Guid bidderId,Guid Id) : base(Id)
+        {
+            ProductId = productId;
+            SellerId = sellerId;
+            BidderId = bidderId;
+        }
     }
 }

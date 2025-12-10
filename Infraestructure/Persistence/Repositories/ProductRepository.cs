@@ -29,6 +29,8 @@ namespace Infraestructure.Persistence.Repositories
                     .ThenInclude(b => b.Bidder)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.User)
+                .Include(p => p.Blacklists)
+                    .ThenInclude(b => b.Bidder)
                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted, cancellationToken);
         }
 
@@ -103,6 +105,16 @@ namespace Infraestructure.Persistence.Repositories
             return await _appDbContext.Blacklists
                 .Where(bl => bl.BidderId == userId || bl.ProductId == productId)
                 .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public void DeleteBlackList(BlackList entity)
+        {
+            _appDbContext.Blacklists.Remove(entity);
+        }
+
+        public async Task<BlackList?> GetBlackListById(Guid id, CancellationToken cancellationToken)
+        {
+            return await _appDbContext.Blacklists.FindAsync(id);
         }
     }
 }

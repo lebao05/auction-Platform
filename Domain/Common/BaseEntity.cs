@@ -4,7 +4,7 @@ namespace Domain.Common
 {
     public abstract class BaseEntity : IEquatable<BaseEntity>
     {
-        public Guid Id { get; protected init; }
+        public Guid Id { get; init; }
         public DateTime CreatedAt { get; set; } 
         public DateTime? UpdatedAt { get; set; }
 

@@ -53,7 +53,15 @@ namespace Application.Product.Queries.GetProductDetails
 
                 SellerId = product.SellerId,
                 SellerFullName = product.Seller.FullName,
-
+                BlackList = product.Blacklists
+                .Select(b => new BlackListDto
+                {
+                    Id = b.Id,
+                    SellerId = b.SellerId,
+                    CreatedAt = b.CreatedAt,
+                    BidderName = b.Bidder.FullName,
+                })
+                .ToList(),
                 Images = product.Images.Select(img => new ProductImageDto
                 {
                     Id = img.Id,

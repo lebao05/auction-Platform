@@ -65,6 +65,27 @@ namespace Infraestructure.Persistence.Contexts
                 new IdentityRole<Guid> { Id = Guid.Parse("22222222-2222-2222-3333-222222222222"), Name = "User", NormalizedName = "User" },
                 new IdentityRole<Guid> { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Name = "Admin", NormalizedName = "ADMIN" }
             );
+            builder.Entity<SystemSetting>().HasData(
+                new SystemSetting
+                {
+                    Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    SystemKey = "NewProductTime",
+                    SystemValue = 5
+                },
+                new SystemSetting
+                {
+                    Id = Guid.Parse("13333333-3333-3333-3333-333333333333"),
+                    SystemKey = "ExtraRenewalTime",
+                    SystemValue = 10
+                },
+                new SystemSetting
+                {
+                    Id = Guid.Parse("23333333-3333-3333-3333-333333333333"),
+                    SystemKey = "RenewalTriggerTime",
+                    SystemValue = 5
+                }
+            );
+
             builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

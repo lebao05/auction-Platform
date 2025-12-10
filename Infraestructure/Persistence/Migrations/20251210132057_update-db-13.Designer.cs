@@ -4,6 +4,7 @@ using Infraestructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infraestructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251210132057_update-db-13")]
+    partial class updatedb13
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -838,21 +841,21 @@ namespace Infraestructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 12, 10, 13, 20, 55, 484, DateTimeKind.Utc).AddTicks(1752),
                             SystemKey = "NewProductTime",
                             SystemValue = 5
                         },
                         new
                         {
                             Id = new Guid("13333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 12, 10, 13, 20, 55, 484, DateTimeKind.Utc).AddTicks(2563),
                             SystemKey = "ExtraRenewalTime",
                             SystemValue = 10
                         },
                         new
                         {
                             Id = new Guid("23333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 12, 10, 13, 20, 55, 484, DateTimeKind.Utc).AddTicks(2565),
                             SystemKey = "RenewalTriggerTime",
                             SystemValue = 5
                         });

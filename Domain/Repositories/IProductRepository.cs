@@ -17,6 +17,7 @@ namespace Domain.Repositories
         void AddBiddingHistory(BiddingHistory entity);
         void AddComment(Comment entity);
         Task<BlackList?> GetBlackListAsync(Guid userId,Guid productId, CancellationToken cancellationToken);
-       
+        void DeleteBlackList(BlackList entity);
+        Task<BlackList?> GetBlackListById(Guid id, CancellationToken cancellationToken);
     }
 }

@@ -1,9 +1,14 @@
 ﻿using Domain.Common;
-namespace Domain.Entities
+
+public class SystemSetting : BaseEntity
 {
-    public class SystemSetting : BaseEntity
+    public string SystemKey { get; set; } = null!;
+    public int SystemValue { get; set; }
+
+    public SystemSetting(string systemKey, int systemValue, Guid id) : base(id)
     {
-        public string SystemKey { get; set; } = string.Empty;
-        public string SystemValue { get; set; } = string.Empty;
+        SystemKey = systemKey;
+        SystemValue = systemValue;
     }
+    public SystemSetting() { }
 }
