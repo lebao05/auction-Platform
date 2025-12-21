@@ -1,9 +1,17 @@
-﻿using Application.Product.Commands.AddToBlackList;
+﻿using Application.Product.Commands.AddDescription;
+using Application.Product.Commands.AddToBlackList;
+using Application.Product.Commands.AddToWatchList;
 using Application.Product.Commands.CreateProduct;
 using Application.Product.Commands.DeleteFromBlackList;
+using Application.Product.Commands.DeleteFromWatchList;
 using Application.Product.Commands.PlaceBid;
 using Application.Product.Queries.GetProductDetails;
 using Application.Product.Queries.GetProductsForSeller;
+using Application.Product.Queries.GetTopBiddingCountProducts;
+using Application.Product.Queries.GetTopSoonProducts;
+using Application.Product.Queries.GetWachtList;
+using Application.Product.Queries.SearchProducts;
+using Domain.Shared;
 using Infraestructure.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +19,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Abstractions;
 using Presentation.Contracts.Product;
+using System.Threading;
 namespace Presentation.Controllers
 {
     [Route("api/product")]
@@ -116,7 +125,7 @@ namespace Presentation.Controllers
                 return HandleFailure(result);
             return Ok(result.Value);
         }
-        [HttpDelete("{blacklistId}")]
+        [HttpDelete("blacklist/{blacklistId}")]
         [Authorize]
         public async Task<IActionResult> DeleteFromBLackList([FromRoute] Guid blacklistId,CancellationToken 
             cancellationToken)
@@ -127,6 +136,126 @@ namespace Presentation.Controllers
             if( result.IsFailure)
                 return HandleFailure(result);
             return Ok();
+        }
+        [HttpPost("watchlist/{productId}")]
+        [Authorize]
+        public async Task<IActionResult> AddToWatchList([FromRoute] Guid productId,CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new AddToWatchListCommand(Guid.Parse(userId), productId);
+            var result = await _sender.Send(command, cancellationToken);
+            if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok();
+        }
+        [HttpDelete("watchlist/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteItemFromWatchList([FromRoute] Guid id, CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new DeleteFromWatchListCommand(Guid.Parse(userId),id);
+            var result = await _sender.Send(command, cancellationToken);
+            if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok();
+        }
+        [HttpGet("watchlist")]
+        [Authorize]
+        public async Task<IActionResult> GetWatchList(CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var query = new GetWatchListQuery(Guid.Parse(userId));
+            var result = await _sender.Send(query, cancellationToken);
+            if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok(result.Value);
+        }
+        [HttpPut("description")]
+        [Authorize]
+        public async Task<IActionResult> AddDescription([FromBody] AddDescriptionRequest request, CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new AddDescriptionCommand(Guid.Parse(userId),request.productId,request.description);
+            var result = await _sender.Send(command, cancellationToken);
+            if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok();
+        }
+        [HttpGet("top-count")]
+        public async Task<IActionResult> GetTopBiddingCountProducts(
+            [FromQuery] int pageIndex = 1,
+            CancellationToken cancellationToken = default)
+        {
+            int pageSize = 8;
+            var query = new GetTopBiddingCountProductsQuery(
+                pageIndex,
+                pageSize);
+
+            var result = await _sender.Send(query, cancellationToken);
+
+            if (result.IsFailure)
+                return HandleFailure(result);
+
+            return Ok(result.Value);
+        }
+        [HttpGet("top-soon")]
+        public async Task<IActionResult> GetTopSoonProducts(
+            [FromQuery] int pageIndex = 1,
+            CancellationToken cancellationToken = default)
+        {
+            int pageSize = 8;
+            var query = new GetTopSoonProductsQuery(
+                pageIndex,
+                pageSize);
+
+            var result = await _sender.Send(query, cancellationToken);
+
+            if (result.IsFailure)
+                return HandleFailure(result);
+
+            return Ok(result.Value);
+        }
+        [HttpGet("top-value")]
+        public async Task<IActionResult> GetTopBiddingProducts(
+            [FromQuery] int pageIndex = 1,CancellationToken cancellationToken = default)
+        {
+            int pageSize = 8;
+            var query = new GetTopBiddingCountProductsQuery(pageIndex, pageSize);
+
+            Result<List<GetTopProductsDto>> result = await _sender.Send(query);
+
+            if (result.IsSuccess)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Error);
+        }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProducts(
+            [FromQuery] string? searchTerm,
+            [FromQuery] Guid? categoryId,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] string? sortBy = "EndDate",
+            [FromQuery] bool sortDescending = true,
+            CancellationToken cancellationToken = default)
+        {
+            int pageSize = 8;
+            var query = new SearchProductsQuery(
+                SearchTerm: searchTerm,
+                CategoryId: categoryId,
+                PageIndex: pageIndex,
+                PageSize: pageSize,
+                SortBy: sortBy,
+                SortDescending: sortDescending
+            );
+
+            var result = await _sender.Send(query, cancellationToken);
+
+            if (result.IsFailure)
+                return HandleFailure(result);
+
+            return Ok(result.Value);
         }
     }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { getProductDetailsApi, placeBidApi } from "../services/product.service";
+import { addToBlackListApi, deleteFromBlackListApi, getProductDetailsApi, placeBidApi } from "../services/product.service";
 
 export function useProductDetails(productId) {
     const [product, setProduct] = useState(null);
@@ -10,7 +10,9 @@ export function useProductDetails(productId) {
 
     const [bidLoading, setBidLoading] = useState(false);
     const [bidError, setBidError] = useState(null);
-
+    const [biddingHistories, setBiddingHistories] = useState([]);
+    const [comments, setComments] = useState([]);
+    const [blackList, setBlackList] = useState([]);
     const fetchProduct = useCallback(async () => {
         if (!productId) return;
 
@@ -20,6 +22,9 @@ export function useProductDetails(productId) {
         try {
             const data = await getProductDetailsApi({ productId });
             setProduct(data);
+            setBiddingHistories(data.biddingHistories);
+            setBlackList(data.blackList);
+            setComments(data.comments);
         } catch (err) {
             console.error("Failed to load product details:", err);
             setError(err);
@@ -38,7 +43,7 @@ export function useProductDetails(productId) {
             setBidError(null);
             try {
                 const result = await placeBidApi({ productId, maxBidAmount });
-                await fetchProduct();
+                const data = await getProductDetailsApi({ productId });
                 return result;
             } catch (err) {
                 console.error("Failed to place bid:", err);
@@ -50,16 +55,46 @@ export function useProductDetails(productId) {
         },
         [productId, fetchProduct]
     );
+    const addToBlacklist = useCallback(
+        async ({ bidderId, productId }) => {
+            try {
+                const result = await addToBlackListApi({ bidderId, productId });
+                const data = await getProductDetailsApi({ productId });
+                setBiddingHistories(data.biddingHistories);
+                setBlackList(data.blackList);
+            } catch (err) {
+                console.error("Failed to add to blacklist:", err);
+                throw err;
+            }
+        },
+        [fetchProduct]
+    );
 
+    // Remove from blacklist
+    const removeFromBlacklist = useCallback(
+        async ({ blacklistId }) => {
+            try {
+                const result = await deleteFromBlackListApi({ blacklistId });
+                const data = await getProductDetailsApi({ productId });
+                setBiddingHistories(data.biddingHistories);
+                setBlackList(data.blackList);
+            } catch (err) {
+                console.error("Failed to remove from blacklist:", err);
+                throw err;
+            }
+        },
+        [fetchProduct]
+    );
     return {
         product,
         loading,
         error,
         refresh: fetchProduct,
-
-        // placeBid extras
         placeBid,
-        bidLoading,
-        bidError,
+        addToBlacklist,
+        removeFromBlacklist,
+        comments,
+        blackList,
+        biddingHistories,
     };
 }

@@ -1,11 +1,11 @@
 ﻿using Application.Category.Queries.GetAll;
 using Application.SystemSetting.Commands.AdjustSetting;
+using Application.SystemSetting.Queries.GetAllSettings;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Abstractions;
 using Presentation.Contracts.SystemSetting;
-using RouteAttribute = Microsoft.AspNetCore.Components.RouteAttribute;
 
 namespace Presentation.Controllers
 {
@@ -21,21 +21,21 @@ namespace Presentation.Controllers
         [Authorize(Roles = ("Admin"))]
         public async Task<IActionResult> GetAllSystemSettings(CancellationToken cancellationToken)
         {
-            var query = new GetAllCategoryQuery();
+            var query = new GetAllSettingsQuery();
             var result = await _sender.Send(query,cancellationToken);
             if( result.IsFailure)
                 return HandleFailure(result);
-            return Ok(result);
+            return Ok(result.Value);
         }
 
-        [HttpPut("{systemKey}")]
+        [HttpPut]
         [Authorize(Roles = ("Admin"))]
-        public async Task<IActionResult> SetUpSystemSettings([FromRoute] string systemKey,
+        public async Task<IActionResult> SetUpSystemSettings(
             [FromBody] SetUpSystemSettingsRequest request
             ,CancellationToken cancellationToken
             )
         {
-            var command = new AdjustSettingCommand(systemKey, request.Value);
+            var command = new AdjustSettingCommand(request.systemKey, request.systemValue);
             var result = await _sender.Send(command,cancellationToken);
             if( result.IsFailure)
                 return HandleFailure(result);

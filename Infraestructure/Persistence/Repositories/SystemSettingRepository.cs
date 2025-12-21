@@ -22,6 +22,5 @@ namespace Infraestructure.Persistence.Repositories
         {
             return await _appContext.SystemSettings.Where( s=>s.SystemKey == key ).FirstOrDefaultAsync();
         }
-
     }
 }

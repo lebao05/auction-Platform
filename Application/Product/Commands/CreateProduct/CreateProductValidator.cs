@@ -32,7 +32,7 @@ namespace Application.Product.Commands.CreateProduct
                 .GreaterThan(0).WithMessage("StepPrice must be greater than 0.");
 
             RuleFor(x => x.Hours)
-                .InclusiveBetween(1, 168) // 1 hour to 7 days
+                .InclusiveBetween(1, 168) 
                 .WithMessage("Hours must be between 1 and 168.");
 
             RuleFor(x => x.ImagePaths)

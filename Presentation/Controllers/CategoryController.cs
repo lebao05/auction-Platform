@@ -27,7 +27,6 @@ namespace Presentation.Controllers
             }
             return Ok(result.Value);
         }
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllCategory(CancellationToken cancellationToken)
         {

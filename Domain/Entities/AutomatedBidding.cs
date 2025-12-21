@@ -13,7 +13,7 @@ namespace Domain.Entities
         public AppUser Bidder { get; set; } = null!;
         public AutomatedBidding(long maxBidAmount,Guid productId,Guid bidderId,Guid id)
         {
-            Id = Id;
+            Id = id;
             MaxBidAmount = maxBidAmount;
             ProductId = productId;
             BidderId = bidderId;

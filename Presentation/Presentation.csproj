@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Infraestructure\Infraestructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\WatchList\" />
+  </ItemGroup>
+
 </Project>

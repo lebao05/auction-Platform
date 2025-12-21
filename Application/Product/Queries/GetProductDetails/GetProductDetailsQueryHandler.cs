@@ -1,10 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Domain.Repositories;
 using Domain.Shared;
-using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Application.Product.Queries.GetProductDetails
 {
     public class GetProductDetailsQueryHandler

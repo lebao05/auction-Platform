@@ -6,10 +6,12 @@ import { ProfileRatings } from "../components/ProfileRatings"
 import { ProfileWishlist } from "../components/ProfileWishlist"
 import { ProfileAuctions } from "../components/ProfileAuction"
 import { UserIcon, Star, Heart, Gavel, Settings } from "lucide-react"
+import { useAuth } from "../../../contexts/AuthContext"
 
 export default function ProfilePage() {
   const [activeSection, setActiveSection] = useState("info")
-
+  const { user, updateInfo } = useAuth();
+  if (user == null) return null;
   const menuItems = [
     { id: "info", label: "Thông tin", icon: <UserIcon className="h-5 w-5" /> },
     { id: "ratings", label: "Đánh giá", icon: <Star className="h-5 w-5" /> },
@@ -20,7 +22,7 @@ export default function ProfilePage() {
   const renderContent = () => {
     switch (activeSection) {
       case "info":
-        return <ProfileInfo />
+        return <ProfileInfo user={user} updateInfo={updateInfo} />
       case "ratings":
         return <ProfileRatings />
       case "wishlist":
@@ -50,8 +52,8 @@ export default function ProfilePage() {
               <button
                 key={item.id}
                 className={`flex items-center gap-2 p-2 rounded-md w-full text-left transition ${activeSection === item.id
-                    ? "bg-blue-100 text-blue-700 font-semibold"
-                    : "hover:bg-gray-100 text-gray-700"
+                  ? "bg-blue-100 text-blue-700 font-semibold"
+                  : "hover:bg-gray-100 text-gray-700"
                   }`}
                 onClick={() => setActiveSection(item.id)}
               >

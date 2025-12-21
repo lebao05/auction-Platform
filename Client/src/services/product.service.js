@@ -50,3 +50,51 @@ export async function placeBidApi({ productId, maxBidAmount }) {
     const response = await axios.post(`/product/place/${productId}`, { maxBidAmount });
     return response.data;
 }
+
+export async function addToBlackListApi({ bidderId, productId }) {
+    console.log(bidderId, productId);
+    const response = await axios.post("/product/blacklist", { bidderId, productId });
+    return response.data;
+}
+
+export async function deleteFromBlackListApi({ blacklistId }) {
+    console.log(blacklistId);
+    const response = await axios.delete(`/product/blacklist/${blacklistId}`);
+    return response.data;
+}
+export async function addDescriptionApi({ productId, description }) {
+    const response = await axios.put("/product/description", {
+        productId,
+        description
+    });
+    return response.data;
+}
+
+export async function addToWatchListApi({ productId }) {
+    const response = await axios.post(`/product/watchlist/${productId}`);
+    return response.data;
+}
+
+
+export async function deleteFromWatchListApi({ productId }) {
+    const response = await axios.delete(`/product/watchlist/${productId}`);
+    return response.data;
+}
+
+export async function getAllLikedProductsApi() {
+    const response = await axios.get("/product/watchlist");
+    return response.data;
+}
+
+export async function getTopSoonProcutsApi({ pageIndex }) {
+    const response = await axios.get(`/product/top-soon?pageIndex=${pageIndex}`);
+    return response.data;
+}
+export async function getTopCountProcutsApi({ pageIndex }) {
+    const response = await axios.get(`/product/top-count?pageIndex=${pageIndex}`);
+    return response.data;
+}
+export async function getTopValueProcutsApi({ pageIndex }) {
+    const response = await axios.get(`/product/top-value?pageIndex=${pageIndex}`);
+    return response.data;
+}

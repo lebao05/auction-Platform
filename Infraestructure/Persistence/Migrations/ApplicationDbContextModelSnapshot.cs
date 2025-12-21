@@ -493,6 +493,10 @@ namespace Infraestructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Description_NoAccent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
@@ -506,6 +510,10 @@ namespace Infraestructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name_NoAccent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SellerId")
                         .HasColumnType("uniqueidentifier");
@@ -618,6 +626,34 @@ namespace Infraestructure.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("SellerRequests", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Watchlist", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId", "ProductId")
+                        .IsUnique();
+
+                    b.ToTable("Watchlists", (string)null);
                 });
 
             modelBuilder.Entity("Infraestructure.Outbox.OutboxMessage", b =>
@@ -863,7 +899,7 @@ namespace Infraestructure.Persistence.Migrations
                     b.HasOne("Domain.Entities.AppUser", "Bidder")
                         .WithMany()
                         .HasForeignKey("BidderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Product", "Product")
@@ -1108,6 +1144,25 @@ namespace Infraestructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Watchlist", b =>
+                {
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany("Watchlists")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.AppUser", "User")
+                        .WithMany("Watchlists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -1174,6 +1229,8 @@ namespace Infraestructure.Persistence.Migrations
                     b.Navigation("RatingsReceived");
 
                     b.Navigation("SellerRequests");
+
+                    b.Navigation("Watchlists");
                 });
 
             modelBuilder.Entity("Domain.Entities.Category", b =>
@@ -1214,6 +1271,8 @@ namespace Infraestructure.Persistence.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Images");
+
+                    b.Navigation("Watchlists");
                 });
 #pragma warning restore 612, 618
         }

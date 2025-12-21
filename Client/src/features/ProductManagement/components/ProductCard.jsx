@@ -1,5 +1,6 @@
 import { Edit2, Trash2, TrendingUp, Clock } from "lucide-react"
 import { Button } from "../../../components/ui/Button"
+import { convertUTCToLocal } from "../../../utils/DateTimeExtension";
 
 export default function ProductCard({ product, onEdit, onDelete }) {
   const formatPrice = (price) =>
@@ -9,17 +10,52 @@ export default function ProductCard({ product, onEdit, onDelete }) {
       maximumFractionDigits: 0,
     }).format(price)
 
-  const getTimeRemaining = (endDate) => {
-    const now = new Date()
-    const diff = new Date(endDate).getTime() - now.getTime()
-    if (diff <= 0) return "Đã kết thúc"
+  const getTime = (dateUtc) => {
+    const date = convertUTCToLocal(dateUtc);
+    const diff = date.getTime() - Date.now(); // dương: tương lai, âm: quá khứ
+    const absDiff = Math.abs(diff);
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const days = Math.floor(absDiff / 86400000); // 1000*60*60*24
+    const hours = Math.floor((absDiff % 86400000) / 3600000);
+    const minutes = Math.floor((absDiff % 3600000) / 60000);
 
-    if (days > 0) return `${days} ngày ${hours} giờ`
-    return `${hours} giờ`
-  }
+    // quá khứ
+    if (diff < 0) {
+      if (days > 3) {
+        return date.toLocaleString("vi-VN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        });
+      }
+      if (days > 0) return `${days} ngày trước`;
+      if (hours > 0) return `${hours} giờ trước`;
+      return `${minutes} phút trước`;
+    }
+
+    // tương lai
+    if (days > 3) {
+      return date.toLocaleString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+    }
+    if (days > 0) return `Còn ${days} ngày`;
+    if (hours > 0) return `Còn ${hours} giờ`;
+    return `Còn ${minutes} phút`;
+  };
+
+
+
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-blue-400 transition-all hover:shadow-lg">
@@ -51,7 +87,7 @@ export default function ProductCard({ product, onEdit, onDelete }) {
 
         {/* Price Box */}
         <div className="bg-gray-100 rounded p-3 mb-4">
-          <p className="text-xs text-gray-500 mb-1">Giá hiện tại</p>
+          <p className="text-xs text-gray-500 mb-1">Giá cao nhất</p>
           <p className="text-lg font-bold text-blue-600">{product.bids == 0 ? "Không có lượt ra giá" : formatPrice(product.currentPrice)}</p>
           <p className="text-xs text-gray-400 mt-1">
             Khởi: {formatPrice(product.startPrice)}
@@ -77,7 +113,7 @@ export default function ProductCard({ product, onEdit, onDelete }) {
               className={`font-bold text-sm ${product.status === "active" ? "text-green-600" : "text-gray-500"
                 }`}
             >
-              {getTimeRemaining(product.endDate)}
+              {getTime(product.endDate)}
             </p>
           </div>
         </div>

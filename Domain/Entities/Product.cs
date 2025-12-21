@@ -5,12 +5,16 @@ namespace Domain.Entities
     public class Product : BaseEntity
     {
         public string Name { get; set; } = string.Empty;
+        public string Name_NoAccent { get; set; } = string.Empty;
+
         public long? BuyNowPrice { get; set; }
         public long StartPrice { get; set; }
         public long StepPrice { get; set; }
         public bool AllowAll { get; set; } = true;
         public int BiddingCount { get; set; } = 0;
         public bool IsAutoRenewal { get; set; }
+        public string Description_NoAccent { get; set; } = string.Empty;
+
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public Guid SellerId { get; set; }
@@ -26,6 +30,8 @@ namespace Domain.Entities
         public ICollection<AutomatedBidding> AutomatedBiddings { get; set; } = new List<AutomatedBidding>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<BlackList> Blacklists { get; set; } = new List<BlackList>();
+        public ICollection<Watchlist> Watchlists { get; private set; } = new List<Watchlist>();
+
         public static Product Create(
           string name,
           long? buyNowPrice,
@@ -69,6 +75,10 @@ namespace Domain.Entities
 
             var @event = new ProductImagesCreatedEvent(this.Id, createdImageIds, imagePaths);
             AddDomainEvent(@event);
+        }
+        public void AddDesciption(string desciption)
+        {
+            this.Description += desciption;
         }
     }
 }

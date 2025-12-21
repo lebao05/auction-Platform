@@ -32,6 +32,7 @@ namespace Infraestructure.Persistence.Contexts
         public DbSet<ConversationParticipant> ConversationParticipants { get; set; }
         public DbSet<MessageAttachment> MessageAttachments { get; set; }
         public DbSet<MessageReadStatus> MessageReadStatuses { get; set; }
+        public DbSet<Watchlist> Watchlists { get; set; }
         public DbSet<OutboxMessage> OutboxMessages { get; set; }
         //public DbSet<OrderCompletion> OrderCompletions { get; set; }
         //public DbSet<OrderChatMessage> OrderChatMessages { get; set; }
@@ -51,6 +52,7 @@ namespace Infraestructure.Persistence.Contexts
             builder.ApplyConfiguration(new SystemSettingConfiguration());
             builder.ApplyConfiguration(new EmailLogConfiguration());
             builder.ApplyConfiguration(new SellerRequestConfiguration());
+            builder.ApplyConfiguration(new WatchlistConfiguration());
             base.OnModelCreating(builder);
             builder.Entity<AppUser>().ToTable("AspNetUsers");
             builder.Entity<IdentityRole<Guid>>().ToTable("AspNetRoles");
@@ -85,7 +87,6 @@ namespace Infraestructure.Persistence.Contexts
                     SystemValue = 5
                 }
             );
-
             builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -112,6 +113,7 @@ namespace Infraestructure.Persistence.Contexts
                         break;
                 }
             }
+ 
             var domainEvents = ChangeTracker
                   .Entries<BaseEntity>()
                   .Where(e => e.Entity.DomainEvents.Any())

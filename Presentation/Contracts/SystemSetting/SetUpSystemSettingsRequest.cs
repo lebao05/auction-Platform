@@ -2,6 +2,8 @@
 {
     public class SetUpSystemSettingsRequest
     {
-        public int Value { get; set; }
+        public string systemKey { get; set; } = null!;
+
+        public int systemValue { get; set; }
     }
 }

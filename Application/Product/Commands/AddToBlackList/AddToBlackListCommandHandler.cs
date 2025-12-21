@@ -25,16 +25,19 @@ namespace Application.Product.Commands.AddToBlackList
             if (user == null) {
                 return Result.Failure<BlackListDto>(new Error("AppUser.NotFound", "User not exists"));
             }
-
-            var product = await _productRepository.GetProductDetails(request.SellerId, cancellationToken);
-            if (product == null)
-                return Result.Failure<BlackListDto>(new Error("Product.NotFound", "Product not exists"));
-            var blacklist = product.Blacklists.Where(b => b.BidderId == request.BidderId).FirstOrDefault();
+            Console.WriteLine(request.BidderId);
+            var isSelelrOfProduct = await _productRepository.IsSellerOfProductAsync(request.ProductId,
+                request.SellerId, cancellationToken);
+            if (!isSelelrOfProduct)
+                return Result.Failure<BlackListDto>(new Error("Product.IsNotSeller", "You do not have permission to cancle biddings"));
+            var blacklist = await _productRepository.GetBlackListAsync(request.BidderId,
+                request.ProductId, cancellationToken);
             if( blacklist is not null)
                 return Result.Failure<BlackListDto>(new Error("BlackList.AlreadyAdded", "This user already exists in blacklist"));
-            var bl = new BlackList(request.ProductId, request.BidderId, request.BidderId,Guid.NewGuid());
-            product.Blacklists.Add(bl);
-            await _unitOfWork.SaveChangesAsync();
+            var bl = new BlackList(request.ProductId, request.SellerId, request.BidderId,Guid.NewGuid());
+            _productRepository.AddBlackList(bl);
+            await _productRepository.RemoveBidderData(request.BidderId,request.ProductId, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             var dto = new BlackListDto
             {
                 CreatedAt = bl.CreatedAt,

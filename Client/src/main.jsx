@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // Import React-Toastify
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import WatchListProvider from "./contexts/WatchListContext.jsx";
 
 const queryClient = new QueryClient();
 
@@ -20,19 +21,20 @@ createRoot(document.getElementById("root")).render(
       <AuthProvider>
         <AdminProvider>
           <ProductProvider>
-            <App />
-            {/* Add ToastContainer at root level */}
-            <ToastContainer
-              position="top-right"
-              autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-            />
+            <WatchListProvider>
+              <App />
+              <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+              />
+            </WatchListProvider>
           </ProductProvider>
         </AdminProvider>
       </AuthProvider>

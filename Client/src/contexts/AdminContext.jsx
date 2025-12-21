@@ -2,13 +2,14 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAllCategoryApi, addCategoryApi, deleteCategoryApi, updateCategoryApi } from "../services/category.service";
+import { getAllSystemSettingsApi, updateSystemSettingApi } from "../services/systemsetting.service";
 
 const AdminContext = createContext(null);
 
 export function AdminProvider({ children }) {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const [systemSetting, setSystemSetting] = useState([]);
     // ======================
     useEffect(() => {
         refreshCategories();
@@ -17,6 +18,36 @@ export function AdminProvider({ children }) {
     // ======================
     // FETCH ALL CATEGORIES
     // ======================
+
+    const getSystemSettings = async () => {
+        setLoading(true);
+        try {
+            const data = await getAllSystemSettingsApi();
+            setSystemSetting(data);
+        }
+        catch (err) {
+            console.error(data);
+        }
+        finally {
+        }
+        setLoading(false);
+    }
+
+    const updateSystemSetting = async ({ systemKey, systemValue }) => {
+        setLoading(true);
+        try {
+            await updateSystemSettingApi({ systemKey, systemValue });
+            setSystemSetting(pre => pre.map(item => item.systemKey == systemKey ? { systemKey, systemValue } : item));
+
+        }
+        catch (err) {
+            console.error(err);
+            throw err;
+        }
+        finally {
+            setLoading(false);
+        }
+    }
     const refreshCategories = async () => {
         setLoading(true);
         try {
@@ -77,7 +108,9 @@ export function AdminProvider({ children }) {
                 categories,
                 loading,
                 refreshCategories,
-                addCategory, updateCategory, deleteCategory
+                addCategory, updateCategory, deleteCategory,
+                getAllSystemSettingsApi,
+                updateSystemSetting, systemSetting, getSystemSettings
             }}
         >
             {children}

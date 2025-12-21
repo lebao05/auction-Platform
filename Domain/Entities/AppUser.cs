@@ -34,6 +34,7 @@ namespace Domain.Entities
         //public ICollection<OrderCompletion> OrdersAsBuyer { get; set; } = new List<OrderCompletion>();
         //public ICollection<OrderChatMessage> SentMessages { get; set; } = new List<OrderChatMessage>();
         public ICollection<SellerRequest> SellerRequests { get; private set; } = new List<SellerRequest>();
+        public ICollection<Watchlist> Watchlists { get; set; } = new List<Watchlist>();
 
 
         public Result UpdateInfo(

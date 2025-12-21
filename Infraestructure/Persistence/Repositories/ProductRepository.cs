@@ -2,6 +2,7 @@
 using Domain.Repositories;
 using Infraestructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace Infraestructure.Persistence.Repositories
 {
@@ -21,7 +22,6 @@ namespace Infraestructure.Persistence.Repositories
         public async Task<Product?> GetProductDetails(Guid id, CancellationToken cancellationToken)
         {
             return await _appDbContext.Products
-                .AsNoTracking()
                 .Include(p => p.Seller)
                 .Include(p => p.Category)
                 .Include(p => p.Images)
@@ -99,11 +99,14 @@ namespace Infraestructure.Persistence.Repositories
         {
             _appDbContext.Add(entity);
         }
-
+        public void AddBlackList(BlackList entity)
+        {
+            _appDbContext.Add(entity);
+        }
         public async Task<BlackList?> GetBlackListAsync(Guid userId, Guid productId, CancellationToken cancellationToken)
         {
             return await _appDbContext.Blacklists
-                .Where(bl => bl.BidderId == userId || bl.ProductId == productId)
+                .Where(bl => bl.BidderId == userId && bl.ProductId == productId)
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
@@ -116,5 +119,97 @@ namespace Infraestructure.Persistence.Repositories
         {
             return await _appDbContext.Blacklists.FindAsync(id);
         }
+        public async Task RemoveBidderData(Guid bidderId, Guid productId, CancellationToken cancellationToken)
+        {
+            var histories = await _appDbContext.BiddingHistories
+                .Where(b => b.BidderId == bidderId && b.ProductId == productId)
+                .ToListAsync(cancellationToken);
+
+            _appDbContext.BiddingHistories.RemoveRange(histories);
+
+            var autoBidding = await _appDbContext.AutomatedBiddings
+                .FirstOrDefaultAsync(b => b.BidderId == bidderId && b.ProductId == productId, cancellationToken);
+
+            if (autoBidding != null)
+            {
+                _appDbContext.AutomatedBiddings.Remove(autoBidding);
+            }
+        }
+        public async Task<bool> IsSellerOfProductAsync(Guid productId, Guid sellerId, CancellationToken cancellationToken)
+        {
+            return await _appDbContext.Products
+                .AsNoTracking()
+                .AnyAsync(p => p.Id == productId && p.SellerId == sellerId, cancellationToken);
+        }
+
+        public async Task<Product?> GetProductAsyncById(Guid id, CancellationToken cancellationToken)
+        {
+            return await _appDbContext.Products.FindAsync(new object[] { id }, cancellationToken);
+        }
+
+        public async Task<Watchlist?> GetWatchList(Guid userId, Guid productId, CancellationToken cancellationToken)
+        {
+            return await _appDbContext.Watchlists.FirstOrDefaultAsync(w => w.UserId == userId && w.ProductId == productId, cancellationToken);
+        }
+
+        public void DeleteWatchList(Watchlist entity)
+        {
+            _appDbContext.Watchlists.Remove(entity);
+        }
+        public void AddWatchList(Watchlist entity)
+        {
+            _appDbContext.Watchlists.Add(entity);
+        }
+        public async Task<List<Watchlist>> GetLikedProducts(
+            Guid userId,
+            CancellationToken cancellationToken)
+        {
+            return await _appDbContext.Watchlists
+                .AsNoTracking()
+                .Where(w => w.UserId == userId && !w.Product.IsDeleted)
+                .Include(w => w.Product)
+                    .ThenInclude(p => p.Images)
+                .Include(w => w.Product)
+                    .ThenInclude(p => p.Seller)
+                .Include(w => w.Product)
+                    .ThenInclude(p => p.BiddingHistories
+                        .OrderByDescending(b => b.CreatedAt)
+                        .Take(1))
+                        .ThenInclude(b => b.Bidder)
+                .ToListAsync(cancellationToken);
+        }
+        public IQueryable<Product> GetTopProducts()
+        {
+            return _appDbContext.Products
+                .Where(p => !p.IsDeleted)
+                .Include(p => p.Seller)
+                .Include(p => p.Category)
+                .Include(p => p.Images.Where(i => i.IsMain))
+                .Include(p => p.BiddingHistories
+                    .OrderByDescending(b => b.BidAmount)
+                    .ThenBy(b => b.CreatedAt)
+                    .Take(1))
+                    .ThenInclude(b => b.Bidder);
+        }
+        public IQueryable<Product> SearchProducts(string searchTerms)
+        {
+            // Raw SQL query for Full-Text Search
+            return _appDbContext.Products
+                .FromSqlRaw(@"
+                    SELECT *
+                    FROM Products
+                    WHERE FREETEXT((Name, Description), {0})
+                      AND IsDeleted = 0", searchTerms)
+                .Include(p => p.Seller)
+                .Include(p => p.Category)
+                .Include(p => p.Images.Where(i => i.IsMain))
+                .Include(p => p.BiddingHistories
+                    .OrderByDescending(b => b.BidAmount)
+                    .ThenBy(b => b.CreatedAt)
+                    .Take(1))
+                    .ThenInclude(b => b.Bidder);
+
+        }
+
     }
 }
