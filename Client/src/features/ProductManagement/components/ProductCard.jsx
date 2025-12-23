@@ -1,6 +1,7 @@
 import { Edit2, Trash2, TrendingUp, Clock } from "lucide-react"
 import { Button } from "../../../components/ui/Button"
-import { convertUTCToLocal } from "../../../utils/DateTimeExtension";
+import { convertUTCToLocal, formatTime } from "../../../utils/DateTimeExtension";
+import { useNavigate } from "react-router-dom";
 
 export default function ProductCard({ product, onEdit, onDelete }) {
   const formatPrice = (price) =>
@@ -9,54 +10,7 @@ export default function ProductCard({ product, onEdit, onDelete }) {
       currency: "VND",
       maximumFractionDigits: 0,
     }).format(price)
-
-  const getTime = (dateUtc) => {
-    const date = convertUTCToLocal(dateUtc);
-    const diff = date.getTime() - Date.now(); // dương: tương lai, âm: quá khứ
-    const absDiff = Math.abs(diff);
-
-    const days = Math.floor(absDiff / 86400000); // 1000*60*60*24
-    const hours = Math.floor((absDiff % 86400000) / 3600000);
-    const minutes = Math.floor((absDiff % 3600000) / 60000);
-
-    // quá khứ
-    if (diff < 0) {
-      if (days > 3) {
-        return date.toLocaleString("vi-VN", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        });
-      }
-      if (days > 0) return `${days} ngày trước`;
-      if (hours > 0) return `${hours} giờ trước`;
-      return `${minutes} phút trước`;
-    }
-
-    // tương lai
-    if (days > 3) {
-      return date.toLocaleString("vi-VN", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      });
-    }
-    if (days > 0) return `Còn ${days} ngày`;
-    if (hours > 0) return `Còn ${hours} giờ`;
-    return `Còn ${minutes} phút`;
-  };
-
-
-
-
+  const navigate = useNavigate();
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-blue-400 transition-all hover:shadow-lg">
       {/* Image */}
@@ -113,31 +67,31 @@ export default function ProductCard({ product, onEdit, onDelete }) {
               className={`font-bold text-sm ${product.status === "active" ? "text-green-600" : "text-gray-500"
                 }`}
             >
-              {getTime(product.endDate)}
+              {formatTime(product.endDate)}
             </p>
           </div>
         </div>
         <div className="flex gap-2">
           {/* Button xem chi tiết */}
           <button
-            onClick={() => onEdit(product)}
-            className="
-      flex-1 flex items-center justify-center gap-2
-      text-blue-600 bg-blue-50
-      hover:bg-blue-100 hover:text-blue-700
-      font-medium text-sm
-      py-2 rounded-md
-      cursor-pointer transition-all
-    "
+            onClick={() => navigate(`/product/${product.id}`)}
+          className="
+          flex-1 flex items-center justify-center gap-2
+          text-blue-600 bg-blue-50
+          hover:bg-blue-100 hover:text-blue-700
+          font-medium text-sm
+          py-2 rounded-md
+          cursor-pointer transition-all
+          "
           >
-            <Edit2 className="w-4 h-4" />
-            Xem chi tiết
-          </button>
+          <Edit2 className="w-4 h-4" />
+          Xem chi tiết
+        </button>
 
-          {/* Button Xóa – warning style */}
-          <button
-            onClick={() => onDelete(product.id)}
-            className="
+        {/* Button Xóa – warning style */}
+        <button
+          onClick={() => onDelete(product.id)}
+          className="
       flex-1 flex items-center justify-center gap-2
       text-white bg-red-600
       hover:bg-red-700
@@ -145,12 +99,12 @@ export default function ProductCard({ product, onEdit, onDelete }) {
       py-2 rounded-md
       cursor-pointer transition-all shadow-sm
     "
-          >
-            <Trash2 className="w-4 h-4" />
-            Xóa
-          </button>
-        </div>
+        >
+          <Trash2 className="w-4 h-4" />
+          Xóa
+        </button>
       </div>
     </div>
+    </div >
   )
 }

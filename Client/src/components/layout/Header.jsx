@@ -1,20 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ShoppingCart,
   User,
-  Menu,
   Bell,
   MessageCircle,
-  Edit2,
   ChevronRight,
   Heart,
-  Bookmark,
-  Clock,
   Star,
   History,
   Store,
   Settings,
-  LogOut
+  LogOut,
+  PlusCircle
 } from "lucide-react";
 import { useState } from "react";
 import { SellerRequestModal } from "../../features/Home/components/SellerRequestModal";
@@ -35,39 +31,29 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm font-sans">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 font-sans">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
 
         {/* Logo */}
-        <Link to="/" className="text-2xl font-bold text-primary">
-          AuctionHub
+        <Link to="/" className="group flex items-center gap-2">
+          <div className="bg-primary p-1.5 rounded-lg">
+             <Store className="text-white h-6 w-6" />
+          </div>
+          <span className="text-2xl font-black tracking-tight text-slate-900 group-hover:text-primary transition-colors">
+            AuctionHub
+          </span>
         </Link>
 
         {/* Icons Area */}
-        <div className="relative flex items-center gap-4">
+        <div className="relative flex items-center gap-3">
 
           {/* Đăng sản phẩm */}
           <button
             onClick={() => navigate("/product/create")}
-            className="
-              bg-yellow-500 
-              hover:bg-yellow-400 
-              cursor-pointer 
-              text-black 
-              font-medium 
-              px-4 
-              py-2 
-              rounded-full 
-              transition 
-              duration-200 
-              ease-in-out 
-              transform 
-              hover:scale-105 
-              shadow-md 
-              hover:shadow-lg
-            "
+            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-xl mr-2"
           >
-            Đăng sản phẩm
+            <PlusCircle className="h-4 w-4 text-yellow-400" />
+            <span className="text-sm">Đăng sản phẩm</span>
           </button>
 
           {/* Chat */}
@@ -78,161 +64,150 @@ export function Header() {
                 setOpenNotif(false);
                 setOpenProfile(false);
               }}
-              className="p-2 rounded cursor-pointer hover:bg-gray-100 transition"
+              className={`p-2.5 rounded-full transition-all duration-200 ${
+                openChat ? "bg-primary/10 text-primary" : "text-slate-500 hover:bg-slate-100"
+              }`}
             >
               <MessageCircle className="h-5 w-5" />
             </button>
+            
             {openChat && (
-              <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md border p-3 text-sm z-50">
-                <p className="font-medium mb-2">Recent Chats</p>
-                <p className="text-gray-500 text-xs">No messages yet.</p>
+              <div className="absolute right-0 mt-3 w-72 bg-white shadow-2xl rounded-2xl border border-slate-100 p-4 text-sm z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="flex justify-between items-center mb-3">
+                  <p className="font-bold text-slate-800 text-base">Tin nhắn gần đây</p>
+                  <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500">Mới</span>
+                </div>
+                <div className="py-8 text-center">
+                   <MessageCircle className="h-10 w-10 text-slate-200 mx-auto mb-2" />
+                   <p className="text-slate-400 text-xs">Chưa có tin nhắn nào.</p>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Notifications */}
-          {/* <div className="relative">
-            <button
-              onClick={() => {
-                setOpenNotif(!openNotif);
-                setOpenChat(false);
-                setOpenProfile(false);
-              }}
-              className="p-2 rounded hover:bg-gray-100 transition"
-            >
-              <Bell className="h-5 w-5" />
-            </button>
-            {openNotif && (
-              <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md border p-3 text-sm z-50">
-                <p className="font-medium mb-2">Notifications</p>
-                <p className="text-gray-500 text-xs">No new notifications.</p>
-              </div>
-            )}
-          </div> */}
-
           {/* Authentication Buttons */}
           {!user && (
-            <>
+            <div className="flex items-center gap-2 ml-2">
               <button
                 onClick={() => navigate("/signin")}
-                className="bg-yellow-300 hover:bg-yellow-500 cursor-pointer text-white px-4 py-2 rounded"
+                className="text-slate-600 font-semibold px-4 py-2 hover:text-primary transition-colors"
               >
                 Đăng Nhập
               </button>
               <button
                 onClick={() => navigate("/signup")}
-                className="bg-yellow-300 hover:bg-yellow-500 cursor-pointer text-white px-4 py-2 rounded"
+                className="bg-primary text-white font-bold px-6 py-2 rounded-full hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
               >
                 Đăng Ký
               </button>
-            </>
+            </div>
           )}
 
           {/* User Profile */}
           {user && (
-            <div className="relative">
+            <div className="relative ml-2">
               <button
                 onClick={toggleProfile}
-                className={`p-2 rounded transition-colors ${openProfile
-                  ? "bg-blue-300 text-white hover:bg-blue-400"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-                  }`}
+                className={`flex items-center gap-2 p-1 pr-3 rounded-full transition-all border ${
+                  openProfile 
+                  ? "bg-slate-900 border-slate-900 text-white" 
+                  : "bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+                }`}
               >
-                <User className="h-5 w-5" />
+                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/20">
+                    <img src="https://github.com/shadcn.png" alt="User" className="w-full h-full object-cover" />
+                </div>
+                <span className="text-xs font-bold hidden md:block">Bảo Lê</span>
               </button>
 
               {openProfile && (
-                <div className="absolute right-0 mt-2 w-80 max-h-[85vh] overflow-y-auto bg-white shadow-xl rounded-xl border border-gray-100 z-50 scrollbar-thin scrollbar-thumb-gray-200">
-
-                  {/* Header */}
-                  <div className="flex flex-col items-center pt-6 pb-4 bg-white">
-                    <div className="relative">
-                      <div
+                <div className="absolute right-0 mt-3 w-80 max-h-[85vh] overflow-y-auto bg-white shadow-2xl rounded-2xl border border-slate-100 z-50 scrollbar-hide animate-in fade-in slide-in-from-top-2">
+                  
+                  {/* Profile Header */}
+                  <div className="relative p-6 text-center border-b border-slate-50">
+                    <div className="flex flex-col items-center">
+                      <div 
                         onClick={() => navigate("/profile")}
-                        className="w-16 h-16 cursor-pointer rounded-full bg-gray-800 flex items-center justify-center text-white overflow-hidden"
+                        className="w-20 h-20 cursor-pointer rounded-full p-1 border-4 border-slate-50 shadow-inner mb-3 overflow-hidden"
                       >
-                        <img src="https://github.com/shadcn.png" alt="User" className="w-full h-full object-cover" />
+                        <img src="https://github.com/shadcn.png" alt="User" className="w-full h-full rounded-full object-cover hover:scale-110 transition-transform" />
                       </div>
-                    </div>
-                    <h3 className="mt-2 font-bold text-gray-800">Bảo Lê</h3>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-1 text-xs">
-                        <span className="font-semibold text-gray-700">5.0</span>
-                        <span className="text-gray-400">(12 đánh giá)</span>
+                      <h3 className="font-black text-slate-800 text-lg leading-tight">Bảo Lê</h3>
+                      
+                      <div className="flex items-center gap-1.5 mt-2 bg-yellow-50 px-3 py-1 rounded-full">
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <Star key={i} className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                          ))}
+                        </div>
+                        <span className="font-bold text-xs text-yellow-700">5.0</span>
+                        <span className="text-slate-400 text-[10px]">(12 đánh giá)</span>
                       </div>
                     </div>
                   </div>
-
-                  <div className="h-[1px] bg-gray-100 mx-4"></div>
 
                   {/* Utilities */}
-                  <div className="py-2">
-                    <p className="px-4 py-1 text-xs font-semibold text-gray-400 uppercase">Tiện ích</p>
-                    <MenuItem icon={<Heart size={18} />} label="Tin đăng đã lưu" />
-                    <MenuItem icon={<History size={18} />} label="Lịch sử giao dịch" />
+                  <div className="py-3">
+                    <p className="px-5 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cá nhân</p>
+                    <MenuItem icon={<Heart size={18} className="text-rose-500" />} label="Tin đăng đã lưu" />
+                    <MenuItem icon={<History size={18} className="text-blue-500" />} label="Lịch sử giao dịch" />
                   </div>
 
-                  <div className="h-[1px] bg-gray-100 mx-4"></div>
-
                   {/* Paid Services */}
-                  <div className="py-2 bg-gray-50/30">
-                    <p className="px-4 py-1 text-xs font-semibold text-gray-400 uppercase">Dịch vụ trả phí</p>
-                    <div className="px-3 mt-2 mb-1">
-                      {(!sellerRequest || (sellerRequest?.status == 2)) && (
+                  <div className="py-3 bg-slate-50/50">
+                    <p className="px-5 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cửa hàng</p>
+                    <div className="px-4 mt-1">
+                      {(!sellerRequest || (sellerRequest?.status === 2)) && (
                         <button
                           onClick={() => setRequestModal(true)}
-                          className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm group"
+                          className="w-full flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all group"
                         >
                           <div className="flex items-center gap-3">
-                            <Store className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm font-medium text-gray-700">Đăng kí trở thành Seller</span>
+                            <Store className="w-4 h-4 text-slate-400 group-hover:text-primary" />
+                            <span className="text-sm font-bold text-slate-700 group-hover:text-primary">Trở thành Seller</span>
                           </div>
+                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary" />
                         </button>
                       )}
-                      {sellerRequest?.status == 0 && (
-                        <div className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-700">
-                          <span>Đang chờ duyệt Seller</span>
+                      {sellerRequest?.status === 0 && (
+                        <div className="w-full text-center px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl text-amber-700 text-xs font-bold italic">
+                          Đang chờ duyệt Seller...
                         </div>
                       )}
-                      {sellerRequest?.status == 1 && (
+                      {sellerRequest?.status === 1 && (
                         <button
                           onClick={() => setRequestModal(true)}
-                          className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm group"
+                          className="w-full flex items-center justify-between px-4 py-3 bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-emerald-100 transition-all group"
                         >
                           <div className="flex items-center gap-3">
-                            <Store className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm font-medium text-gray-700">Quản lí sản phẩm đăng</span>
+                            <Store className="w-4 h-4 text-emerald-600" />
+                            <span className="text-sm font-bold text-emerald-700">Quản lý bán hàng</span>
                           </div>
+                          <ChevronRight className="w-4 h-4 text-emerald-400" />
                         </button>
                       )}
                     </div>
                   </div>
 
-                  <div className="h-[1px] bg-gray-100 mx-4"></div>
-
-                  {/* Others */}
-                  <div className="py-2">
-                    <p className="px-4 py-1 text-xs font-semibold text-gray-400 uppercase">Khác</p>
-                    <MenuItem icon={<Settings size={18} />} label="Cài đặt tài khoản"
-                      onClick={() => navigate("/user/setting")} />
+                  {/* Settings & Logout */}
+                  <div className="py-3 mb-2">
+                    <p className="px-5 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Hệ thống</p>
+                    <MenuItem 
+                       icon={<Settings size={18} />} 
+                       label="Cài đặt tài khoản"
+                       onClick={() => navigate("/user/setting")} 
+                    />
                     <MenuItem
                       onClick={() => logout()}
-                      icon={<LogOut size={18} className="text-red-500" />}
+                      icon={<LogOut size={18} className="text-rose-500" />}
                       label="Đăng xuất"
-                      textClassName="text-red-500 font-medium"
+                      textClassName="text-rose-500 font-bold"
                     />
                   </div>
-
                 </div>
               )}
             </div>
           )}
-
         </div>
       </div>
 
@@ -245,13 +220,13 @@ function MenuItem({ icon, label, onClick, textClassName }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition group"
+      className="w-full flex items-center justify-between px-5 py-3 hover:bg-slate-50 transition-all group"
     >
-      <div className={`flex items-center gap-3 ${textClassName || "text-gray-600 group-hover:text-gray-900"}`}>
-        {icon}
-        <span className="text-sm font-medium">{label}</span>
+      <div className={`flex items-center gap-3 ${textClassName || "text-slate-600 group-hover:text-slate-900"}`}>
+        <span className="transition-transform group-hover:scale-110">{icon}</span>
+        <span className="text-sm font-semibold">{label}</span>
       </div>
-      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500" />
+      <ChevronRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-1" />
     </button>
   );
 }

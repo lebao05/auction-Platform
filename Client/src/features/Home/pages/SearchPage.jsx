@@ -1,369 +1,104 @@
 import { useState } from "react";
-import { SearchBar } from "../components/SearchBar";
-import { SearchFilters } from "../components/SearchFilters";
-import { SearchResults } from "../components/SearchResults";
-import { Pagination } from "../components/Pagination";
-
-const allProducts = [
-  {
-    id: 1,
-    name: "iPhone 11",
-    currentBid: 10000000,
-    image: "/modern-smartphone.png",
-    endsIn: "2d 5h",
-    bids: 24,
-    seller: { name: "Tech Store", rating: 4.8 },
-    category: "Electronics",
-    buyNowPrice: 12000000,
-    postedDate: "2 days ago",
-  },
-  {
-    id: 2,
-    name: 'Apple MacBook Pro 16"',
-    currentBid: 28000000,
-    image: "/silver-macbook-on-desk.png",
-    endsIn: "1d 12h",
-    bids: 18,
-    seller: { name: "Laptop World", rating: 4.9 },
-    category: "Electronics",
-    buyNowPrice: 32000000,
-    postedDate: "1 day ago",
-  },
-  {
-    id: 3,
-    name: "Rolex Submariner Watch",
-    currentBid: 15000000,
-    image: "/rolex-watch.jpg",
-    endsIn: "3d 1h",
-    bids: 32,
-    seller: { name: "Luxury Watches", rating: 5.0 },
-    category: "Fashion",
-    buyNowPrice: 18000000,
-    postedDate: "3 days ago",
-  },
-  {
-    id: 4,
-    name: "Nike Air Force 1 Limited",
-    currentBid: 3500000,
-    image: "/athletic-shoes.png",
-    endsIn: "18h 30m",
-    bids: 45,
-    seller: { name: "Sneaker Palace", rating: 4.7 },
-    category: "Fashion",
-    buyNowPrice: 4500000,
-    postedDate: "12 hours ago",
-    isNew: true,
-  },
-  {
-    id: 5,
-    name: "Canon EOS R5 Camera",
-    currentBid: 35000000,
-    image: "/professional-camera.png",
-    endsIn: "2d 3h",
-    bids: 12,
-    seller: { name: "Camera Pro", rating: 4.9 },
-    category: "Electronics",
-    buyNowPrice: 40000000,
-    postedDate: "5 hours ago",
-    isNew: true,
-  },
-  {
-    id: 6,
-    name: "Omega Seamaster",
-    currentBid: 12000000,
-    image: "/luxury-watch.jpg",
-    endsIn: "4d 2h",
-    bids: 28,
-    seller: { name: "Luxury Watches", rating: 5.0 },
-    category: "Fashion",
-    buyNowPrice: 14000000,
-    postedDate: "1 day ago",
-  },
-  {
-    id: 7,
-    name: "AirPods Pro Max",
-    currentBid: 7500000,
-    image: "/diverse-people-listening-headphones.png",
-    endsIn: "6h 20m",
-    bids: 38,
-    seller: { name: "Tech Store", rating: 4.8 },
-    category: "Electronics",
-    buyNowPrice: 8500000,
-    postedDate: "3 hours ago",
-    isNew: true,
-  },
-  {
-    id: 8,
-    name: "Sony WH-1000XM5",
-    currentBid: 5500000,
-    image: "/wireless-headphones.png",
-    endsIn: "12h 45m",
-    bids: 42,
-    seller: { name: "Audio World", rating: 4.6 },
-    category: "Electronics",
-    buyNowPrice: 6500000,
-    postedDate: "8 hours ago",
-  },
-  {
-    id: 9,
-    name: "Louis Vuitton Bag",
-    currentBid: 18000000,
-    image: "/luxury-bag.png",
-    endsIn: "5d 6h",
-    bids: 22,
-    seller: { name: "Luxury Store", rating: 5.0 },
-    category: "Fashion",
-    buyNowPrice: 22000000,
-    postedDate: "2 days ago",
-  },
-  {
-    id: 10,
-    name: "PlayStation 5",
-    currentBid: 9000000,
-    image: "/modern-gaming-console.png",
-    endsIn: "8h 15m",
-    bids: 35,
-    seller: { name: "Gaming Hub", rating: 4.7 },
-    category: "Electronics",
-    buyNowPrice: 10500000,
-    postedDate: "4 hours ago",
-    isNew: true,
-  },
-  {
-    id: 11,
-    name: "Dell XPS 15 Laptop",
-    currentBid: 22000000,
-    image: "/silver-macbook-on-desk.png",
-    endsIn: "3d 8h",
-    bids: 15,
-    seller: { name: "Tech Store", rating: 4.8 },
-    category: "Electronics",
-    buyNowPrice: 26000000,
-    postedDate: "18 hours ago",
-  },
-  {
-    id: 12,
-    name: 'Samsung 65" QLED TV',
-    currentBid: 18000000,
-    image: "/professional-camera.png",
-    endsIn: "5d 2h",
-    bids: 20,
-    seller: { name: "Electronics World", rating: 4.9 },
-    category: "Electronics",
-    buyNowPrice: 21000000,
-    postedDate: "2 days ago",
-  },
-  {
-    id: 13,
-    name: "Google Pixel 8 Pro",
-    currentBid: 16000000,
-    image: "/modern-smartphone.png",
-    endsIn: "1d 6h",
-    bids: 28,
-    seller: { name: "Tech Store", rating: 4.8 },
-    category: "Electronics",
-    buyNowPrice: 19000000,
-    postedDate: "12 hours ago",
-    isNew: true,
-  },
-  {
-    id: 14,
-    name: "DJI Air 3S Drone",
-    currentBid: 24000000,
-    image: "/professional-camera.png",
-    endsIn: "2d 10h",
-    bids: 18,
-    seller: { name: "Drone Pro", rating: 4.7 },
-    category: "Electronics",
-    buyNowPrice: 28000000,
-    postedDate: "1 day ago",
-  },
-  {
-    id: 15,
-    name: "Apple Watch Series 9",
-    currentBid: 8000000,
-    image: "/luxury-watch.jpg",
-    endsIn: "4h 30m",
-    bids: 32,
-    seller: { name: "Tech Store", rating: 4.8 },
-    category: "Electronics",
-    buyNowPrice: 9500000,
-    postedDate: "6 hours ago",
-    isNew: true,
-  },
-  {
-    id: 16,
-    name: "Nikon Z9 Professional Camera",
-    currentBid: 42000000,
-    image: "/professional-camera.png",
-    endsIn: "7d 1h",
-    bids: 8,
-    seller: { name: "Camera Pro", rating: 5.0 },
-    category: "Electronics",
-    buyNowPrice: 48000000,
-    postedDate: "4 days ago",
-  },
-  {
-    id: 17,
-    name: "Microsoft Surface Pro 10",
-    currentBid: 20000000,
-    image: "/silver-macbook-on-desk.png",
-    endsIn: "2d 15h",
-    bids: 16,
-    seller: { name: "Laptop World", rating: 4.9 },
-    category: "Electronics",
-    buyNowPrice: 24000000,
-    postedDate: "20 hours ago",
-  },
-  {
-    id: 18,
-    name: "Samsung Galaxy Watch 6",
-    currentBid: 6500000,
-    image: "/luxury-watch.jpg",
-    endsIn: "3d 4h",
-    bids: 25,
-    seller: { name: "Tech Store", rating: 4.8 },
-    category: "Electronics",
-    buyNowPrice: 7500000,
-    postedDate: "14 hours ago",
-    isNew: true,
-  },
-  {
-    id: 19,
-    name: 'iPad Pro 12.9" M2',
-    currentBid: 19000000,
-    image: "/silver-macbook-on-desk.png",
-    endsIn: "1d 20h",
-    bids: 22,
-    seller: { name: "Tablet World", rating: 4.7 },
-    category: "Electronics",
-    buyNowPrice: 23000000,
-    postedDate: "5 hours ago",
-    isNew: true,
-  },
-  {
-    id: 20,
-    name: "GoPro Hero 12 Black",
-    currentBid: 11500000,
-    image: "/professional-camera.png",
-    endsIn: "6h 45m",
-    bids: 29,
-    seller: { name: "Camera Pro", rating: 4.9 },
-    category: "Electronics",
-    buyNowPrice: 13500000,
-    postedDate: "3 hours ago",
-  },
-];
-
-const ITEMS_PER_PAGE = 8;
-
+import SearchFilters from "../components/SearchFilters";
+import { useSearchProducts } from "../../../hooks/useSearchProducts";
+import { ProductCard } from "../components/ProductCard";
+import { Loader2, Search } from "lucide-react";
+import { Button } from "../../../components/ui/Button";
+import { useWatchList } from "../../../contexts/WatchListContext";
 export default function SearchPage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
-  const [filters, setFilters] = useState({
-    priceRange: [0, 50000000],
-    category: "",
-    timeRange: "all",
-  });
-
-  const filteredProducts = allProducts.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesPrice =
-      product.currentBid >= filters.priceRange[0] &&
-      product.currentBid <= filters.priceRange[1];
-
-    const matchesCategory =
-      !filters.category ||
-      product.category.toLowerCase() === filters.category.toLowerCase();
-
-    const getHoursUntilEnd = (endsIn) => {
-      const parts = endsIn.split(" ");
-      let hours = 0;
-      for (let i = 0; i < parts.length; i += 2) {
-        const value = parseInt(parts[i]);
-        const unit = parts[i + 1];
-        if (unit.includes("d")) hours += value * 24;
-        else if (unit.includes("h")) hours += value;
-      }
-      return hours;
-    };
-
-    let matchesTime = true;
-    if (filters.timeRange === "24h")
-      matchesTime = getHoursUntilEnd(product.endsIn) <= 24;
-    else if (filters.timeRange === "48h")
-      matchesTime = getHoursUntilEnd(product.endsIn) <= 48;
-    else if (filters.timeRange === "7d")
-      matchesTime = getHoursUntilEnd(product.endsIn) <= 168;
-
-    return matchesSearch && matchesPrice && matchesCategory && matchesTime;
-  });
-
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case "price-low":
-        return a.currentBid - b.currentBid;
-      case "price-high":
-        return b.currentBid - a.currentBid;
-      case "most-bids":
-        return b.bids - a.bids;
-      case "ending-soon": {
-        const getMinutes = (endsIn) => {
-          const parts = endsIn.split(" ");
-          let minutes = 0;
-          for (let i = 0; i < parts.length; i += 2) {
-            const value = parseInt(parts[i]);
-            const unit = parts[i + 1];
-            if (unit.includes("d")) minutes += value * 24 * 60;
-            else if (unit.includes("h")) minutes += value * 60;
-            else if (unit.includes("m")) minutes += value;
-          }
-          return minutes;
-        };
-        return getMinutes(a.endsIn) - getMinutes(b.endsIn);
-      }
-      case "newest":
-      default:
-        return 0;
-    }
-  });
-
-  const totalPages = Math.ceil(sortedProducts.length / ITEMS_PER_PAGE);
-  const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedProducts = sortedProducts.slice(
-    startIdx,
-    startIdx + ITEMS_PER_PAGE
-  );
-
+  const { products,
+    loading,
+    error,
+    hasMore,
+    loadMore,
+    setSearchFilter } = useSearchProducts();
+  const { likedProducts, addToWatchList, deleteFromWatchList } = useWatchList();
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-6 border-b">
-        <SearchFilters
-          filters={filters}
-          onFiltersChange={setFilters}
-          onSearch={setSearchQuery}
-        />
+    <main className="min-h-screen bg-slate-50">
+      {/* Thanh lọc & Tìm kiếm */}
+      <div className="bg-white border-b sticky top-0 z-20 shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 py-6">
+          <SearchFilters setSearchFilter={setSearchFilter} />
+        </div>
       </div>
-      <div className="mx-auto max-w-7xl px-4 py-12">
-        <SearchResults
-          products={paginatedProducts}
-          totalResults={sortedProducts.length}
-          onSort={setSortBy}
-          sortBy={sortBy}
-        />
-        {totalPages > 1 && (
-          <div className="mt-12">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+
+      <div className="mx-auto lg:w-[68%] xl:w-[60%] px-4 py-8">
+        {/* Tiêu đề & Trạng thái */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-slate-900">
+            {loading && products.length === 0 ? "Đang tìm..." : `Kết quả tìm kiếm`}
+          </h2>
+        </div>
+
+        {/* Lưới sản phẩm */}
+        {products.length > 0 ? (
+          <div className="grid grid-cols-1  gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                likedProducts={likedProducts || []}
+                addToWatchList={addToWatchList}
+                deleteFromWatchList={deleteFromWatchList}
+              />
+            ))}
           </div>
+        ) : (
+          !loading && (
+            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
+              <Search className="h-12 w-12 text-slate-300 mb-4" />
+              <p className="text-slate-500 font-medium">Không tìm thấy sản phẩm nào phù hợp.</p>
+            </div>
+          )
         )}
+
+        {/* Nút Load More */}
+        <div className="mt-12 flex flex-col items-center gap-4">
+          {loading && (
+            <div className="flex items-center gap-2 text-slate-500 font-medium">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Đang tải thêm...
+            </div>
+          )}
+
+          {/* Container bọc nút Load More */}
+          <div className="mt-12 mb-20 flex justify-center w-full">
+            {loading ? (
+              /* Trạng thái đang tải thêm */
+              <div className="flex flex-col items-center gap-2">
+                <div className="h-8 w-8 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+                <p className="text-sm text-slate-500 font-medium">Đang tải thêm sản phẩm...</p>
+              </div>
+            ) : (
+              /* Nút Xem thêm khi có dữ liệu mới */
+              hasMore && (
+                <button
+                  onClick={loadMore}
+                  className="
+                  cursor-pointer
+                  group relative px-10 py-3 
+                  border-2 border-slate-900 
+                  text-slate-900 font-bold uppercase tracking-wider text-sm
+                  overflow-hidden transition-all duration-300
+                  hover:bg-slate-900 hover:text-white
+                  active:scale-95 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]
+                  hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]
+                "
+                >
+                  Xem thêm kết quả
+                </button>
+              )
+            )}
+
+            {/* Thông báo khi đã hết sản phẩm */}
+            {!hasMore && products.length > 0 && !loading && (
+              <div className="flex flex-col items-center gap-2 text-slate-400">
+                <div className="h-px w-20 bg-slate-200" />
+                <p className="text-sm italic">Bạn đã xem hết danh sách sản phẩm</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );

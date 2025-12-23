@@ -98,3 +98,20 @@ export async function getTopValueProcutsApi({ pageIndex }) {
     const response = await axios.get(`/product/top-value?pageIndex=${pageIndex}`);
     return response.data;
 }
+export async function searchProductsApi({
+    searchTerm,
+    categoryId,
+    pageIndex = 1,
+    sortBy = ""
+}) {
+    console.log(searchTerm);
+    const response = await axios.get("/product/search", {
+        params: {
+            searchTerm: searchTerm,
+            categoryId: categoryId || undefined,
+            pageIndex: pageIndex,
+            sortBy: sortBy || undefined
+        }
+    });
+    return response.data;
+}

@@ -1,5 +1,5 @@
 export function Button({ children, variant = "default", className = "", ...props }) {
-  const base = "flex items-center justify-center px-4 py-2 rounded-md font-semibold transition-all";
+  const base = "flex cursor-pointer items-center justify-center px-4 py-2 rounded-md font-semibold transition-all";
   var colors =
     variant === "outline"
       ? "border border-gray-300 text-gray-700 hover:bg-gray-100"

@@ -8,7 +8,5 @@ namespace Application.Product.Queries.SearchProducts
         Guid? CategoryId = null,
         int PageIndex = 1,
         int PageSize = 8,
-        string? SortBy = "EndDate",
-        bool SortDescending = true
-    ) : IQuery<List<GetTopProductsDto>>;
+        string? SortBy = "EndDate") : IQuery<List<GetTopProductsDto>>;
 }

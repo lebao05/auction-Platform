@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Application.Product.Queries.GetTopBiddingCountProducts;
+using Domain.Common;
 using Domain.Repositories;
 using Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,13 @@ namespace Application.Product.Queries.GetTopSoonProducts
         : IQueryHandler<GetTopSoonProductsQuery, List<GetTopProductsDto>>
     {
         private readonly IProductRepository _productRepository;
+        private readonly ISystemSettingRepository _systemSettingRepository;
 
-        public GetTopSoonProductsHandler(IProductRepository productRepository)
+        public GetTopSoonProductsHandler(IProductRepository productRepository
+            , ISystemSettingRepository systemSettingRepository)
         {
             _productRepository = productRepository;
+            _systemSettingRepository = systemSettingRepository;
         }
 
         public async Task<Result<List<GetTopProductsDto>>> Handle(
@@ -25,11 +29,11 @@ namespace Application.Product.Queries.GetTopSoonProducts
             var skip = (pageIndex - 1) * pageSize;
 
             var query = _productRepository.GetTopProducts()
-                .Where(p => p.EndDate > DateTime.UtcNow)
                 .OrderBy(p => p.EndDate);
-            var newThreshold = DateTime.UtcNow.AddMinutes(-5); // sản phẩm mới trong 5 phút
+            query = query.OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
 
-
+            var timeForNew = await _systemSettingRepository.GetSystemSettingByKey(SystemSettingKey.NewProductTime, cancellationToken);
+            var newThreshold = DateTime.UtcNow.AddMinutes(timeForNew!.SystemValue);
             var items = await query
                 .Skip(skip)
                 .Take(pageSize)

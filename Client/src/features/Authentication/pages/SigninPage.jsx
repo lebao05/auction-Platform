@@ -6,13 +6,13 @@ import { useNavigate } from "react-router-dom";
 export const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, user } = useAuth();
+  const { login, user, loading } = useAuth();
   const navigate = useNavigate();
   if (user)
     navigate("/");
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login(email, password);
+    await login(email, password);
   };
 
   return (
@@ -61,10 +61,41 @@ export const Signin = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+            disabled={loading}
+            className={`w-full cursor-pointer py-2 flex items-center justify-center gap-2
+    bg-blue-500 text-white font-semibold rounded-lg
+    hover:bg-blue-600 transition-colors
+    disabled:opacity-60 disabled:cursor-not-allowed`}
           >
-            Sign In
+            {loading ? (
+              <>
+                <svg
+                  className="w-5 h-5 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+                Signing in...
+              </>
+            ) : (
+              "Sign In"
+            )}
           </button>
+
         </form>
         {/* Signup Link */}
         <p className="mt-4 text-center text-sm text-gray-600">

@@ -21,11 +21,11 @@ export function PlaceBidModal({ currentBid, onClose, onSubmit }) {
                 {/* Body */}
                 <p className="text-sm text-gray-600 mb-2">Current highest bid:</p>
                 <p className="text-2xl font-bold text-primary mb-4">
-                    {currentBid.toLocaleString()} đ
+                    {currentBid} đ
                 </p>
 
                 <p className="text-sm text-gray-600 mb-2">Your bid will be automatically placed at:</p>
-                <p className="text-2xl font-bold text-primary mb-4">{automaticBidAmount.toLocaleString()} đ</p>
+                <p className="text-2xl font-bold text-primary mb-4">{automaticBidAmount} đ</p>
 
                 {/* Confirmation Checkbox */}
                 <label className="flex items-center gap-2 mb-4 cursor-pointer">

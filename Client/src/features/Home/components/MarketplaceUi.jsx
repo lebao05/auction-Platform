@@ -4,16 +4,13 @@ import { useState } from "react";
 import { SearchBar } from "./SearchBar";
 
 
-export default function MarketplaceUI() {
+export default function MarketplaceUI({ categories }) {
   const [showAll, setShowAll] = useState(false);
 
 
   return (
-    <div className="w-full bg-gray-50 text-gray-800">
-      <div className="w-full bg-yellow-300 py-8 flex justify-center text-3xl font-bold">
-        Giá tốt, gần bạn, chốt nhanh!
-      </div>
-      <SearchBar />
+    <div className="w-full text-gray-800">
+      <SearchBar categories={categories} />
     </div>
   );
 }

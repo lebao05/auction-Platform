@@ -4,6 +4,7 @@ import { useTopSoonProducts } from "../../../hooks/useTopSoonProducts";
 import { useTopCountProducts } from "../../../hooks/useTopCountProducts";
 import { useTopValueProducts } from "../../../hooks/useTopValueProducts";
 import { useWatchList } from "../../../contexts/WatchListContext";
+import Spinner from "../../../components/ui/Spinner";
 
 export function FeaturedProducts() {
   const { addToWatchList, deleteFromWatchList, likedProducts } = useWatchList();
@@ -22,7 +23,7 @@ export function FeaturedProducts() {
       </div>
 
       {hook.hasMore && (
-        <div className="flex mb-15 justify-center mt-8">
+        <div className="flex justify-center mt-8">
           <button
             onClick={hook.loadMore}
             disabled={hook.loading}
@@ -31,7 +32,8 @@ export function FeaturedProducts() {
               transition-all duration-200 ease-in-out
               cursor-pointer
 
-              hover:bg-green-500 hover:text-white hover:border-green-500
+              bg-white
+              hover:bg-gray-200
               active:scale-95
 
               disabled:cursor-not-allowed
@@ -41,12 +43,9 @@ export function FeaturedProducts() {
             "
           >
             {hook.loading ? (
-              <span className="flex items-center gap-2">
-                <span className="h-4 w-4  animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
-                Loading...
-              </span>
+              <Spinner />
             ) : (
-              "See more"
+              "Xem thêm"
             )}
           </button>
 

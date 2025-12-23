@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Application.Product.Queries.GetTopBiddingCountProducts;
+using Domain.Common;
 using Domain.Repositories;
 using Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,6 @@ namespace Application.Product.Queries.GetTopValueProducts
         {
             // Get base query from repository
             var query = _productRepository.GetTopProducts()
-                .Where(p => p.EndDate > DateTime.UtcNow)
                 // Order by highest bid in BiddingHistories
                 .OrderByDescending(p => p.BiddingHistories
                     .OrderByDescending(b => b.BidAmount)
@@ -30,11 +30,12 @@ namespace Application.Product.Queries.GetTopValueProducts
                     .Select(b => (long?)b.BidAmount)
                     .FirstOrDefault()
                 );
-
+            query = query.OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
             var pageIndex = request.PageIndex < 1 ? 1 : request.PageIndex;
             var pageSize = request.PageSize < 1 ? 8 : request.PageSize;
             var skip = (pageIndex - 1) * pageSize;
-            var newThreshold = DateTime.UtcNow.AddMinutes(-5); // sản phẩm mới trong 5 phút
+            var timeForNew = await _systemSettingRepository.GetSystemSettingByKey(SystemSettingKey.NewProductTime,cancellationToken);
+            var newThreshold = DateTime.UtcNow.AddMinutes(timeForNew!.SystemValue); 
 
             var items = await query
                 .Skip(skip)

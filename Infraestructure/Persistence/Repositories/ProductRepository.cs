@@ -201,6 +201,7 @@ namespace Infraestructure.Persistence.Repositories
                     WHERE FREETEXT((Name, Description), {0})
                       AND IsDeleted = 0", searchTerms)
                 .Include(p => p.Seller)
+                .Where(p => !p.IsDeleted)
                 .Include(p => p.Category)
                 .Include(p => p.Images.Where(i => i.IsMain))
                 .Include(p => p.BiddingHistories
@@ -208,8 +209,6 @@ namespace Infraestructure.Persistence.Repositories
                     .ThenBy(b => b.CreatedAt)
                     .Take(1))
                     .ThenInclude(b => b.Bidder);
-
         }
-
     }
 }

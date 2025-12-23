@@ -236,8 +236,7 @@ namespace Presentation.Controllers
             [FromQuery] string? searchTerm,
             [FromQuery] Guid? categoryId,
             [FromQuery] int pageIndex = 1,
-            [FromQuery] string? sortBy = "EndDate",
-            [FromQuery] bool sortDescending = true,
+            [FromQuery] string? sortBy = "endingsoon",
             CancellationToken cancellationToken = default)
         {
             int pageSize = 8;
@@ -246,8 +245,7 @@ namespace Presentation.Controllers
                 CategoryId: categoryId,
                 PageIndex: pageIndex,
                 PageSize: pageSize,
-                SortBy: sortBy,
-                SortDescending: sortDescending
+                SortBy: sortBy
             );
 
             var result = await _sender.Send(query, cancellationToken);

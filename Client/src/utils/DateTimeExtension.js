@@ -4,18 +4,23 @@ export function formatDate(date) {
 
 export function formatTime(dateUtc) {
     const date = new Date(dateUtc);
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
     const diff = date.getTime() - Date.now();
     const absDiff = Math.abs(diff);
-
-    const days = Math.floor(absDiff / 86400000);
+    const days = Math.floor(absDiff / 86400000); // 1000*60*60*24
     const hours = Math.floor((absDiff % 86400000) / 3600000);
     const minutes = Math.floor((absDiff % 3600000) / 60000);
 
+    // quá khứ
     if (diff < 0) {
         if (days > 3) {
             return date.toLocaleString("vi-VN", {
-                year: "numeric", month: "2-digit", day: "2-digit",
-                hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
             });
         }
         if (days > 0) return `${days} ngày trước`;
@@ -23,10 +28,15 @@ export function formatTime(dateUtc) {
         return `${minutes} phút trước`;
     }
 
+    // tương lai
     if (days > 3) {
         return date.toLocaleString("vi-VN", {
-            year: "numeric", month: "2-digit", day: "2-digit",
-            hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
         });
     }
     if (days > 0) return `Còn ${days} ngày`;
@@ -41,21 +51,25 @@ export function formatDateTimeFull(date) {
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
         hour12: false
     });
 }
 export const convertUTCToLocal = (utcInput) => {
     if (!utcInput) return null;
-    const date =
-        typeof utcInput === "string"
-            ? new Date(utcInput.replace(" ", "T") + "Z")
-            : new Date(utcInput);
-    const offsetMinutes = date.getTimezoneOffset();
-    date.setMinutes(date.getMinutes() - offsetMinutes);
 
-    return date;
+    if (utcInput instanceof Date) {
+        return new Date(utcInput);
+    }
+
+    // ensure ISO UTC format
+    const iso =
+        typeof utcInput === "string" && !utcInput.endsWith("Z")
+            ? utcInput.replace(" ", "T") + "Z"
+            : utcInput;
+
+    return new Date(iso);
 };
+
 export const formatSmartTime = (utcDate) => {
     const now = new Date();
     const target = new Date(utcDate);

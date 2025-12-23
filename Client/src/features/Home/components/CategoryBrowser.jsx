@@ -1,22 +1,21 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
-import { useCategory } from "../../../hooks/useCategory";
 
-export function CategoryBrowser() {
-  const { categories: rawCategories, loading, error } = useCategory();
-
+export function CategoryBrowser({ rawCategories, loading, error }) {
   const groupedCategories = useMemo(
     () => groupCategories(rawCategories),
     [rawCategories]
   );
 
-  // track expanded parents
   const [expanded, setExpanded] = useState(() => new Set());
 
-  const toggle = useCallback((id) => {
+  const toggle = useCallback((id, e) => {
+    // Ngăn chặn sự kiện click lan ra ngoài làm ảnh hưởng đến Link
+    e.preventDefault();
+    e.stopPropagation();
     setExpanded((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -24,47 +23,55 @@ export function CategoryBrowser() {
     });
   }, []);
 
-  if (loading) return <div className="text-sm text-muted-foreground">Loading...</div>;
-  if (error) return <div className="text-sm text-red-500">Failed to load categories</div>;
+  if (loading) return <div className="text-sm text-slate-400">Đang tải...</div>;
+  if (error) return <div className="text-sm text-red-500">Lỗi tải danh mục</div>;
 
   return (
-    <div className="space-y-2">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Danh mục
+    <div className="space-y-4">
+      <h3 className="text-[12px] font-bold uppercase tracking-[0.1em] text-slate-900 border-b pb-2 border-slate-100">
+        Danh mục sản phẩm
       </h3>
 
-      <div className="space-y-1">
+      <div className="flex flex-col space-y-0.5">
         {groupedCategories.map((category) => {
           const isOpen = expanded.has(category.id);
+          const hasChildren = category.children.length > 0;
 
           return (
-            <div key={category.id} className="space-y-1">
-              {/* Parent */}
-              <button
-                type="button"
-                onClick={() => toggle(category.id)}
-                className="flex w-full items-center cursor-pointer gap-2 rounded-md px-3 py-2 text-sm font-medium
-                           hover:bg-accent hover:text-accent-foreground transition"
-              >
-                <span className="text-left">{category.name}</span>
+            <div key={category.id} className="group">
+              <div className="flex items-center justify-between rounded-lg hover:bg-slate-50 transition-all duration-200">
+                {/* 1. Vùng Click vào chữ để Navigate */}
+                <Link
+                  to={`/search?categoryId=${category.id}`}
+                  className="flex-1 px-3 py-2 text-[14px] font-bold text-slate-800 hover:text-black transition-colors"
+                >
+                  {category.name}
+                </Link>
 
-                {category.children.length > 0 && (
-                  <ChevronRight
-                    className={`ml-auto h-4 w-4 opacity-50 transition-transform
-                      ${isOpen ? "rotate-90" : ""}`}
-                  />
+                {/* 2. Vùng Click vào Icon để Mở rộng (chỉ hiện nếu có con) */}
+                {hasChildren && (
+                  <button
+                    type="button"
+                    onClick={(e) => toggle(category.id, e)}
+                    className="p-2 cursor-pointer mr-1 rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-900 transition-all"
+                  >
+                    {isOpen ? (
+                      <ChevronDown className="h-4 w-4" strokeWidth={3} />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" strokeWidth={3} />
+                    )}
+                  </button>
                 )}
-              </button>
+              </div>
 
-              {/* Children */}
-              {isOpen && category.children.length > 0 && (
-                <div className="space-y-1 pl-4">
+              {/* Children List */}
+              {isOpen && hasChildren && (
+                <div className="mt-1 ml-4 space-y-0.5 border-l-2 border-slate-100 pl-2 animate-in slide-in-from-top-1 duration-200">
                   {category.children.map((child) => (
                     <Link
                       key={child.id}
-                      to={`/category/${category.slug}/${child.slug}`}
-                      className="block rounded px-2 py-1 text-xs text-muted-foreground
-                                 hover:text-foreground hover:bg-accent transition"
+                      to={`/search?categoryId=${child.id}`}
+                      className="block rounded-md px-3 py-1.5 text-[13px] font-medium text-slate-500 hover:text-black hover:bg-slate-50 transition-all"
                     >
                       {child.name}
                     </Link>
@@ -79,22 +86,18 @@ export function CategoryBrowser() {
   );
 }
 
+// Giữ nguyên các hàm helper bên dưới
 function groupCategories(rawCategories = []) {
   const map = new Map();
-
-  // tạo parent trước
   rawCategories.forEach((item) => {
     if (!item.parent) {
       map.set(item.id, {
         id: item.id,
         name: item.name,
-        slug: slugify(item.name),
         children: [],
       });
     }
   });
-
-  // gắn children
   rawCategories.forEach((item) => {
     if (item.parent) {
       const parent = map.get(item.parent.id);
@@ -102,19 +105,9 @@ function groupCategories(rawCategories = []) {
         parent.children.push({
           id: item.id,
           name: item.name,
-          slug: slugify(item.name),
         });
       }
     }
   });
-
   return Array.from(map.values());
-}
-
-function slugify(text) {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-");
 }

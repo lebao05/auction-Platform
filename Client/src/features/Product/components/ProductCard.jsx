@@ -1,8 +1,12 @@
 import { Heart, Clock, Users, Zap } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
 import { Badge } from "../../../components/ui/Badge";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export function ProductCard({ product }) {
+    const { user } = useAuth();
+    const navigate = useNavigate();
     return (
         <div
             className="group cursor-pointer rounded-lg border border-border bg-card overflow-hidden hover:border-primary transition"
@@ -52,7 +56,7 @@ export function ProductCard({ product }) {
                     </div>
                     {product.buyNowPrice && (
                         <div className="flex items-baseline justify-between">
-                            <span className="text-sm text-muted-foreground">Buy now</span>
+                            <span className="text-sm text-muted-foreground">Mua ngay</span>
                             <span className="text-sm font-semibold text-accent">
                                 {(product.buyNowPrice / 1_000_000).toFixed(1)}M đ
                             </span>

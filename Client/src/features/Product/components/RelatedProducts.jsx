@@ -48,7 +48,7 @@ const relatedProducts = [
 export function RelatedProducts() {
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Related Products in Electronics</h2>
+      <h2 className="text-2xl font-bold mb-6">Đề xuất</h2>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {relatedProducts.map((product) => (
           <ProductCard key={product.id} product={product} />

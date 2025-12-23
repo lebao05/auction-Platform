@@ -6,7 +6,7 @@ import {
     ChevronRight,
     UserX,
     Trash2,
-    Trophy
+    ArrowLeft
 } from "lucide-react";
 
 import { Button } from "../../../components/ui/Button";
@@ -19,21 +19,25 @@ import { Badge } from "../../../components/ui/Badge";
 import { PlaceBidModal } from "../components/PlaceBidModal";
 import { useProductDetails } from "../../../hooks/useProductDetails";
 
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { toast } from "react-toastify";
 import Unknow from "../../../utils/Unknow";
 import { useWatchList } from "../../../contexts/WatchListContext";
-import { formatTime } from "../../../utils/DateTimeExtension";
+import { formatDateTimeFull, formatTime } from "../../../utils/DateTimeExtension";
+import Spinner from "../../../components/ui/Spinner";
+import ProductQnA from "../components/ProductQnA";
 export default function ProductPage() {
     const { productId } = useParams();
     const { product, loading, error, addToBlacklist, removeFromBlacklist
         , comments,
         blackList,
-        biddingHistories
+        biddingHistories, addDescription
     } = useProductDetails(productId);
+    const navigate = useNavigate();
+    const [showFullDesc, setShowFullDesc] = useState(false);
     const { user } = useAuth();
     const { likedProducts, deleteFromWatchList, addToWatchList } = useWatchList();
     const isLiked = likedProducts.some(lp => lp.productId == product.id
@@ -45,15 +49,13 @@ export default function ProductPage() {
     const [savingDesc, setSavingDesc] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
 
-    if (loading) return <p className="text-center py-10">Loading...</p>;
     if (error) return <p className="text-center text-red-500">{error}</p>;
-    if (!product) return <p>No product found</p>;
-
+    if (!product) return null;
     const images = product.images?.map(img => img.imageUrl) ?? [];
 
     const auctionEnded = new Date(product.endDate) < new Date();
     const isSeller = user?.userId === product.sellerId;
-    const canBid = !blackList.some(bl => bl.bidderId == user.id) && user.id != product.sellerId;
+    const canBid = user && !blackList.some(bl => bl.bidderId == user.id) && user.id != product.sellerId;
     const prevImage = () =>
         setCurrentImageIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
 
@@ -83,11 +85,44 @@ export default function ProductPage() {
     // Add Description
     // ===========================
     const handleAddDescription = async () => {
-
+        if (extraDescription === `<p><br></p>`) {
+            toast.warning("Mô tả không được trống");
+            return;
+        }
+        console.log(extraDescription);
+        try {
+            setSavingDesc(true);
+            const now = new Date();
+            await addDescription({
+                description: `<br/><p className="inline-flex items-center gap-1 mb-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+            <span>✏️</span>
+            <span>${formatDateTimeFull(now)}</span>
+        </p>`+ extraDescription
+            });
+            setExtraDescription("");
+            toast.success("Đã thêm mô tả");
+        } catch (err) {
+            toast.error("Thêm mô tả thất bại");
+        } finally {
+            setSavingDesc(false);
+        }
     };
-
     return (
-        <main className="bg-background min-h-screen py-8">
+        <main className="bg-background min-h-screen lg:w-[80%] mx-auto py-8">
+            <button
+                onClick={() => navigate("/")}
+                className="
+                    fixed top-25 cursor-pointer left-4 z-50
+                    h-10 w-10 rounded-full
+                    bg-white shadow-md
+                    flex items-center justify-center
+                    hover:bg-gray-100
+                    transition
+                "
+                aria-label="Back to home"
+            >
+                <ArrowLeft className="h-5 w-5 text-gray-700" />
+            </button>
             <div className="mx-auto max-w-7xl px-4">
                 {/* Auction Ended Banner */}
                 {auctionEnded && (
@@ -99,7 +134,8 @@ export default function ProductPage() {
                     />
                 )}
 
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                <div className="grid grid-cols-1  gap-8 lg:grid-cols-3">
+
                     {/* ---------------- MAIN IMAGES ---------------- */}
                     <div className="lg:col-span-2 space-y-4">
                         <div className="relative h-96 lg:h-[700px] w-full bg-muted rounded-lg overflow-hidden">
@@ -213,7 +249,7 @@ export default function ProductPage() {
 
                             <button
                                 onClick={() => setShowBidModal(true)}
-                                className="w-full px-4 py-2 cursor-pointer bg-gray-400 text-white font-semibold rounded-lg hover:bg-gray-600 transition"
+                                className="w-full px-4 py-2 cursor-pointer bg-red-600 text-white font-semibold rounded-lg hover:bg-red-400 transition"
                             >
                                 Đấu giá
                             </button>
@@ -255,15 +291,24 @@ export default function ProductPage() {
 
                         {/* Khung mô tả nổi bật */}
                         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                            <div
-                                className="prose prose-sm max-w-none"
-                                dangerouslySetInnerHTML={{ __html: product.description }}
-                            />
+                            <div className="relative">
+                                <div
+                                    className={`
+          prose prose-sm max-w-none transition-all duration-300
+          ${(showFullDesc || product.description?.length <= 100) ? "" : "max-h-40 overflow-hidden"}
+        `}
+                                    dangerouslySetInnerHTML={{ __html: product.description }}
+                                />
 
-                            {/* Xem thêm / Xem bớt nếu mô tả dài */}
-                            {product.description?.length > 300 && (
+                                {/* Fade effect when collapsed */}
+                                {!showFullDesc && product.description?.length > 100 && (
+                                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-white to-transparent" />
+                                )}
+                            </div>
+
+                            {product.description?.length > 100 && (
                                 <button
-                                    className="mt-2 text-blue-500 text-sm hover:underline"
+                                    className="mt-3 cursor-pointer text-blue-500 text-sm hover:underline"
                                     onClick={() => setShowFullDesc(prev => !prev)}
                                 >
                                     {showFullDesc ? "Thu gọn" : "Xem thêm"}
@@ -326,7 +371,7 @@ export default function ProductPage() {
 
                         {/* ==== Q&A ==== */}
                         <TabsContent value="qna" className="mt-6">
-                            <p>No questions yet.</p>
+                            <ProductQnA />
                         </TabsContent>
 
                         {/* ==== BLACKLIST (ONLY SELLER) ==== */}
@@ -385,6 +430,7 @@ export default function ProductPage() {
                     }}
                 />
             )}
+            {loading && <Spinner />}
         </main>
     );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { addToBlackListApi, deleteFromBlackListApi, getProductDetailsApi, placeBidApi } from "../services/product.service";
+import { addDescriptionApi, addToBlackListApi, deleteFromBlackListApi, getProductDetailsApi, placeBidApi } from "../services/product.service";
 
 export function useProductDetails(productId) {
     const [product, setProduct] = useState(null);
@@ -85,6 +85,21 @@ export function useProductDetails(productId) {
         },
         [fetchProduct]
     );
+
+    const addDescription = useCallback(
+        async ({ description }) => {
+            console.log(description);
+            try {
+                await addDescriptionApi({ productId, description });
+                setProduct(pre => ({ ...pre, description: pre.description + description }));
+            }
+            catch (err) {
+                console.error(err);
+                throw err;
+            }
+        }
+
+    );
     return {
         product,
         loading,
@@ -95,6 +110,7 @@ export function useProductDetails(productId) {
         removeFromBlacklist,
         comments,
         blackList,
-        biddingHistories,
+        biddingHistories, 
+        addDescription
     };
 }

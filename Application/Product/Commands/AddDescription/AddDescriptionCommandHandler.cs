@@ -21,6 +21,7 @@ namespace Application.Product.Commands.AddDescription
             if (product == null)
                 return Result.Failure(new Error("Product.NotFound", "Product not exists for adding description"));
             product.AddDesciption(request.description);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
     }
