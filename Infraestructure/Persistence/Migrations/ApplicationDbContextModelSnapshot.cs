@@ -255,9 +255,6 @@ namespace Infraestructure.Persistence.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -515,8 +512,24 @@ namespace Infraestructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("OrderStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentInvoiceUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("SellerId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ShippingAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShippingInvoiceUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShippingPhone")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -575,12 +588,14 @@ namespace Infraestructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Comment")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("RatedUserId")
                         .HasColumnType("uniqueidentifier");
@@ -595,6 +610,8 @@ namespace Infraestructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("RatedUserId");
 
@@ -1116,6 +1133,12 @@ namespace Infraestructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Rating", b =>
                 {
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany("Ratings")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.AppUser", "RatedUser")
                         .WithMany("RatingsReceived")
                         .HasForeignKey("RatedUserId")
@@ -1127,6 +1150,8 @@ namespace Infraestructure.Persistence.Migrations
                         .HasForeignKey("RaterId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Product");
 
                     b.Navigation("RatedUser");
 
@@ -1271,6 +1296,8 @@ namespace Infraestructure.Persistence.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Images");
+
+                    b.Navigation("Ratings");
 
                     b.Navigation("Watchlists");
                 });

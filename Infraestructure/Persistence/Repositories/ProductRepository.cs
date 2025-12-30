@@ -2,7 +2,6 @@
 using Domain.Repositories;
 using Infraestructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 
 namespace Infraestructure.Persistence.Repositories
 {
@@ -14,9 +13,9 @@ namespace Infraestructure.Persistence.Repositories
             _appDbContext = appDbContext;
         }
 
-        public async Task AddProductAsync(Product entity,CancellationToken cancellationToken)
+        public async Task AddProductAsync(Product entity, CancellationToken cancellationToken)
         {
-            await _appDbContext.Products.AddAsync(entity,cancellationToken);
+            await _appDbContext.Products.AddAsync(entity, cancellationToken);
         }
 
         public async Task<Product?> GetProductDetails(Guid id, CancellationToken cancellationToken)
@@ -25,12 +24,17 @@ namespace Infraestructure.Persistence.Repositories
                 .Include(p => p.Seller)
                 .Include(p => p.Category)
                 .Include(p => p.Images)
+                .Include(p => p.AutomatedBiddings)
                 .Include(p => p.BiddingHistories)
                     .ThenInclude(b => b.Bidder)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.User)
                 .Include(p => p.Blacklists)
                     .ThenInclude(b => b.Bidder)
+                .Include(p => p.Ratings)
+                    .ThenInclude(r => r.Rater)
+                .Include(p => p.Ratings)
+                    .ThenInclude(r => r.RatedUser)
                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted, cancellationToken);
         }
 
@@ -39,8 +43,8 @@ namespace Infraestructure.Persistence.Repositories
         {
             // 1) Load product (không Include các collection)
             var product = await _appDbContext.Products
-                .Include( p=> p.AutomatedBiddings.OrderByDescending(a=>a.MaxBidAmount).ThenBy(a=>a.CreatedAt).Take(1))
-                .Include( p => p.BiddingHistories.OrderByDescending(o => o.BidAmount).ThenBy(a => a.CreatedAt).Take(1))
+                .Include(p => p.AutomatedBiddings.OrderByDescending(a => a.MaxBidAmount).ThenBy(a => a.CreatedAt).Take(1))
+                .Include(p => p.BiddingHistories.OrderByDescending(o => o.BidAmount).ThenBy(a => a.CreatedAt).Take(1))
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
 
             return product;
@@ -50,8 +54,8 @@ namespace Infraestructure.Persistence.Repositories
         public async Task<List<Product>> GetProductsForSeller(Guid sellerId, CancellationToken cancellationToken)
         {
             return await _appDbContext.Products
-                .Include( p=> p.Category)
-                .Include( p=> p.Images.Where( i => i.IsMain == true) )
+                .Include(p => p.Category)
+                .Include(p => p.Images.Where(i => i.IsMain == true))
                 .Include(p => p.BiddingHistories.OrderByDescending(o => o.BidAmount).ThenBy(a => a.CreatedAt).Take(1))
                 .Where(p => p.SellerId == sellerId)
                 .OrderByDescending(p => p.CreatedAt)
@@ -67,7 +71,7 @@ namespace Infraestructure.Persistence.Repositories
         public async Task UpdateAsync(Product entity, CancellationToken cancellationToken)
         {
             _appDbContext.Products.Update(entity);
-            await Task.CompletedTask; 
+            await Task.CompletedTask;
         }
         public async Task<AutomatedBidding?> GetAutoBidding(Guid userId, Guid productId, CancellationToken cancellationToken)
         {
@@ -209,6 +213,31 @@ namespace Infraestructure.Persistence.Repositories
                     .ThenBy(b => b.CreatedAt)
                     .Take(1))
                     .ThenInclude(b => b.Bidder);
+        }
+
+        public IQueryable<Comment> GetComment()
+        {
+            return _appDbContext.Comments;
+        }
+ 
+        public void DeleteComment(Comment comment)
+        {
+            _appDbContext.Comments.Remove(comment);
+        }
+
+        public void AddRating(Rating rating)
+        {
+            _appDbContext.Ratings.Add(rating);
+        }
+        public async Task<bool> IsRatingExisting(Guid UserId, Guid RatedUserId, Guid ProductId, CancellationToken cancellationToken)
+        {
+            return await _appDbContext.Ratings
+                .AsNoTracking()
+                .AnyAsync(r => r.RaterId == UserId && r.RatedUserId == RatedUserId && r.ProductId == ProductId, cancellationToken);
+        }
+        public async Task<Rating?> GetRatingById(Guid id, CancellationToken cancellationToken)
+        {
+            return await _appDbContext.Ratings.FindAsync(new object[] { id }, cancellationToken);
         }
     }
 }

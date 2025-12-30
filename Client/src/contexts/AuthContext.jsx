@@ -1,8 +1,14 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { getMySellerRequestApi, getUserProfileApi, requestSellerApi, updateUserProfileApi } from "../services/user.service";
+import {
+    getMySellerRequestApi,
+    getUserProfileApi,
+    requestSellerApi,
+    updateUserProfileApi,
+} from "../services/user.service";
 import { loginApi } from "../services/auth.service";
+import Spinner from "../components/ui/Spinner";
 
 const AuthContext = createContext(null);
 
@@ -10,130 +16,142 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [sellerRequest, setSellerRequest] = useState({});
+    const [sellerRequest, setSellerRequest] = useState(null);
 
-    // Load token on first run
+    /* ===========================
+       INITIAL AUTH CHECK
+       =========================== */
     useEffect(() => {
-        const savedToken = localStorage.getItem("token");
-        if (savedToken) {
-            setToken(savedToken);
-            refreshProfile(savedToken);
-        } else {
-            setLoading(false);
-        }
-    }, []);
+        const bootstrapAuth = async () => {
+            const savedToken = localStorage.getItem("token");
 
-    useEffect(() => {
-        if (user == null) return;
-        getSellerRequest();
-    }, [user])
-    const requestSeller = async () => {
-        try {
-            setLoading(true);
-            await requestSellerApi();
-            const res = await getMySellerRequestApi();
-            setSellerRequest(res);
-        }
-        catch (err) {
-            // console.error(err);
-        }
-        finally {
-            setLoading(false);
-        }
-
-    }
-    const getSellerRequest = async () => {
-        if (user == null) return;
-        try {
-            setLoading(true);
-            const res = await getMySellerRequestApi();
-            setSellerRequest(res);
-        }
-        catch (err) {
-            // console.error(err);
-        }
-        finally {
-            setLoading(false);
-        }
-
-    }
-
-    // -------------------------
-    // LOGIN
-    // -------------------------
-    const login = async (email, password) => {
-        setLoading(true);
-
-        try {
-            const data = await loginApi(email, password);
-            const jwt = data;
-            localStorage.setItem("token", jwt);
-            setToken(jwt);
-            await refreshProfile(jwt);
-            return true;
-        } catch (err) {
-            setLoading(false);
-            return false;
-        }
-    };
-
-    // -------------------------
-    // REFRESH PROFILE
-    // -------------------------
-    const refreshProfile = async (overrideToken) => {
-        setLoading(true);
-
-        try {
-            const jwt = overrideToken || token;
-            if (!jwt) {
+            if (!savedToken) {
                 setLoading(false);
                 return;
             }
 
+            setToken(savedToken);
+
+            try {
+                const profile = await getUserProfileApi();
+                setUser(profile);
+            } catch (err) {
+                logout();
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        bootstrapAuth();
+    }, []);
+
+    /* ===========================
+       SELLER REQUEST
+       =========================== */
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchSellerRequest = async () => {
+            try {
+                const res = await getMySellerRequestApi();
+                setSellerRequest(res);
+            } catch {
+                setSellerRequest(null);
+            }
+        };
+
+        fetchSellerRequest();
+    }, [user]);
+
+    /* ===========================
+       LOGIN
+       =========================== */
+    const login = async (email, password) => {
+        setLoading(true);
+        try {
+            const jwt = await loginApi(email, password);
+            localStorage.setItem("token", jwt);
+            setToken(jwt);
+
             const profile = await getUserProfileApi();
-            console.log("Fetched user profile:", profile);
             setUser(profile);
-        } catch (error) {
-            logout();
+            return true;
+        } catch {
+            return false;
         } finally {
             setLoading(false);
         }
     };
-    //UPDATE USER INFO
-    const updateInfo = async ({ fullName, dateOfBirth, phoneNumber, address, email }) => {
+
+    /* ===========================
+       UPDATE PROFILE
+       =========================== */
+    const updateInfo = async (payload) => {
         setLoading(true);
         try {
-            await updateUserProfileApi({ fullName, dateOfBirth, phoneNumber, address, email });
-            setUser(pre => pre ? { ...pre, fullName, dateOfBirth, phoneNumber, address, email } : null);
+            await updateUserProfileApi(payload);
+            setUser((prev) => (prev ? { ...prev, ...payload } : null));
             return true;
-        } catch (error) {
-            console.error("Failed to update user info:", error);
+        } catch {
             return false;
-        }
-        finally {
+        } finally {
             setLoading(false);
         }
-    }
-    // -------------------------
-    // LOGOUT
-    // -------------------------
+    };
+
+    /* ===========================
+       REQUEST SELLER
+       =========================== */
+    const requestSeller = async () => {
+        setLoading(true);
+        try {
+            await requestSellerApi();
+            const res = await getMySellerRequestApi();
+            setSellerRequest(res);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /* ===========================
+       LOGOUT
+       =========================== */
     const logout = () => {
         localStorage.removeItem("token");
         setUser(null);
         setToken(null);
     };
 
+    /* ===========================
+       🔒 BLOCK RENDERING HERE
+       =========================== */
+    if (loading) {
+        return (
+            <Spinner />
+        );
+    }
+
     return (
         <AuthContext.Provider
-            value={{ user, token, loading, sellerRequest, login, logout, refreshProfile, updateInfo, requestSeller, getMySellerRequestApi }}>
+            value={{
+                user,
+                token,
+                loading,
+                sellerRequest,
+                login,
+                logout,
+                updateInfo,
+                requestSeller,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
 }
 
-// -------------------------
-// CUSTOM HOOK
-// -------------------------
+/* ===========================
+   CUSTOM HOOK
+   =========================== */
 export function useAuth() {
     const ctx = useContext(AuthContext);
     if (!ctx) throw new Error("useAuth must be used inside AuthProvider");

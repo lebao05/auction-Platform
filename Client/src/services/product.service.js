@@ -104,7 +104,6 @@ export async function searchProductsApi({
     pageIndex = 1,
     sortBy = ""
 }) {
-    console.log(searchTerm);
     const response = await axios.get("/product/search", {
         params: {
             searchTerm: searchTerm,
@@ -113,5 +112,14 @@ export async function searchProductsApi({
             sortBy: sortBy || undefined
         }
     });
+    return response.data;
+}
+
+export async function addCommentApi({ productId, parentId, content }) {
+    const response = await axios.post("/product/comment", { ProductId: productId, ParentId: parentId, Content: content });
+    return response.data;
+}
+export async function editCommentApi({ commentId, content }) {
+    const response = await axios.put("/product/comment", { CommentId: commentId, Content: content });
     return response.data;
 }

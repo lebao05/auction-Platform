@@ -1,10 +1,12 @@
-﻿using Application.Product.Commands.AddDescription;
+﻿using Application.Product.Commands.AddComment;
+using Application.Product.Commands.AddDescription;
 using Application.Product.Commands.AddToBlackList;
 using Application.Product.Commands.AddToWatchList;
 using Application.Product.Commands.CreateProduct;
 using Application.Product.Commands.DeleteFromBlackList;
 using Application.Product.Commands.DeleteFromWatchList;
 using Application.Product.Commands.PlaceBid;
+using Application.Product.Commands.UpdateComment;
 using Application.Product.Queries.GetProductDetails;
 using Application.Product.Queries.GetProductsForSeller;
 using Application.Product.Queries.GetTopBiddingCountProducts;
@@ -254,6 +256,30 @@ namespace Presentation.Controllers
                 return HandleFailure(result);
 
             return Ok(result.Value);
+        }
+        [Authorize]
+        [HttpPost("comment")]
+        public async Task<IActionResult> PostComment([FromBody] AddCommentRequest request,CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new AddCommentCommand(Guid.Parse(userId), request.ParentId, request.ProductId, request.Content);
+            var result = await _sender.Send(command, cancellationToken);
+
+            if (result.IsFailure)
+                return HandleFailure(result);
+
+            return Ok(result.Value);
+        }
+        [Authorize]
+        [HttpPut("comment")]
+        public async Task<IActionResult> EditComment([FromBody] UpdateCommentRequest request, CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new UpdateCommentCommand(Guid.Parse(userId), request.CommentId, request.Content);
+            var result = await _sender.Send(command, cancellationToken);
+            if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok();
         }
     }
 }

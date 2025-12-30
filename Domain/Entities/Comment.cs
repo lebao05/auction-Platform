@@ -6,8 +6,6 @@ namespace Domain.Entities
     public class Comment :BaseEntity
     {
         public string Content { get; set; } = string.Empty;
-        public CommentType Type { get; set; }
-
         public Guid? ParentId { get; set; }
         public Comment? Parent { get; set; }
         public ICollection<Comment> Replies { get; set; } = new List<Comment>();
@@ -17,5 +15,17 @@ namespace Domain.Entities
 
         public Guid ProductId { get; set; }
         public Product Product { get; set; } = null!;
+        public Comment(
+            string content,
+            Guid userId,
+            Guid productId,
+            Guid? parentId = null
+        )
+        {
+            Content = content;
+            UserId = userId;
+            ProductId = productId;
+            ParentId = parentId;
+        }
     }
 }

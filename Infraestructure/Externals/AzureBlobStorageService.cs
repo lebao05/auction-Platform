@@ -70,5 +70,32 @@ namespace Infraestructure.Externals
             var blobClient = _containerClient.GetBlobClient(blobName);
             return await blobClient.ExistsAsync(cancellationToken);
         }
+
+        public async Task<string> UploadFileAsync(
+            Stream fileStream,
+            string fileName,
+            CancellationToken cancellationToken = default)
+        {
+            if (fileStream == null || fileStream.Length == 0)
+                throw new ArgumentException("File stream is empty");
+
+            var blobClient = _containerClient.GetBlobClient(fileName);
+
+            var blobHttpHeader = new BlobHttpHeaders
+            {
+                ContentType = GetContentType(fileName),
+                ContentDisposition = "inline"
+            };
+
+            await blobClient.UploadAsync(
+                fileStream,
+                new BlobUploadOptions
+                {
+                    HttpHeaders = blobHttpHeader
+                },
+                cancellationToken);
+
+            return blobClient.Uri.ToString();
+        }
     }
 }

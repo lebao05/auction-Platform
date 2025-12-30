@@ -30,7 +30,11 @@ namespace Domain.Repositories
         Task<List<Watchlist>> GetLikedProducts(Guid userId, CancellationToken cancellationToken);
         IQueryable<Product> GetTopProducts();
         IQueryable<Product> SearchProducts(string searchTerms);
-
+        IQueryable<Comment> GetComment();
+        void DeleteComment(Comment comment);
+        void AddRating(Rating rating);
+        Task<bool> IsRatingExisting(Guid UserId, Guid RatedUserId, Guid ProductId, CancellationToken cancellationToken);
+        Task<Rating?> GetRatingById(Guid id, CancellationToken cancellationToken);
 
     }
 }

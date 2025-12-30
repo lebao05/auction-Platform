@@ -12,7 +12,6 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasKey(c => c.Id);
 
             builder.Property(c => c.Content).IsRequired().HasMaxLength(1000);
-            builder.Property(c => c.Type).IsRequired();
 
             builder.HasOne(c => c.User)
                 .WithMany(u => u.CommentsAsReplier)
@@ -27,7 +26,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasOne(c => c.Parent)
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); 
         }
     }
 }

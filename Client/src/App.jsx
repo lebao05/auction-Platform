@@ -53,7 +53,7 @@ function App() {
 
 
           <Route element={<MainLayout />}>
-            <Route path="/order" element={<OrderPage />} />
+            <Route path="/order/:productId" element={<OrderPage />} />
           </Route>
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />

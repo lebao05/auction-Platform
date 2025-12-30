@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { addDescriptionApi, addToBlackListApi, deleteFromBlackListApi, getProductDetailsApi, placeBidApi } from "../services/product.service";
+import { addCommentApi, addDescriptionApi, addToBlackListApi, deleteFromBlackListApi, editCommentApi, getProductDetailsApi, placeBidApi } from "../services/product.service";
 
 export function useProductDetails(productId) {
     const [product, setProduct] = useState(null);
@@ -44,6 +44,7 @@ export function useProductDetails(productId) {
             try {
                 const result = await placeBidApi({ productId, maxBidAmount });
                 const data = await getProductDetailsApi({ productId });
+                setProduct(data);
                 return result;
             } catch (err) {
                 console.error("Failed to place bid:", err);
@@ -100,6 +101,56 @@ export function useProductDetails(productId) {
         }
 
     );
+
+    const addComment = useCallback(async ({ parentId, content }) => {
+        try {
+            const newCommentId = await addCommentApi({ productId, parentId, content });
+
+            // Tạo object comment giả lập dựa trên dữ liệu hiện có
+            const newComment = {
+                id: newCommentId,
+                parentId: parentId || null,
+                content: content,
+                createdAt: new Date().toISOString(),
+                fullName: "Tôi", // Tạm thời set tên hiển thị
+                // Thêm các field cần thiết khác tùy thuộc vào structure của bạn
+            };
+            setComments(prev => [...prev, newComment]);
+
+            // Cập nhật bên trong object product (để đồng bộ dữ liệu tổng thể)
+            setProduct(prev => ({
+                ...prev,
+                comments: [...(prev.comments || []), newComment]
+            }));
+        } catch (err) {
+            console.error("Failed to add comment:", err);
+            throw err;
+        }
+    }, [productId]);
+
+    // --- Cập nhật Edit Comment không fetch lại ---
+    const editComment = useCallback(async ({ commentId, content }) => {
+        try {
+            await editCommentApi({ commentId, content });
+
+            // Duyệt mảng và cập nhật nội dung cho đúng ID
+            setComments(prev =>
+                prev.map(c => c.id === commentId ? { ...c, content: content } : c)
+            );
+            setProduct(prev => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    comments: prev.comments.map(c =>
+                        c.id === commentId ? { ...c, content: content } : c
+                    )
+                };
+            });
+        } catch (err) {
+            console.error("Failed to edit comment:", err);
+            throw err;
+        }
+    }, []);
     return {
         product,
         loading,
@@ -110,7 +161,9 @@ export function useProductDetails(productId) {
         removeFromBlacklist,
         comments,
         blackList,
-        biddingHistories, 
-        addDescription
+        biddingHistories,
+        addDescription,
+        editComment,
+        addComment
     };
 }

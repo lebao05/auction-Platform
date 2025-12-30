@@ -1,5 +1,6 @@
 ﻿using Domain.Common;
 using Domain.DomainEvents;
+using Domain.Enums;
 namespace Domain.Entities
 {
     public class Product : BaseEntity
@@ -24,6 +25,17 @@ namespace Domain.Entities
         public bool IsDeleted { get; set; } = false;
         public string Description { get; set; } = null!;
 
+        // Buyer info
+
+        public string? ShippingAddress { get; set; } = string.Empty;
+        public string? PaymentInvoiceUrl { get; set; } = string.Empty;
+        public string? ShippingPhone { get; set; } = string.Empty;
+
+
+        // Seller info
+        public string ShippingInvoiceUrl { get; set; } = string.Empty;
+
+        public OrderStatus OrderStatus { get; set; } = OrderStatus.WaitingForPayment;
         // Navigation Properties
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public ICollection<BiddingHistory> BiddingHistories { get; set; } = new List<BiddingHistory>();
@@ -31,6 +43,7 @@ namespace Domain.Entities
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<BlackList> Blacklists { get; set; } = new List<BlackList>();
         public ICollection<Watchlist> Watchlists { get; private set; } = new List<Watchlist>();
+        public ICollection<Rating> Ratings { get; private set; } = new List<Rating>();
 
         public static Product Create(
           string name,

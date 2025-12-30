@@ -17,6 +17,8 @@
         public int BiddingCount { get; set; }
 
         public bool IsAutoRenewal { get; set; }
+        public long? YourRecentBidding { get; set; }
+        public long? YourAutoBidding { get; set; }
 
         public DateTime StartDate { get; set; }
 
@@ -71,6 +73,7 @@
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
+        public Guid? ParentId { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }

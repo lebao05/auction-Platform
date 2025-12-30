@@ -43,7 +43,8 @@ namespace Application.Product.Queries.GetProductDetails
                 StartDate = product.StartDate,
                 EndDate = product.EndDate,
                 Description = product.Description,
-
+                YourRecentBidding = request.userId.HasValue ? product.BiddingHistories.Where(b => b.BidderId == request.userId.Value).OrderByDescending(b=>b.BidAmount).FirstOrDefault()?.BidAmount : null,
+                YourAutoBidding = request.userId.HasValue ? product.AutomatedBiddings.Where(b => b.BidderId == request.userId.Value).FirstOrDefault()?.MaxBidAmount : null,
                 CategoryId = product.CategoryId,
                 CategoryName = product.Category?.Name,
 
@@ -84,6 +85,7 @@ namespace Application.Product.Queries.GetProductDetails
                 {
                     Id = c.Id,
                     UserId = c.UserId,
+                    ParentId = c.ParentId,
                     FullName = c.User.FullName,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt

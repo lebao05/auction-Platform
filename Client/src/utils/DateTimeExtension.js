@@ -55,19 +55,9 @@ export function formatDateTimeFull(date) {
     });
 }
 export const convertUTCToLocal = (utcInput) => {
-    if (!utcInput) return null;
-
-    if (utcInput instanceof Date) {
-        return new Date(utcInput);
-    }
-
-    // ensure ISO UTC format
-    const iso =
-        typeof utcInput === "string" && !utcInput.endsWith("Z")
-            ? utcInput.replace(" ", "T") + "Z"
-            : utcInput;
-
-    return new Date(iso);
+    const date = new Date(utcInput);
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date;
 };
 
 export const formatSmartTime = (utcDate) => {

@@ -43,7 +43,7 @@ namespace Application.Product.Commands.PlaceBid
 
             if (product.EndDate <= DateTime.UtcNow)
                 return Result.Failure(new Error("Product.Ended", "This auction has ended."));
-            if (product.StartPrice >= maxBixAmount)
+            if (product.StartPrice > maxBixAmount)
                 return Result.Failure(new Error("Product.InValidPrice", "Your bidding must greater than or equal to startprice"));
 
             if ((maxBixAmount - product.StartPrice) % product.StepPrice != 0)
@@ -79,8 +79,17 @@ namespace Application.Product.Commands.PlaceBid
                     )
                 );
             }
-            var maxAuto = product.AutomatedBiddings.FirstOrDefault();
-            var maxBidding = product.BiddingHistories.FirstOrDefault();
+            var maxBidding = product.BiddingHistories
+                .OrderByDescending(a => a.BidAmount)
+                .ThenBy(a => a.CreatedAt)
+                .FirstOrDefault();
+            var maxAuto = maxBidding is not null ? product.AutomatedBiddings
+                .Where(b => b.BidderId == maxBidding.BidderId)
+                .OrderByDescending(a => a.MaxBidAmount)
+                .FirstOrDefault() :
+                product.AutomatedBiddings
+                .OrderByDescending(a => a.MaxBidAmount)
+                .FirstOrDefault();
             long increment = product.StepPrice;
 
             long startPrice = product.StartPrice;
@@ -95,7 +104,7 @@ namespace Application.Product.Commands.PlaceBid
                     bidAmount = Math.Min(maxBixAmount, buyNowPrice.Value);
                 var bidding = new BiddingHistory(bidAmount, productId, userId);
                 if (buyNowPrice.HasValue && bidAmount == buyNowPrice)
-                    product.EndDate = DateTime.Now;
+                    product.EndDate = DateTime.UtcNow;
                 product.BiddingCount++;
                 _productRepository.AddAutoBidding(auto);
                 _productRepository.AddBiddingHistory(bidding);

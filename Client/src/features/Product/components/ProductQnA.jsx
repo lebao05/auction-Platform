@@ -1,134 +1,279 @@
-import { useState } from "react";
-import { MessageCircle, Send } from "lucide-react";
-import { formatDateTimeFull } from "../../../utils/DateTimeExtension";
+"use client";
 
+import { useState, useMemo } from "react";
+import { MessageCircle, Send, Reply, User, MessageSquareText, Pencil, X, Check } from "lucide-react";
+import { formatDateTimeFull } from "../../../utils/DateTimeExtension";
+import { useAuth } from "../../../contexts/AuthContext";
+
+/**
+ * COMPONENT CHÍNH: ProductQnA
+ */
 export default function ProductQnA({
-    questions = [],
+    comments = [],
     isSeller,
-    onAskQuestion,
-    onAnswerQuestion,
+    editComment,
+    addComment
 }) {
-    const [questionText, setQuestionText] = useState("");
-    const [answerText, setAnswerText] = useState({});
+    const [activeReplyId, setActiveReplyId] = useState(null);
+    const [textValue, setTextValue] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handleAsk = async () => {
-        if (!questionText.trim()) return;
-        setLoading(true);
-        await onAskQuestion?.(questionText);
-        setQuestionText("");
-        setLoading(false);
-    };
+    // 1. Xây dựng cây comment từ mảng phẳng
+    const commentTree = useMemo(() => {
+        const map = {};
+        const roots = [];
 
-    const handleAnswer = async (id) => {
-        if (!answerText[id]?.trim()) return;
+        comments.forEach(c => {
+            map[c.id] = { ...c, children: [] };
+        });
+
+        comments.forEach(c => {
+            if (c.parentId && map[c.parentId]) {
+                map[c.parentId].children.push(map[c.id]);
+            } else {
+                roots.push(map[c.id]);
+            }
+        });
+
+        const sortNodes = (nodes, isRoot) => {
+            nodes.sort((a, b) => {
+                const timeA = new Date(a.createdAt).getTime();
+                const timeB = new Date(b.createdAt).getTime();
+                return isRoot ? timeB - timeA : timeA - timeB;
+            });
+            nodes.forEach(node => sortNodes(node.children, false));
+        };
+
+        sortNodes(roots, true);
+        return roots;
+    }, [comments]);
+
+    const handleAction = async (parentId = null) => {
+        if (!textValue.trim()) return;
         setLoading(true);
-        await onAnswerQuestion?.(id, answerText[id]);
-        setAnswerText((prev) => ({ ...prev, [id]: "" }));
-        setLoading(false);
+        try {
+            await addComment({ parentId, content: textValue });
+            setTextValue("");
+            setActiveReplyId(null);
+        } catch (error) {
+            console.error("Lỗi khi gửi bình luận:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div className="space-y-6">
-            {/* ================= ASK QUESTION ================= */}
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-                <h3 className="mb-3 flex items-center gap-2 font-semibold">
-                    <MessageCircle className="h-5 w-5 text-blue-500" />
-                    Hỏi người bán
-                </h3>
-
-                <textarea
-                    rows={3}
-                    value={questionText}
-                    onChange={(e) => setQuestionText(e.target.value)}
-                    placeholder="Nhập câu hỏi của bạn..."
-                    className="w-full resize-none rounded-md border border-gray-300 p-3 text-sm focus:border-blue-500 focus:outline-none"
-                />
-
-                <div className="mt-3 flex justify-end">
-                    <button
-                        onClick={handleAsk}
-                        disabled={loading}
-                        className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
-                    >
-                        <Send className="h-4 w-4" />
-                        Gửi câu hỏi
-                    </button>
+            {/* Form đặt câu hỏi chính */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500/10">
+                <div className="flex items-center gap-2 mb-3 text-gray-800">
+                    <MessageSquareText className="w-5 h-5 text-blue-600" />
+                    <span className="font-semibold text-sm">Hỏi người bán về sản phẩm này</span>
+                </div>
+                <div className="relative">
+                    <textarea
+                        value={activeReplyId === null ? textValue : ""}
+                        onChange={(e) => {
+                            setActiveReplyId(null);
+                            setTextValue(e.target.value);
+                        }}
+                        placeholder="Câu hỏi của bạn là gì?..."
+                        className="w-full min-h-[100px] p-4 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-blue-500 outline-none transition-all resize-none text-sm"
+                    />
+                    <div className="flex justify-end mt-3">
+                        <button
+                            onClick={() => handleAction(null)}
+                            disabled={loading || !textValue.trim()}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium flex items-center gap-2 transition-all disabled:opacity-50 text-sm"
+                        >
+                            <Send size={16} />
+                            {loading ? "Đang gửi..." : "Gửi câu hỏi"}
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* ================= QUESTION LIST ================= */}
-            <div className="space-y-4">
-                {questions.length === 0 && (
-                    <p className="text-sm text-gray-500">
-                        Chưa có câu hỏi nào cho sản phẩm này.
-                    </p>
+            {/* Danh sách các câu hỏi & phản hồi */}
+            <div className="space-y-2">
+                {commentTree.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+                        <MessageCircle className="w-12 h-12 text-gray-200 mb-2" />
+                        <p className="text-gray-400 text-sm italic">Chưa có thắc mắc nào.</p>
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
+                        {commentTree.map((comment) => (
+                            <CommentItem
+                                key={comment.id}
+                                comment={comment}
+                                isSeller={isSeller}
+                                activeReplyId={activeReplyId}
+                                setActiveReplyId={setActiveReplyId}
+                                textValue={textValue}
+                                setTextValue={setTextValue}
+                                handleAction={handleAction}
+                                editComment={editComment}
+                                loading={loading}
+                            />
+                        ))}
+                    </div>
                 )}
+            </div>
+        </div>
+    );
+}
 
-                {questions.map((q) => (
-                    <div
-                        key={q.id}
-                        className="rounded-lg border border-gray-200 bg-white p-4"
-                    >
-                        {/* Question */}
-                        <div className="flex items-start gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
-                                Q
-                            </div>
+/**
+ * COMPONENT CON: Từng mục bình luận
+ */
+function CommentItem({
+    comment,
+    level = 0,
+    isSeller,
+    activeReplyId,
+    setActiveReplyId,
+    textValue,
+    setTextValue,
+    handleAction,
+    editComment,
+    loading
+}) {
+    // LẤY USER TRỰC TIẾP TỪ AUTH CONTEXT ĐỂ TRÁNH LỖI "UNDEFINED"
+    const { user } = useAuth(); 
+    
+    const [isEditing, setIsEditing] = useState(false);
+    const [editValue, setEditValue] = useState(comment.content);
+    const [editLoading, setEditLoading] = useState(false);
 
-                            <div className="flex-1">
-                                <p className="text-sm font-medium">{q.content}</p>
-                                <p className="mt-1 text-xs text-gray-400">
-                                    {q.userName} • {formatDateTimeFull(q.createdAt)}
-                                </p>
+    const isReplying = activeReplyId === comment.id;
+
+    // KIỂM TRA QUYỀN: Chỉ cho phép sửa nếu userId trong comment khớp với userId người dùng đang đăng nhập
+    const canEdit = user && String(user.userId) === String(comment.userId);
+
+    const handleUpdate = async () => {
+        if (!editValue.trim() || editValue === comment.content) {
+            setIsEditing(false);
+            return;
+        }
+        setEditLoading(true);
+        try {
+            await editComment({ commentId: comment.id, content: editValue });
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Comment Updating Error:", error);
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
+    return (
+        <div className={`transition-all ${level === 0 ? "p-5" : "pt-4 pl-4 md:pl-8 border-l-2 border-gray-100 ml-4 md:ml-6 mt-3"}`}>
+            <div className="flex gap-4">
+                <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs border-2 shadow-sm ${level > 0 ? "w-8 h-8" : ""} ${
+                    comment.fullName === "Người bán" 
+                    ? "bg-amber-50 text-amber-600 border-amber-100" 
+                    : "bg-blue-50 text-blue-600 border-blue-100"
+                }`}>
+                    <User size={level > 0 ? 14 : 18} />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline justify-between gap-2 flex-wrap mb-1">
+                        <span className={`font-bold text-gray-900 truncate ${level > 0 ? "text-xs" : "text-sm"}`}>
+                            {comment.fullName}
+                            {comment.fullName === "Người bán" && (
+                                <span className="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-[10px] rounded border border-amber-200">SELLER</span>
+                            )}
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-medium italic">
+                            {formatDateTimeFull(comment.createdAt)}
+                        </span>
+                    </div>
+
+                    {isEditing ? (
+                        <div className="mt-2 space-y-2 animate-in fade-in duration-200">
+                            <textarea
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                className="w-full min-h-[60px] p-3 text-sm bg-white border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500/10 outline-none resize-none"
+                                autoFocus
+                            />
+                            <div className="flex justify-end gap-2">
+                                <button onClick={() => setIsEditing(false)} className="flex items-center gap-1 px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded-md">
+                                    <X size={14} /> Hủy
+                                </button>
+                                <button onClick={handleUpdate} disabled={editLoading} className="bg-amber-600 text-white px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1">
+                                    {editLoading ? "..." : <><Check size={14} /> Lưu</>}
+                                </button>
                             </div>
                         </div>
+                    ) : (
+                        <p className="text-gray-700 text-sm leading-relaxed break-words">{comment.content}</p>
+                    )}
 
-                        {/* Answer */}
-                        {q.answer && (
-                            <div className="mt-4 flex items-start gap-3 pl-12">
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-semibold text-green-600">
-                                    A
-                                </div>
+                    {!isEditing && (
+                        <div className="flex items-center gap-4 mt-2">
+                            <button
+                                onClick={() => {
+                                    setActiveReplyId(isReplying ? null : comment.id);
+                                    setTextValue("");
+                                }}
+                                className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 hover:text-blue-600 transition-colors uppercase"
+                            >
+                                <Reply size={12} />
+                                {isReplying ? "Đóng" : "Phản hồi"}
+                            </button>
 
-                                <div className="flex-1 rounded-md bg-green-50 p-3">
-                                    <p className="text-sm">{q.answer}</p>
-                                    <p className="mt-1 text-xs text-gray-400">
-                                        Người bán • {formatDateTimeFull(q.answeredAt)}
-                                    </p>
-                                </div>
+                            {/* CHỈ HIỂN THỊ NÚT SỬA NẾU LÀ CHỦ SỞ HỮU COMMENT */}
+                            {canEdit && (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-400 hover:text-amber-600 transition-colors uppercase"
+                                >
+                                    <Pencil size={11} /> Chỉnh sửa
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {isReplying && (
+                        <div className="mt-3 animate-in fade-in slide-in-from-top-1">
+                            <textarea
+                                autoFocus
+                                value={textValue}
+                                onChange={(e) => setTextValue(e.target.value)}
+                                placeholder={`Phản hồi cho ${comment.fullName}...`}
+                                className="w-full min-h-[70px] p-3 text-sm bg-gray-50 border border-blue-200 rounded-lg outline-none resize-none"
+                            />
+                            <div className="flex justify-end mt-2">
+                                <button
+                                    onClick={() => handleAction(comment.id)}
+                                    disabled={loading || !textValue.trim()}
+                                    className="bg-gray-900 text-white px-4 py-1.5 rounded-md text-[11px] font-bold"
+                                >
+                                    {loading ? "Đang gửi..." : "Gửi phản hồi"}
+                                </button>
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {/* Seller reply box */}
-                        {isSeller && !q.answer && (
-                            <div className="mt-4 pl-12">
-                                <textarea
-                                    rows={2}
-                                    value={answerText[q.id] || ""}
-                                    onChange={(e) =>
-                                        setAnswerText((prev) => ({
-                                            ...prev,
-                                            [q.id]: e.target.value,
-                                        }))
-                                    }
-                                    placeholder="Trả lời câu hỏi..."
-                                    className="w-full resize-none rounded-md border border-gray-300 p-2 text-sm focus:border-green-500 focus:outline-none"
-                                />
-
-                                <div className="mt-2 flex justify-end">
-                                    <button
-                                        onClick={() => handleAnswer(q.id)}
-                                        disabled={loading}
-                                        className="rounded-md bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-500 disabled:opacity-50"
-                                    >
-                                        Trả lời
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                ))}
+                    {/* RENDER ĐỆ QUY: Không cần truyền user xuống vì bên trong đã dùng useAuth() */}
+                    {comment.children?.map((child) => (
+                        <CommentItem
+                            key={child.id}
+                            comment={child}
+                            level={level + 1}
+                            isSeller={isSeller}
+                            activeReplyId={activeReplyId}
+                            setActiveReplyId={setActiveReplyId}
+                            textValue={textValue}
+                            setTextValue={setTextValue}
+                            handleAction={handleAction}
+                            editComment={editComment}
+                            loading={loading}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );

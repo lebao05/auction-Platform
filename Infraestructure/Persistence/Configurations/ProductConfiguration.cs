@@ -48,6 +48,10 @@ namespace Infraestructure.Persistence.Configurations
                 .WithOne(b => b.Product)
                 .HasForeignKey(b => b.ProductId) .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasMany(p=>p.Ratings)
+                .WithOne(b => b.Product)
+                .HasForeignKey(b => b.ProductId) .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }
