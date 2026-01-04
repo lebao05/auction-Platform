@@ -26,7 +26,7 @@ namespace Application.Product.Queries.GetProductDetails
                 {
                     UserId = b.BidderId,
                     BidAmount = b.BidAmount,
-                    FullName = request.userId.HasValue && b.BidderId == request.userId.Value ? b.Bidder.FullName : MaskName(b.Bidder.FullName),
+                    FullName = request.userId.HasValue && ( b.BidderId == request.userId.Value || request.userId.Value == product.SellerId )? b.Bidder.FullName : MaskName(b.Bidder.FullName),
                 })
                 .FirstOrDefault();
             var response = new GetProductDetailsResponse
@@ -72,7 +72,7 @@ namespace Application.Product.Queries.GetProductDetails
             {
                 Id = b.Id,
                 UserId = b.BidderId,
-                UserName = request.userId.HasValue && b.BidderId == request.userId.Value
+                UserName = request.userId.HasValue && (b.BidderId == request.userId.Value || request.userId == product.SellerId)
                         ? b.Bidder.FullName
                         : MaskName(b.Bidder.FullName),
                 BidAmount = b.BidAmount,

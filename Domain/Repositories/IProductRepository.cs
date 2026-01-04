@@ -20,6 +20,7 @@ namespace Domain.Repositories
         Task<BlackList?> GetBlackListAsync(Guid userId,Guid productId, CancellationToken cancellationToken);
         void DeleteBlackList(BlackList entity);
         void AddBlackList(BlackList entity);
+        Task<List<Product>> GetProductParticipating(Guid bidderId, CancellationToken cancellationToken);
 
         Task<BlackList?> GetBlackListById(Guid id, CancellationToken cancellationToken);
         Task RemoveBidderData(Guid bidderId, Guid productId, CancellationToken cancellationToken);
@@ -35,6 +36,8 @@ namespace Domain.Repositories
         void AddRating(Rating rating);
         Task<bool> IsRatingExisting(Guid UserId, Guid RatedUserId, Guid ProductId, CancellationToken cancellationToken);
         Task<Rating?> GetRatingById(Guid id, CancellationToken cancellationToken);
+        IQueryable<Product> GetProducts();
+        IQueryable<Rating> GetRatings();
 
     }
 }

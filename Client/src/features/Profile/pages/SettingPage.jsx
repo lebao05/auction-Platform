@@ -11,7 +11,7 @@ export default function SettingPage() {
             <h1 className="text-2xl font-bold">Cài Đặt Tài Khoản</h1>
 
             {/* Editable personal info */}
-            <ProfileInfo user={user} updateInfo={updateInfo} />
+            <ProfileInfo user={user} IsYou={true} updateInfo={updateInfo} />
 
             {/* Password, email verification, forgot password */}
             <ProfileSettings />

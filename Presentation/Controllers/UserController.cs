@@ -1,8 +1,10 @@
 ﻿using Application.User.Commands.AcceptSellerRequest;
+using Application.User.Commands.ChangePassword;
 using Application.User.Commands.UpdateInfo;
 using Application.User.Queries.GetProfile;
 using Application.User.Queries.GetSellerRequest;
 using Application.User.Queries.GetSellerRequestsAsAdmin;
+using Domain.Shared;
 using Infraestructure.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,6 +24,21 @@ namespace Presentation.Controllers
         {
             _logger = logger;
         }
+
+        [Authorize]
+        [HttpPut("password-change")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequest request,CancellationToken cancellationToken)
+        {
+            string userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new ChangePasswordCommand(userId,request.OldPassword,request.NewPassword);
+            var result = await _sender.Send(command, cancellationToken);
+
+            if (result.IsFailure)
+            {
+                return HandleFailure(result);
+            }
+            return Ok();
+        }
         [Authorize]
         [HttpGet("profile")]
         public async Task<IActionResult> GetProfile(CancellationToken cancellationToken)
@@ -36,7 +53,6 @@ namespace Presentation.Controllers
             }
             return Ok(result.Value);
         }
-        [Authorize]
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserById([FromRoute] Guid userId,CancellationToken cancellationToken)
         {

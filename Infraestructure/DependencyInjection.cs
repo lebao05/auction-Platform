@@ -19,7 +19,8 @@ namespace Infraestructure
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IFileStorageService, AzureBlobStorageService>();
             services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
-
+            services.AddScoped<IConversationRepository, ConversationRepository>();
+            services.AddTransient<IEmailService, EmailService>();
             return services;
         }
     }

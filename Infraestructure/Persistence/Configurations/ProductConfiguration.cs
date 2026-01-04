@@ -51,6 +51,10 @@ namespace Infraestructure.Persistence.Configurations
             builder.HasMany(p=>p.Ratings)
                 .WithOne(b => b.Product)
                 .HasForeignKey(b => b.ProductId) .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne( p=> p.Winner)
+                .WithMany( u=>u.ProductsWon)
+                .HasForeignKey( p=> p.Winnerid)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

@@ -61,6 +61,20 @@ namespace Infraestructure.Persistence.Repositories
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync(cancellationToken);
         }
+        public async Task<List<Product>> GetProductParticipating(Guid bidderId, CancellationToken cancellationToken)
+        {
+            return await _appDbContext.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images.Where(i => i.IsMain == true))
+                .Include(p => p.BiddingHistories
+                    .Where(bh => bh.BidderId == bidderId)
+                    .OrderByDescending(bh => bh.BidAmount)
+                    .ThenBy(bh => bh.CreatedAt)
+                    .Take(1))
+                .Where(p => p.BiddingHistories.Any(bh => bh.BidderId == bidderId))
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync(cancellationToken);
+        }
 
         public async Task<Product?> GetProductWithImagesAsync(Guid id, CancellationToken cancellationToken)
         {
@@ -239,5 +253,14 @@ namespace Infraestructure.Persistence.Repositories
         {
             return await _appDbContext.Ratings.FindAsync(new object[] { id }, cancellationToken);
         }
+        public IQueryable<Product> GetProducts()
+        {
+            return _appDbContext.Products.Where(p=>!p.IsDeleted).AsNoTracking();
+        }
+        public IQueryable<Rating> GetRatings()
+        {
+            return _appDbContext.Ratings.AsNoTracking();
+        }
+       
     }
 }

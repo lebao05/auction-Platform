@@ -19,8 +19,15 @@ namespace Application.Product.Commands.AddComment
         }
         public async Task<Result<Guid>> Handle(AddCommentCommand request, CancellationToken cancellationToken)
         {
+            var product = await _productRepository.GetProductAsyncById(request.ProductId, cancellationToken);
+            if (product is null)
+                return Result.Failure<Guid>(new Error("Product.NotFound", "There is no product with this id"));
             var comment = new Comment(request.Content, request.UserId, request.ProductId, request.ParentId);
             _productRepository.AddComment(comment);
+            if (request.ParentId is null)
+                product.AskQuestion(comment);
+            else
+                product.ReplyToQuestion(comment);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             return Result<Guid>.Success(comment.Id);
         }

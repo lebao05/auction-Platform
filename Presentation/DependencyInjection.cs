@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Presentation.SignalR;
 
 namespace Presentation
 {
@@ -6,6 +7,8 @@ namespace Presentation
     {
         public static IServiceCollection AddPresentationDependencies(this IServiceCollection services)
         {
+            services.AddSingleton<IPresenceTracker, PresenceTracker>();
+            services.AddSignalR();
             return services;
         }
     }

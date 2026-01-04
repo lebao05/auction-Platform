@@ -18,19 +18,23 @@ import WishlistPage from "./features/Profile/pages/WishListPage";
 import PostProductPage from "./features/ProductManagement/pages/PostProductPage";
 import OrderPage from "./features/Order/pages/OrderPage";
 import SellerProductsPage from "./features/ProductManagement/pages/SellerProductPage";
+import { ChatBox } from "./features/Chat/components/ChatBox";
+import { useAuth } from "./contexts/AuthContext";
 
 function App() {
+  const { user } = useAuth();
   return (
     <>
+      <ChatBox user={user} />
       <Router>
         <Routes>
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route element={<MainLayout />}>
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/:userId" element={<ProfilePage />} />
           </Route>
 
-          
+
           <Route element={<MainLayout />}>
             <Route path="/search" element={<SearchPage />} />
           </Route>
@@ -43,9 +47,6 @@ function App() {
           </Route>
           <Route element={<MainLayout />}>
             <Route path="/product/manage" element={<SellerProductsPage />} />
-          </Route>
-          <Route element={<MainLayout />}>
-            <Route path="/product/mage" element={<SellerProductsPage />} />
           </Route>
           <Route element={<MainLayout />}>
             <Route path="/user/wishlist" element={<WishlistPage />} />

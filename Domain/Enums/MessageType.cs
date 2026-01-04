@@ -2,7 +2,8 @@
 {
     public enum MessageType
     {
-        Text = 0,
-        System = 1
+        Text = 1,
+        File = 2,
+        System = 3
     }
 }

@@ -34,6 +34,9 @@ namespace Domain.Entities
 
         // Seller info
         public string ShippingInvoiceUrl { get; set; } = string.Empty;
+        //winner
+        public Guid? Winnerid { get; set; }
+        public AppUser? Winner { get; set; }
 
         public OrderStatus OrderStatus { get; set; } = OrderStatus.WaitingForPayment;
         // Navigation Properties
@@ -48,7 +51,7 @@ namespace Domain.Entities
         public static Product Create(
           string name,
           long? buyNowPrice,
-          bool allowAll, 
+          bool allowAll,
           bool isAutoRenewal,
           long startPrice,
           long stepPrice,
@@ -81,7 +84,7 @@ namespace Domain.Entities
             for (int i = 0; i < imagePaths.Count; i++)
             {
                 bool isMain = (i == main); // mark the main image
-                var productImage = ProductImage.Create(this, null , isMain);
+                var productImage = ProductImage.Create(this, null, isMain);
                 Images.Add(productImage);
                 createdImageIds.Add(productImage.Id);
             }
@@ -93,5 +96,61 @@ namespace Domain.Entities
         {
             this.Description += desciption;
         }
+        public void EndByBuyNow(Guid winnerId)
+        {
+            EndDate = DateTime.UtcNow;
+            Winnerid = winnerId;
+
+            AddDomainEvent(
+                new ProductEndedDomainEvent(
+                    Id,
+                    SellerId,
+                    winnerId
+                )
+            );
+        }
+        public void EndByTime()
+        {
+            AddDomainEvent(
+                new ProductEndedDomainEvent(
+                    Id,
+                    SellerId,
+                    Winnerid
+                )
+            );
+        }
+        public void BlacklistBidder(Guid bidderId)
+        {
+            AddDomainEvent(new BidderBlacklistedDomainEvent(
+                productId: Id,
+                sellerId: SellerId,
+                bidderId: bidderId));
+        }
+        public void AskQuestion(Comment comment)
+        {
+            AddDomainEvent(new BuyerAskedQuestionDomainEvent(
+                productId: comment.ProductId,
+                questionId: comment.Id,
+                buyerId: comment.UserId));
+        }
+        public void ReplyToQuestion(Comment comment)
+        {
+            AddDomainEvent(new SellerRepliedToQuestionDomainEvent(
+                productId: comment.ProductId,
+                questionId: comment.Id,
+                sellerId: SellerId));
+        }
+        public void PlaceBid(long bidPrice,Guid? PreviosBidder,Guid TopBidder)
+        {
+       
+
+            AddDomainEvent(new BidPlacedSuccessfullyDomainEvent(
+                productId: Id,
+                sellerId: SellerId,
+                newBidderId: TopBidder,
+                previousBidderId: PreviosBidder,
+                newPrice: bidPrice));
+        }
+
     }
 }

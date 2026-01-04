@@ -29,8 +29,8 @@ namespace Application.Product.Queries.GetTopSoonProducts
             var skip = (pageIndex - 1) * pageSize;
 
             var query = _productRepository.GetTopProducts()
-                .OrderBy(p => p.EndDate);
-            query = query.OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
+                .OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
+            query = query.ThenBy(p => p.EndDate );
 
             var timeForNew = await _systemSettingRepository.GetSystemSettingByKey(SystemSettingKey.NewProductTime, cancellationToken);
             var newThreshold = DateTime.UtcNow.AddMinutes(timeForNew!.SystemValue);

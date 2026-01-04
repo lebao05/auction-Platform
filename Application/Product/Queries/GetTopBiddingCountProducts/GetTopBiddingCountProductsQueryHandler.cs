@@ -22,8 +22,8 @@ namespace Application.Product.Queries.GetTopBiddingCountProducts
             CancellationToken cancellationToken)
         {
             var query = _productRepository.GetTopProducts()
-                .OrderByDescending(p => p.BiddingCount);
-            query = query.OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
+                .OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
+            query = query.ThenByDescending(p=>p.BiddingCount);
             var pageIndex = request.PageIndex < 1 ? 1 : request.PageIndex;
             var pageSize = request.PageSize < 1 ? 10 : request.PageSize;
             var skip = (pageIndex - 1) * pageSize;

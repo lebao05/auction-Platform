@@ -37,9 +37,9 @@ namespace Infraestructure.Persistence.Configurations
                 .HasForeignKey(rs => rs.MessageId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(m => m.Attachments)
+            builder.HasMany(m => m.Attachments)
                 .WithOne(a => a.Message)
-                .HasForeignKey<MessageAttachment>(a => a.MessageId)
+                .HasForeignKey(a => a.MessageId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

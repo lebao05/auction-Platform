@@ -13,6 +13,7 @@ namespace Domain.Repositories
         Task <SellerRequest?> GetSellerRequest(Guid userId, CancellationToken cancellationToken = default);
         Task <SellerRequest?> GetSellerRequestById(Guid rqId, CancellationToken cancellationToken = default);
         Task <List<SellerRequest>> GetSellerRequestsWithQuery(string[] userNames, int pageNumber, int pageSize, bool createdAtDecesding , CancellationToken cancellationToken = default);
+        IQueryable<AppUser> GetUser();
         void AddSellerRequest(SellerRequest request);
     }
 }

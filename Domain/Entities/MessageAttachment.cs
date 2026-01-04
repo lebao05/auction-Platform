@@ -12,5 +12,6 @@ namespace Domain.Entities
         public string FileName { get; set; } = null!;
         public long FileSize { get; set; }
         public FileType FileType { get; set; }
+        public string? MimeType { get; set; }
     }
 }

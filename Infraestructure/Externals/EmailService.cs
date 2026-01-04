@@ -1,11 +1,12 @@
-﻿using Infraestructure.Options;
+﻿using Application.Abstractions;
+using Infraestructure.Options;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
 namespace Infraestructure.Externals
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
         private readonly EmailSettings _settings;
 
@@ -13,7 +14,6 @@ namespace Infraestructure.Externals
         {
             _settings = options.Value;
         }
-
         public async Task SendAsync(string to, string subject, string body, bool isHtml = true)
         {
             var email = new MimeMessage();

@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions.Messaging;
 using Application.Product.Queries.GetTopBiddingCountProducts;
 using Domain.Common;
+using Domain.Entities;
 using Domain.Repositories;
 using Domain.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -37,15 +38,24 @@ namespace Application.Product.Queries.SearchProducts
             }
 
             // 4️⃣ Sắp xếp theo yêu cầu người dùng
+            IOrderedQueryable<Domain.Entities.Product> orderedQuery =
+                query.OrderByDescending(p => p.EndDate >= DateTime.UtcNow); 
             query = request.SortBy?.ToLower() switch
             {
-                "pricedecsending" => query.OrderByDescending(p => p.BiddingHistories.Select(b => b.BidAmount).FirstOrDefault() | 0),
-                "priceascsending" => query.OrderBy(p => p.BiddingHistories.Select(b => b.BidAmount).FirstOrDefault() | 0),
-                "endingsoon" => query.OrderBy(p => p.EndDate),
-                "newest" => query.OrderBy(p => p.CreatedAt),
+                "pricedecsending" => orderedQuery.ThenByDescending(p =>
+                            p.BiddingHistories.Any()
+                                ? p.BiddingHistories.Max(b => b.BidAmount)
+                                : 0
+                        ),
+                "priceascsending" => orderedQuery.ThenBy(p =>
+                            p.BiddingHistories.Any()
+                                ? p.BiddingHistories.Max(b => b.BidAmount)
+                                : 0
+                        ),
+                "endingsoon" => orderedQuery.ThenBy(p => p.EndDate),
+                "newest" => orderedQuery.ThenByDescending(p => p.CreatedAt),
                 _ => query // default: do nothing, leave ordering as-is
             };
-            query = query.OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
             query = query
                 .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize);

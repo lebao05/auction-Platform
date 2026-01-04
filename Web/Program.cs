@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Presentation;
+using Presentation.SignalR;
 using Serilog;
 using System.Text;
 
@@ -22,11 +23,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings")
+);
+
 // Configure MediatR and Pipeline Behaviors
 builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
 
 // Outbox processor
 builder.Services.AddHostedService<OutboxProcessor>();
+
+
+//ProductEnd backgournd service
+builder.Services.AddHostedService<ProductExpirationBackgroundService>();
 
 
 var ClientUrl = builder.Configuration["ClientUrl"];
@@ -204,5 +213,5 @@ app.Use(async (context, next) =>
 app.UseAuthorization();
 app.MapStaticAssets(); // if you have static assets
 app.MapControllers();   // map API controllers
-
+app.MapHub<ChatHub>("hubs/chat");
 app.Run();

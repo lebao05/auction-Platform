@@ -80,6 +80,9 @@ namespace Infraestructure.Persistence.Repositories
         {
             return await _context.Users.Include(u => u.SellerRequests).FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         }
-
+        public IQueryable<AppUser> GetUser()
+        {
+            return _context.Users.AsQueryable();
+        }
     }
 }

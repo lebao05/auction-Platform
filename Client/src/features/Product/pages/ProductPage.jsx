@@ -13,7 +13,7 @@ import {
     CheckCircle2,
     XCircle
 } from "lucide-react";
-
+import { motion, AnimatePresence } from "framer-motion"; // Import thêm cái này
 import { Button } from "../../../components/ui/Button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/Tabs";
 import { Card } from "../../../components/ui/Card";
@@ -79,31 +79,33 @@ export default function ProductPage() {
         error,
         addToBlacklist,
         removeFromBlacklist,
+        biddingHistories,
         // biddingHistories, // Đã có trong product object
         blackList,
         addDescription,
         addComment,
         placeBid, editComment,
+        relatedProducts,
+        hasMoreRelated,
+        loadMoreRelated
     } = useProductDetails(productId);
-
     const navigate = useNavigate();
     const [showFullDesc, setShowFullDesc] = useState(false);
     const { user } = useAuth();
     const { likedProducts, deleteFromWatchList, addToWatchList } = useWatchList();
-    console.log(product);
     const isLiked = product ? likedProducts.some(lp => lp.productId === product.id && !lp.isDeleted) : false;
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+    
     // State cho việc Bid
     const [bidAmount, setBidAmount] = useState(0);
     const [showBuyNowConfirm, setShowBuyNowConfirm] = useState(false);
     const [pendingBid, setPendingBid] = useState(null);
-
+    
     // State cho description
     const [extraDescription, setExtraDescription] = useState("");
     const [savingDesc, setSavingDesc] = useState(false);
     const [showEditor, setShowEditor] = useState(false);
-
+    
     // Set giá trị mặc định cho ô Bid khi load xong product
     useEffect(() => {
         if (product) {
@@ -111,20 +113,21 @@ export default function ProductPage() {
             setBidAmount(highestBid);
         }
     }, [product]);
-
+    
     if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
     if (loading || !product) return <Spinner />;
-
+    
     const images = product.images?.map(img => img.imageUrl) ?? [];
     const auctionEnded = convertUTCToLocal(product.endDate) < new Date();
     const isSeller = user?.userId === product.sellerId;
     const canBid = user && !blackList.some(bl => bl.bidderId === user.id) && user.id !== product.sellerId && !auctionEnded;
-
+    
     // Check xem user hiện tại có phải top bidder không
     const isTopBidder = user && product.topBidding && product.topBidding.userId === user.userId;
     const prevImage = () => setCurrentImageIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
     const nextImage = () => setCurrentImageIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
-
+    
+    if( product == null ) return;
     const handleRemoveFromBlacklist = async ({ blacklistId }) => {
         try {
             await removeFromBlacklist({ blacklistId });
@@ -237,6 +240,7 @@ export default function ProductPage() {
                             auctionEnded={auctionEnded}
                             isWinner={isTopBidder}
                             isSeller={isSeller}
+                            topBidding={product.topBidding}
                         />
                     </div>
                 )}
@@ -245,40 +249,48 @@ export default function ProductPage() {
                     {/* ---------------- LEFT COLUMN: IMAGES (7 cols) ---------------- */}
                     <div className="lg:col-span-7 space-y-4">
                         <div className="relative aspect-[4/3] w-full bg-muted rounded-xl overflow-hidden border border-border shadow-sm group">
-                            <img
-                                src={images[currentImageIndex] || Unknow}
-                                alt="Product Main"
-                                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                            />
+                            {/* Bọc ảnh bằng AnimatePresence để xử lý hiệu ứng khi component biến mất/xuất hiện */}
+                            <AnimatePresence mode="wait">
+                                <motion.img
+                                    key={currentImageIndex} // Key cực kỳ quan trọng để Framer Motion nhận biết ảnh đã đổi
+                                    src={images[currentImageIndex] || Unknow}
+                                    alt="Product Main"
+                                    initial={{ opacity: 0, x: 10 }} // Bắt đầu: mờ và hơi lệch phải
+                                    animate={{ opacity: 1, x: 0 }}  // Hiện lên: rõ nét và về vị trí cũ
+                                    exit={{ opacity: 0, x: -10 }}   // Thoát ra: mờ dần và lệch trái
+                                    transition={{ duration: 0.3 }}   // Thời gian chuyển (0.3 giây)
+                                    className="absolute inset-0 object-cover w-full h-full"
+                                />
+                            </AnimatePresence>
 
                             {/* Navigation Arrows */}
                             {images.length > 1 && (
                                 <>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+                                        className="absolute cursor-pointer left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
                                     >
                                         <ChevronLeft className="w-6 h-6" />
                                     </button>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+                                        className="absolute cursor-pointer right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-md backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
                                     >
                                         <ChevronRight className="w-6 h-6" />
                                     </button>
                                 </>
                             )}
 
-                            {/* Wishlist Button */}
+                            {/* Wishlist Button - Thêm z-10 để không bị ảnh đè lên khi animation */}
                             <button
                                 onClick={() => isLiked ? deleteFromWatchList({ productId: product.id }) : addToWatchList({ productId: product.id })}
-                                className="absolute top-4 right-4 p-2 rounded-full bg-white/90 shadow-sm hover:bg-white transition-all"
+                                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 shadow-sm hover:bg-white transition-all"
                             >
                                 <Heart className={`h-6 w-6 ${isLiked ? "text-red-500 fill-red-500" : "text-gray-400"}`} />
                             </button>
                         </div>
 
-                        {/* Thumbnails */}
+                        {/* Thumbnails (Giữ nguyên hoặc thêm motion cho đẹp) */}
                         {images.length > 1 && (
                             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                                 {images.map((img, index) => (
@@ -293,24 +305,7 @@ export default function ProductPage() {
                                 ))}
                             </div>
                         )}
-
-                        {/* Desktop Description (Left side) */}
-                        <div className="hidden lg:block mt-8">
-                            <DescriptionSection
-                                description={product.description}
-                                showFullDesc={showFullDesc}
-                                setShowFullDesc={setShowFullDesc}
-                                isSeller={isSeller}
-                                showEditor={showEditor}
-                                setShowEditor={setShowEditor}
-                                extraDescription={extraDescription}
-                                setExtraDescription={setExtraDescription}
-                                handleAddDescription={handleAddDescription}
-                                savingDesc={savingDesc}
-                            />
-                        </div>
                     </div>
-
                     {/* ---------------- RIGHT COLUMN: INFO & BIDDING (5 cols) ---------------- */}
                     <div className="lg:col-span-5 space-y-6">
                         {/* Header Info */}
@@ -517,14 +512,14 @@ export default function ProductPage() {
                         <div className="border-b border-gray-200 px-6 pt-4">
                             <TabsList className="bg-transparent gap-6 p-0 h-auto">
                                 <TabsTrigger value="bids" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-3 text-gray-500 data-[state=active]:text-primary text-base">
-                                    Lịch sử đấu giá ({product.biddingCount})
+                                    Lịch sử đấu giá
                                 </TabsTrigger>
                                 <TabsTrigger value="qna" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-3 text-gray-500 data-[state=active]:text-primary text-base">
                                     Hỏi đáp & Bình luận
                                 </TabsTrigger>
                                 {isSeller && (
                                     <TabsTrigger value="blacklist" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-red-500 rounded-none px-0 pb-3 text-gray-500 data-[state=active]:text-red-600 text-base">
-                                        Danh sách chặn ({blackList.length})
+                                        Danh sách chặn
                                     </TabsTrigger>
                                 )}
                             </TabsList>
@@ -532,7 +527,7 @@ export default function ProductPage() {
 
                         <div className="p-6 bg-gray-50 min-h-[300px]">
                             <TabsContent value="bids" className="mt-0">
-                                <BidHistory bids={product.biddingHistories || []} handleAddToBlackList={handleAddToBlackList} isSeller={isSeller} />
+                                <BidHistory bids={biddingHistories || []} handleAddToBlackList={handleAddToBlackList} isSeller={isSeller} />
                             </TabsContent>
 
                             <TabsContent value="qna" className="mt-0">
@@ -552,7 +547,10 @@ export default function ProductPage() {
                 {/* Related Products */}
                 <div className="mt-16">
                     <h2 className="text-2xl font-bold mb-6">Sản phẩm tương tự</h2>
-                    <RelatedProducts categoryId={product.categoryId} currentProductId={product.id} />
+                    <RelatedProducts categoryId={product.categoryId} currentProductId={product.id}
+                        products={relatedProducts}
+                        hasMoreRelated={hasMoreRelated}
+                        loadMoreRelated={loadMoreRelated} />
                 </div>
             </div>
 

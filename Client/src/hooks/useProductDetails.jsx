@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { addCommentApi, addDescriptionApi, addToBlackListApi, deleteFromBlackListApi, editCommentApi, getProductDetailsApi, placeBidApi } from "../services/product.service";
+import { addCommentApi, addDescriptionApi, addToBlackListApi, deleteFromBlackListApi, editCommentApi, getProductDetailsApi, placeBidApi, searchProductsApi } from "../services/product.service";
 
 export function useProductDetails(productId) {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    const [pageIndex, setPageIndex] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [relatedProducts, setRelatedProducts] = useState([]);
     const [bidLoading, setBidLoading] = useState(false);
     const [bidError, setBidError] = useState(null);
     const [biddingHistories, setBiddingHistories] = useState([]);
@@ -44,6 +46,7 @@ export function useProductDetails(productId) {
             try {
                 const result = await placeBidApi({ productId, maxBidAmount });
                 const data = await getProductDetailsApi({ productId });
+                setBiddingHistories(data.biddingHistories);
                 setProduct(data);
                 return result;
             } catch (err) {
@@ -77,6 +80,7 @@ export function useProductDetails(productId) {
             try {
                 const result = await deleteFromBlackListApi({ blacklistId });
                 const data = await getProductDetailsApi({ productId });
+                setProduct(data);
                 setBiddingHistories(data.biddingHistories);
                 setBlackList(data.blackList);
             } catch (err) {
@@ -151,6 +155,45 @@ export function useProductDetails(productId) {
             throw err;
         }
     }, []);
+    const fetchRelatedProducts = useCallback(async () => {
+        if (!product || !hasMore) return;
+        console.log(product);
+        try {
+            const result = await searchProductsApi({
+                categoryId: product.categoryId,    // same category
+                pageIndex,
+            });
+
+            if (!result || result.length === 0) {
+                setHasMore(false);
+                return;
+            }
+
+            setRelatedProducts(prev => {
+                // avoid duplicate products
+                const existingIds = new Set(prev.map(p => p.id));
+                const filtered = result.filter(p => p.id !== product.id && !existingIds.has(p.id));
+                return [...prev, ...filtered];
+            });
+        } catch (err) {
+            console.error("Failed to load related products", err);
+        }
+    }, [product, pageIndex, hasMore]);
+    useEffect(() => {
+        if (!product) return;
+
+        setRelatedProducts([]);
+        setPageIndex(1);
+        setHasMore(true);
+    }, [product?.id]);
+    useEffect(() => {
+        fetchRelatedProducts();
+    }, [fetchRelatedProducts]);
+    const loadMoreRelated = () => {
+        if (hasMore) {
+            setPageIndex(prev => prev + 1);
+        }
+    };
     return {
         product,
         loading,
@@ -164,6 +207,10 @@ export function useProductDetails(productId) {
         biddingHistories,
         addDescription,
         editComment,
-        addComment
+        addComment,
+
+        relatedProducts,
+        hasMoreRelated: hasMore,
+        loadMoreRelated
     };
 }

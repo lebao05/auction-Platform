@@ -16,6 +16,9 @@ namespace Domain.Entities
         public bool IsDeleted { get; set; }
 
         public List<MessageReadStatus> ReadStatuses { get; set; } = new();
-        public MessageAttachment Attachments { get; set; } = new();
+        public List<MessageAttachment> Attachments { get; set; } = new();
+        public bool HasAttachments() => Attachments.Any();
+        public bool IsReadBy(Guid userId) => ReadStatuses.Any(rs => rs.UserId == userId && rs.ReadAt != null);
+
     }
 }

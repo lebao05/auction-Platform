@@ -9,8 +9,11 @@ using Application.Product.Commands.PlaceBid;
 using Application.Product.Commands.UpdateComment;
 using Application.Product.Queries.GetProductDetails;
 using Application.Product.Queries.GetProductsForSeller;
+using Application.Product.Queries.GetProductsOfAUser;
+using Application.Product.Queries.GetRatings;
 using Application.Product.Queries.GetTopBiddingCountProducts;
 using Application.Product.Queries.GetTopSoonProducts;
+using Application.Product.Queries.GetTopValueProducts;
 using Application.Product.Queries.GetWachtList;
 using Application.Product.Queries.SearchProducts;
 using Domain.Shared;
@@ -83,7 +86,7 @@ namespace Presentation.Controllers
 
             return Ok(result.Value);
         }
-        [Authorize(Roles =("Seller"))]
+        [Authorize(Roles = ("Seller"))]
         [HttpGet("seller")]
         public async Task<IActionResult> GetProductsForSeller(CancellationToken cancellationToken)
         {
@@ -91,7 +94,7 @@ namespace Presentation.Controllers
             var query = new GetProductsForSellerQuery(Guid.Parse(userId));
             var result = await _sender.Send(query, cancellationToken);
 
-            if( result.IsFailure )
+            if (result.IsFailure)
                 return HandleFailure(result);
             return Ok(result.Value);
         }
@@ -101,12 +104,12 @@ namespace Presentation.Controllers
             var userId = ClaimsPrincipalExtensions.GetUserId(User);
             var query = new GetProductDetailsQuery(userId == string.Empty ? null : Guid.Parse(userId), productId);
             var result = await _sender.Send(query, cancellationToken);
-            if( result.IsFailure )
-                return HandleFailure(result);   
+            if (result.IsFailure)
+                return HandleFailure(result);
             return Ok(result.Value);
         }
         [HttpPost("place/{productId}")]
-        public async Task<IActionResult> PlaceBid([FromRoute] Guid productId, [FromBody] PlaceBidRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> PlaceBid([FromRoute] Guid productId, [FromBody] PlaceBidRequest request, CancellationToken cancellationToken)
         {
             var userid = ClaimsPrincipalExtensions.GetUserId(User);
             var command = new PlaceBidCommand(Guid.Parse(userid), productId, request.MaxBidAmount);
@@ -118,7 +121,7 @@ namespace Presentation.Controllers
         [HttpPost("blacklist")]
         [Authorize]
         public async Task<IActionResult> AddToBlackList([FromBody] AddToBlackListRequest request
-            ,CancellationToken cancellationToken)
+            , CancellationToken cancellationToken)
         {
             var userId = ClaimsPrincipalExtensions.GetUserId(User);
             var command = new AddToBlackListCommand(Guid.Parse(userId), request.BidderId, request.ProductId);
@@ -129,19 +132,19 @@ namespace Presentation.Controllers
         }
         [HttpDelete("blacklist/{blacklistId}")]
         [Authorize]
-        public async Task<IActionResult> DeleteFromBLackList([FromRoute] Guid blacklistId,CancellationToken 
+        public async Task<IActionResult> DeleteFromBLackList([FromRoute] Guid blacklistId, CancellationToken
             cancellationToken)
         {
             var userId = ClaimsPrincipalExtensions.GetUserId(User);
             var command = new DeleteFromBlackListCommand(blacklistId, Guid.Parse(userId));
             var result = await _sender.Send(command, cancellationToken);
-            if( result.IsFailure)
+            if (result.IsFailure)
                 return HandleFailure(result);
             return Ok();
         }
         [HttpPost("watchlist/{productId}")]
         [Authorize]
-        public async Task<IActionResult> AddToWatchList([FromRoute] Guid productId,CancellationToken cancellationToken)
+        public async Task<IActionResult> AddToWatchList([FromRoute] Guid productId, CancellationToken cancellationToken)
         {
             var userId = ClaimsPrincipalExtensions.GetUserId(User);
             var command = new AddToWatchListCommand(Guid.Parse(userId), productId);
@@ -155,7 +158,7 @@ namespace Presentation.Controllers
         public async Task<IActionResult> DeleteItemFromWatchList([FromRoute] Guid id, CancellationToken cancellationToken)
         {
             var userId = ClaimsPrincipalExtensions.GetUserId(User);
-            var command = new DeleteFromWatchListCommand(Guid.Parse(userId),id);
+            var command = new DeleteFromWatchListCommand(Guid.Parse(userId), id);
             var result = await _sender.Send(command, cancellationToken);
             if (result.IsFailure)
                 return HandleFailure(result);
@@ -177,7 +180,7 @@ namespace Presentation.Controllers
         public async Task<IActionResult> AddDescription([FromBody] AddDescriptionRequest request, CancellationToken cancellationToken)
         {
             var userId = ClaimsPrincipalExtensions.GetUserId(User);
-            var command = new AddDescriptionCommand(Guid.Parse(userId),request.productId,request.description);
+            var command = new AddDescriptionCommand(Guid.Parse(userId), request.productId, request.description);
             var result = await _sender.Send(command, cancellationToken);
             if (result.IsFailure)
                 return HandleFailure(result);
@@ -219,10 +222,10 @@ namespace Presentation.Controllers
         }
         [HttpGet("top-value")]
         public async Task<IActionResult> GetTopBiddingProducts(
-            [FromQuery] int pageIndex = 1,CancellationToken cancellationToken = default)
+            [FromQuery] int pageIndex = 1, CancellationToken cancellationToken = default)
         {
             int pageSize = 8;
-            var query = new GetTopBiddingCountProductsQuery(pageIndex, pageSize);
+            var query = new GetTopValueProductsQuery(pageIndex, pageSize);
 
             Result<List<GetTopProductsDto>> result = await _sender.Send(query);
 
@@ -259,7 +262,7 @@ namespace Presentation.Controllers
         }
         [Authorize]
         [HttpPost("comment")]
-        public async Task<IActionResult> PostComment([FromBody] AddCommentRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> PostComment([FromBody] AddCommentRequest request, CancellationToken cancellationToken)
         {
             var userId = ClaimsPrincipalExtensions.GetUserId(User);
             var command = new AddCommentCommand(Guid.Parse(userId), request.ParentId, request.ProductId, request.Content);
@@ -280,6 +283,26 @@ namespace Presentation.Controllers
             if (result.IsFailure)
                 return HandleFailure(result);
             return Ok();
+        }
+        [HttpGet("products-user/{UserId}")]
+        public async Task<IActionResult> GetProductsUser([FromRoute] Guid UserId, CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var query = new GetProductOfAUserQuery(userId != "" ? Guid.Parse(userId) : null, UserId);
+            var result = await _sender.Send(query, cancellationToken);
+            if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok(result.Value);
+        }
+        [HttpGet("rating/user/{UserId}")]
+        public async Task<IActionResult> GetRatingsOfAUser([FromRoute] Guid UserId, CancellationToken cancellationToken)
+        {
+            var userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var query = new GetRatingsQuery(UserId, userId != "" ? Guid.Parse(userId) : null);
+            var result = await _sender.Send(query, cancellationToken);
+            if (result.IsFailure)
+                return HandleFailure(result);
+            return Ok(result.Value);
         }
     }
 }

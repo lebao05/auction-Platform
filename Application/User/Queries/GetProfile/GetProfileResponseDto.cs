@@ -12,8 +12,5 @@
 
         public DateTime? DateOfBirth { get; set; }
         public DateTime CreatedAt { get; set; }
-
-        public int TotalRatingsReceived { get; set; } = 0;
-        public double AverageRating { get; set; } = 0.0;
     }
 }

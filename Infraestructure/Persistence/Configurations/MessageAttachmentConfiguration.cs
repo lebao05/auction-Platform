@@ -27,11 +27,6 @@ namespace Infraestructure.Persistence.Configurations
                    .HasConversion<int>()
                    .IsRequired()
                    .HasMaxLength(20);
-
-            builder.HasOne(a => a.Message)
-                .WithOne(m => m.Attachments)
-                .HasForeignKey<MessageAttachment>(a => a.MessageId)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

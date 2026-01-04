@@ -23,14 +23,12 @@ namespace Application.Product.Queries.GetTopValueProducts
         {
             // Get base query from repository
             var query = _productRepository.GetTopProducts()
-                // Order by highest bid in BiddingHistories
-                .OrderByDescending(p => p.BiddingHistories
-                    .OrderByDescending(b => b.BidAmount)
-                    .ThenBy(b => b.CreatedAt)
-                    .Select(b => (long?)b.BidAmount)
-                    .FirstOrDefault()
-                );
-            query = query.OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
+                .OrderByDescending(p => p.EndDate >= DateTime.UtcNow)
+                    .ThenByDescending(p =>
+                            p.BiddingHistories.Any()
+                                ? p.BiddingHistories.Max(b => b.BidAmount)
+                                : 0
+                        );
             var pageIndex = request.PageIndex < 1 ? 1 : request.PageIndex;
             var pageSize = request.PageSize < 1 ? 8 : request.PageSize;
             var skip = (pageIndex - 1) * pageSize;

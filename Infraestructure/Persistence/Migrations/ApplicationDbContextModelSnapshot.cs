@@ -57,6 +57,12 @@ namespace Infraestructure.Persistence.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("ForgotPasswordOtpExpiredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ForgotPasswordOtpHash")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -278,6 +284,9 @@ namespace Infraestructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -288,6 +297,8 @@ namespace Infraestructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
 
                     b.HasIndex("CreatedByUserId");
 
@@ -362,6 +373,9 @@ namespace Infraestructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Content")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
@@ -387,6 +401,8 @@ namespace Infraestructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
 
                     b.HasIndex("ConversationId");
 
@@ -424,13 +440,15 @@ namespace Infraestructure.Persistence.Migrations
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("MimeType")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MessageId")
-                        .IsUnique();
+                    b.HasIndex("MessageId");
 
                     b.ToTable("MessageAttachments", (string)null);
                 });
@@ -439,6 +457,9 @@ namespace Infraestructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AppUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -457,6 +478,8 @@ namespace Infraestructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
 
                     b.HasIndex("MessageId");
 
@@ -543,11 +566,16 @@ namespace Infraestructure.Persistence.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("Winnerid")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("SellerId");
+
+                    b.HasIndex("Winnerid");
 
                     b.ToTable("Products", (string)null);
                 });
@@ -1014,6 +1042,10 @@ namespace Infraestructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Conversation", b =>
                 {
+                    b.HasOne("Domain.Entities.AppUser", null)
+                        .WithMany("CreatedConversations")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("Domain.Entities.AppUser", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
@@ -1055,6 +1087,10 @@ namespace Infraestructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Message", b =>
                 {
+                    b.HasOne("Domain.Entities.AppUser", null)
+                        .WithMany("SentMessages")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("Domain.Entities.Conversation", "Conversation")
                         .WithMany("Messages")
                         .HasForeignKey("ConversationId")
@@ -1075,8 +1111,8 @@ namespace Infraestructure.Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.MessageAttachment", b =>
                 {
                     b.HasOne("Domain.Entities.Message", "Message")
-                        .WithOne("Attachments")
-                        .HasForeignKey("Domain.Entities.MessageAttachment", "MessageId")
+                        .WithMany("Attachments")
+                        .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1085,6 +1121,10 @@ namespace Infraestructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.MessageReadStatus", b =>
                 {
+                    b.HasOne("Domain.Entities.AppUser", null)
+                        .WithMany("MessageReadStatuses")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("Domain.Entities.Message", "Message")
                         .WithMany("ReadStatuses")
                         .HasForeignKey("MessageId")
@@ -1115,9 +1155,16 @@ namespace Infraestructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.AppUser", "Winner")
+                        .WithMany("ProductsWon")
+                        .HasForeignKey("Winnerid")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Category");
 
                     b.Navigation("Seller");
+
+                    b.Navigation("Winner");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductImage", b =>
@@ -1247,13 +1294,21 @@ namespace Infraestructure.Persistence.Migrations
 
                     b.Navigation("ConversationParticipants");
 
+                    b.Navigation("CreatedConversations");
+
+                    b.Navigation("MessageReadStatuses");
+
                     b.Navigation("ProductsAsSeller");
+
+                    b.Navigation("ProductsWon");
 
                     b.Navigation("RatingsGiven");
 
                     b.Navigation("RatingsReceived");
 
                     b.Navigation("SellerRequests");
+
+                    b.Navigation("SentMessages");
 
                     b.Navigation("Watchlists");
                 });
@@ -1279,8 +1334,7 @@ namespace Infraestructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Message", b =>
                 {
-                    b.Navigation("Attachments")
-                        .IsRequired();
+                    b.Navigation("Attachments");
 
                     b.Navigation("ReadStatuses");
                 });

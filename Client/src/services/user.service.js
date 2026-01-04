@@ -5,6 +5,10 @@ export async function getUserProfileApi() {
     return response.data;
 }
 
+export async function getProfileOfAUserApi({ userId }) {
+    const response = await axios.get(`/user/${userId}`);
+    return response.data;
+}
 export async function updateUserProfileApi({ fullName, dateOfBirth, phoneNumber, address, email }) {
     const response = await axios.put("/user", { fullName, dateOfBirth, phoneNumber, address, email });
     return response.data;
