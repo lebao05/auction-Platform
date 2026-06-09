@@ -7,9 +7,12 @@ namespace Application.User.Queries.GetProfile
     public class GetProfileCommandHandler : ICommandHandler<GetProfileCommand, GetProfileResponseDto?>
     {
         private readonly IUserRepository _userRepository;
-        public GetProfileCommandHandler(IUserRepository userRepostory)
+        private readonly IProductRepository _productRepository;
+        public GetProfileCommandHandler(IUserRepository userRepostory,
+            IProductRepository productRepository    )
         {
             _userRepository = userRepostory;
+            _productRepository = productRepository;
         }
         public async Task<Result<GetProfileResponseDto?>> Handle(GetProfileCommand request, CancellationToken cancellationToken)
         {
@@ -18,6 +21,7 @@ namespace Application.User.Queries.GetProfile
             {
                 return Result.Failure<GetProfileResponseDto?>(new Domain.Shared.Error("User.NotFound", "User not found."));
             }
+            var averageRating = await _productRepository.GetUserRatingPercentAsync(user.Id, cancellationToken);
             var responseDtoNoRatings = new GetProfileResponseDto
             {
                 UserId = user.Id,
@@ -26,6 +30,7 @@ namespace Application.User.Queries.GetProfile
                 Address = user.Address,
                 PhoneNumber = user.PhoneNumber,
                 DateOfBirth = user.DateOfBirth,
+                AverageRating = averageRating,
             };
             return Result.Success<GetProfileResponseDto?>(responseDtoNoRatings);
         }

@@ -9,8 +9,8 @@ import { useSearchProducts } from "../../../hooks/useSearchProducts";
 const SORT_OPTIONS = [
   { value: "newest", label: "Mới nhất" },
   { value: "endingSoon", label: "Sắp kết thúc" },
-  { value: "priceAsc", label: "Giá tăng dần" },
-  { value: "priceDesc", label: "Giá giảm dần" },
+  { value: "priceascsending", label: "Giá tăng dần" },
+  { value: "pricedecsending", label: "Giá giảm dần" },
 ];
 
 /* ================= COMPONENT ================= */

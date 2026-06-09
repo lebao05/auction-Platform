@@ -4,5 +4,6 @@
     string fullname,
     string email,
     string password,
-    string address);
+    string address,
+    string recaptchaToken);
 }

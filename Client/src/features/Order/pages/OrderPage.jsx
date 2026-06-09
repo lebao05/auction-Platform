@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom"; // Thêm Link
+import { useParams, Link, useNavigate } from "react-router-dom"; // Thêm Link
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/Card";
 import { useOrder } from "../../../hooks/useOrder";
 import { useAuth } from "../../../contexts/AuthContext";
 import Spinner from "../../../components/ui/Spinner";
-
+import { toast } from "react-toastify";
 // ============================================
 // CONSTANTS & ENUMS
 // ============================================
@@ -109,10 +109,10 @@ export default function OrderPage() {
 
                         {/* --- CONDITIONAL RENDERING FOR CANCELLED STATE --- */}
                         {isCancelled ? (
-                            <CancelledOrderView 
-                                isSeller={isSeller} 
-                                order={order} 
-                                partnerName={partnerName} 
+                            <CancelledOrderView
+                                isSeller={isSeller}
+                                order={order}
+                                partnerName={partnerName}
                             />
                         ) : (
                             // --- NORMAL FLOW (Active Order) ---
@@ -205,7 +205,7 @@ export default function OrderPage() {
                                 Hủy đơn hàng
                             </button>
                         )}
-                        <OrderSidebar order={order} />
+                        <OrderSidebar isSeller={isSeller} order={order} />
                     </div>
                 </div>
             </div>
@@ -244,9 +244,9 @@ function CancelledOrderView({ isSeller, order, partnerName }) {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </div>
-                    
+
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Đơn hàng đã bị hủy</h2>
-                    
+
                     <p className="text-gray-600 max-w-lg mx-auto mb-6">
                         {isSeller ? (
                             <span>Bạn đã hủy đơn hàng này vào lúc <span className="font-medium text-gray-900"></span>. Giao dịch đã được đóng lại.</span>
@@ -256,7 +256,7 @@ function CancelledOrderView({ isSeller, order, partnerName }) {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md justify-center">
-                         <Link to="/" className="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                        <Link to="/" className="inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                             Tìm sản phẩm khác
                         </Link>
                         {!isSeller && (
@@ -304,14 +304,14 @@ function PaymentSection({ isSeller, order, onBuyerSubmit, onSellerConfirm, isAct
     const [formData, setFormData] = useState({ address: order.shippingAddress || "", phone: order.shippingPhone || "" });
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(order.paymentInvoiceUrl);
-    
+
     // TRẠNG THÁI LOADING MỚI
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    console.log(order);
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!file && !preview) return alert("Vui lòng chọn ảnh chuyển khoản");
-        
+
         setIsSubmitting(true); // Bắt đầu loading
         try {
             await onBuyerSubmit({ address: formData.address, phoneNumber: formData.phone, paymentImage: file });
@@ -322,14 +322,24 @@ function PaymentSection({ isSeller, order, onBuyerSubmit, onSellerConfirm, isAct
             setIsSubmitting(false); // Kết thúc loading dù thành công hay thất bại
         }
     };
-
     // ... (Phần hiển thị hasData giữ nguyên code cũ)
+    if (!hasData && isSeller) {
+        return (
+
+            <div className="space-y-4">
+                <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed">
+                    <p className="text-gray-500">Đang chờ người mua gửi thông tin thanh toán...</p>
+                </div>
+            </div>
+        )
+    }
     if (hasData && !canEdit) {
         // Copy lại phần code hiển thị hasData cũ của bạn ở đây...
         return (
             <div className="space-y-4">
-                 {/* ...Code cũ hiển thị thông tin... */}
-                 <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded border">
+                {/* ...Code cũ hiển thị thông tin... */}
+
+                <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded border">
                     <div><span className="text-gray-500 text-xs font-bold block mb-1">ĐỊA CHỈ GIAO HÀNG</span><p className="font-medium text-gray-900">{order.shippingAddress}</p></div>
                     <div><span className="text-gray-500 text-xs font-bold block mb-1">SỐ ĐIỆN THOẠI</span><p className="font-medium text-gray-900">{order.shippingPhone}</p></div>
                 </div>
@@ -355,41 +365,40 @@ function PaymentSection({ isSeller, order, onBuyerSubmit, onSellerConfirm, isAct
             </div>
         );
     }
-
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                     <label className="text-xs font-bold text-gray-500">Địa chỉ nhận hàng</label>
-                    <input 
-                        placeholder="VD: 123 Đường Lê Lợi..." 
-                        value={formData.address} 
-                        onChange={e => setFormData({ ...formData, address: e.target.value })} 
-                        className="p-3 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:bg-gray-100" 
-                        required 
+                    <input
+                        placeholder="VD: 123 Đường Lê Lợi..."
+                        value={formData.address}
+                        onChange={e => setFormData({ ...formData, address: e.target.value })}
+                        className="p-3 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:bg-gray-100"
+                        required
                         disabled={isSubmitting} // Disable khi đang gửi
                     />
                 </div>
                 <div className="space-y-1">
                     <label className="text-xs font-bold text-gray-500">Số điện thoại</label>
-                    <input 
-                        placeholder="VD: 0912..." 
-                        value={formData.phone} 
-                        onChange={e => setFormData({ ...formData, phone: e.target.value })} 
-                        className="p-3 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:bg-gray-100" 
-                        required 
+                    <input
+                        placeholder="VD: 0912..."
+                        value={formData.phone}
+                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                        className="p-3 border rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:bg-gray-100"
+                        required
                         disabled={isSubmitting}
                     />
                 </div>
             </div>
             <div className="space-y-1">
-                 <label className="text-xs font-bold text-gray-500">Ảnh chụp màn hình chuyển khoản</label>
+                <label className="text-xs font-bold text-gray-500">Ảnh chụp màn hình chuyển khoản</label>
                 <div className={`border-2 border-dashed border-gray-300 p-6 rounded-lg text-center cursor-pointer relative transition-all group ${isSubmitting ? 'bg-gray-50 opacity-50 cursor-not-allowed' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
-                    <input 
-                        type="file" 
+                    <input
+                        type="file"
                         disabled={isSubmitting}
-                        onChange={(e) => { const f = e.target.files[0]; if (f) { setFile(f); setPreview(URL.createObjectURL(f)); } }} 
-                        className="absolute inset-0 opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed" 
+                        onChange={(e) => { const f = e.target.files[0]; if (f) { setFile(f); setPreview(URL.createObjectURL(f)); } }}
+                        className="absolute inset-0 opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
                     />
                     {preview ? (
                         <div className="relative z-0">
@@ -405,10 +414,10 @@ function PaymentSection({ isSeller, order, onBuyerSubmit, onSellerConfirm, isAct
                     )}
                 </div>
             </div>
-            
+
             {/* NÚT SUBMIT VỚI LOADING SPINNER */}
-            <button 
-                type="submit" 
+            <button
+                type="submit"
                 disabled={isSubmitting}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
@@ -458,7 +467,7 @@ function ShippingSection({ isSeller, order, onSellerUpload, isActive }) {
     if (!isSeller) return (
         <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
             <p className="text-gray-400 italic mb-2">Người bán đang chuẩn bị hàng và sẽ sớm cập nhật vận đơn...</p>
-             <svg className="w-10 h-10 text-gray-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+            <svg className="w-10 h-10 text-gray-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
         </div>
     );
 
@@ -499,10 +508,10 @@ function ReceivingSection({ isSeller, isCompleted, onConfirmReceive }) {
 
     if (isSeller) {
         return (
-             <div className="text-center py-6 bg-gray-50 rounded-lg">
+            <div className="text-center py-6 bg-gray-50 rounded-lg">
                 <p className="text-gray-500 font-medium">Đang chờ người mua xác nhận...</p>
                 <p className="text-xs text-gray-400 mt-1">Trạng thái sẽ tự động cập nhật khi người mua xác nhận.</p>
-             </div>
+            </div>
         );
     }
 
@@ -624,7 +633,7 @@ function OrderStepper({ steps, activeStepIndex, isCancelled }) {
                 if (isCancelled) {
                     // Nếu cancelled, tất cả các bước đã qua vẫn xanh, bước hiện tại thành đỏ (hoặc tất cả đỏ tùy logic)
                     // Ở đây để đơn giản: Xám hết, chỉ hiển thị trạng thái Cancelled ở UI chính
-                    circleClass = 'bg-red-100 border-red-500 text-red-500'; 
+                    circleClass = 'bg-red-100 border-red-500 text-red-500';
                 } else if (isCompleted || isCurrent) {
                     circleClass = 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-200';
                 }
@@ -645,7 +654,8 @@ function OrderStepper({ steps, activeStepIndex, isCancelled }) {
 }
 
 // 6. Sidebar
-function OrderSidebar({ order }) {
+function OrderSidebar({ order, isSeller }) {
+    const navigate = useNavigate();
     return (
         <Card className="shadow-sm sticky top-4 border-0 overflow-hidden">
             <div className="aspect-square w-full bg-gray-100 relative group">
@@ -655,16 +665,50 @@ function OrderSidebar({ order }) {
             <CardContent className="p-5">
                 <h3 className="font-bold text-gray-900 line-clamp-2 text-lg mb-2">{order.productName}</h3>
                 <p className="text-2xl font-bold text-blue-600 mb-4">{order.finalPrice?.toLocaleString()} đ</p>
-                
-                <div className="pt-4 border-t flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center font-bold text-gray-600 text-lg border shadow-sm">
-                        {order.sellerName?.charAt(0).toUpperCase()}
+                {
+                    !isSeller &&
+                    <div className="pt-4 border-t flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center font-bold text-gray-600 text-lg border shadow-sm">
+                            {order.sellerName?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="text-sm">
+                            <p className="text-gray-400 text-xs uppercase tracking-wider font-bold">Người bán</p>
+                            <p
+                                className="font-bold text-gray-900"
+                            >
+                                <a
+                                    href={`/profile/${order.sellerId}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:underline"
+                                >
+                                    {order.sellerName}
+                                </a>
+                            </p></div>
                     </div>
-                    <div className="text-sm">
-                        <p className="text-gray-400 text-xs uppercase tracking-wider font-bold">Người bán</p>
-                        <p className="font-bold text-gray-900">{order.sellerName}</p>
+                }
+                {
+                    isSeller &&
+                    <div className="pt-4 border-t flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center font-bold text-gray-600 text-lg border shadow-sm">
+                            {order.buyerName?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="text-sm">
+                            <p className="text-gray-400 text-xs uppercase tracking-wider font-bold">Người mua</p>
+                            <p
+                                className="font-bold text-gray-900"
+                            >
+                                <a
+                                    href={`/profile/${order.buyerId}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:underline"
+                                >
+                                    {order.buyerName}
+                                </a>
+                            </p> </div>
                     </div>
-                </div>
+                }
             </CardContent>
         </Card>
     );

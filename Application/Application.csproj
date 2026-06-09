@@ -16,10 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Conversation\Commands\DeleteMessage\" />
     <Folder Include="Conversation\Commands\UpdateMessage\" />
-    <Folder Include="Conversation\Commands\SendMessage\" />
-    <Folder Include="Conversation\Queries\" />
   </ItemGroup>
 
 </Project>

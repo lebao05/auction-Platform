@@ -1,8 +1,14 @@
 ﻿using Application.User.Commands.AcceptSellerRequest;
+using Application.User.Commands.BanUser;
+using Application.User.Commands.ChangePassword;
+using Application.User.Commands.ResetPassword;
+using Application.User.Commands.ResetUserPassword;
+using Application.User.Commands.TriggerRestoringPassword;
 using Application.User.Commands.UpdateInfo;
 using Application.User.Queries.GetProfile;
 using Application.User.Queries.GetSellerRequest;
 using Application.User.Queries.GetSellerRequestsAsAdmin;
+using Domain.Shared;
 using Infraestructure.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,9 +24,24 @@ namespace Presentation.Controllers
     public class UserController : ApiController
     {
         private readonly ILogger<UserController> _logger;
-        public UserController(ISender sender,ILogger<UserController> logger) : base(sender)
+        public UserController(ISender sender, ILogger<UserController> logger) : base(sender)
         {
             _logger = logger;
+        }
+
+        [Authorize]
+        [HttpPut("password-change")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken cancellationToken)
+        {
+            string userId = ClaimsPrincipalExtensions.GetUserId(User);
+            var command = new ChangePasswordCommand(userId, request.OldPassword, request.NewPassword);
+            var result = await _sender.Send(command, cancellationToken);
+
+            if (result.IsFailure)
+            {
+                return HandleFailure(result);
+            }
+            return Ok();
         }
         [Authorize]
         [HttpGet("profile")]
@@ -29,16 +50,15 @@ namespace Presentation.Controllers
             string userId = ClaimsPrincipalExtensions.GetUserId(User);
 
             var command = new GetProfileCommand(Guid.Parse(userId));
-            var result =  await _sender.Send(command, cancellationToken);
+            var result = await _sender.Send(command, cancellationToken);
             if (result.IsFailure)
             {
                 return HandleFailure(result);
             }
             return Ok(result.Value);
         }
-        [Authorize]
         [HttpGet("{userId}")]
-        public async Task<IActionResult> GetUserById([FromRoute] Guid userId,CancellationToken cancellationToken)
+        public async Task<IActionResult> GetUserById([FromRoute] Guid userId, CancellationToken cancellationToken)
         {
             var command = new GetProfileCommand(userId);
             var result = await _sender.Send(command, cancellationToken);
@@ -50,12 +70,12 @@ namespace Presentation.Controllers
         }
         [Authorize]
         [HttpPut]
-        public async Task<IActionResult> UpdateInfo([FromBody] UpdateInfoRequest rq,CancellationToken cancellation)
+        public async Task<IActionResult> UpdateInfo([FromBody] UpdateInfoRequest rq, CancellationToken cancellation)
         {
             string userId = ClaimsPrincipalExtensions.GetUserId(User);
             var command = new UpdateInfoCommand(Guid.Parse(userId), rq.FullName, rq.Email, rq.PhoneNumber, rq.DateOfBirth, rq.Address, rq.AvatarUrl);
             var result = await _sender.Send(command, cancellation);
-            if( result.IsFailure )
+            if (result.IsFailure)
             {
                 return HandleFailure(result);
             }
@@ -66,9 +86,9 @@ namespace Presentation.Controllers
         public async Task<IActionResult> RequestSeller(CancellationToken cancellationToken)
         {
             string userId = ClaimsPrincipalExtensions.GetUserId(User);
-            var command = new Application.User.Commands.RequestSeller.RequestSellerCommand( Guid.Parse(userId) );
+            var command = new Application.User.Commands.RequestSeller.RequestSellerCommand(Guid.Parse(userId));
             var result = await _sender.Send(command, cancellationToken);
-            if( result.IsFailure )
+            if (result.IsFailure)
             {
                 return HandleFailure(result);
             }
@@ -79,24 +99,25 @@ namespace Presentation.Controllers
         public async Task<IActionResult> GetSellerRequest(CancellationToken cancellationToken)
         {
             string userId = ClaimsPrincipalExtensions.GetUserId(User);
-            var command = new Application.User.Queries.GetSellerRequest.GetSellerRequestQuery( Guid.Parse(userId) );
+            var command = new Application.User.Queries.GetSellerRequest.GetSellerRequestQuery(Guid.Parse(userId));
             var result = await _sender.Send(command, cancellationToken);
-            if( result.IsFailure )
+            if (result.IsFailure)
             {
                 return HandleFailure(result);
             }
             return Ok(result.Value);
         }
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("request-seller/all")]
-        public async Task<IActionResult> GetSellerRequestsAsAdmin([FromQuery] GetSellerRequestAsAdminRequest request,CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSellerRequestsAsAdmin([FromQuery] GetSellerRequestAsAdminRequest request, CancellationToken cancellationToken)
         {
             string[] words = string.IsNullOrWhiteSpace(request.query)
                 ? Array.Empty<string>()
-                : request.query.Split(' ', StringSplitOptions.RemoveEmptyEntries); 
+                : request.query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var query = new GetSellerRequestsAsAdminQuery(words, request.pageNumber, request.createdDecsending);
             var result = await _sender.Send(query, cancellationToken);
-            if (result.IsFailure) {
+            if (result.IsFailure)
+            {
                 return HandleFailure(result);
             }
             return Ok(result.Value);
@@ -116,6 +137,47 @@ namespace Presentation.Controllers
                 return HandleFailure(result);
             }
 
+            return Ok();
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllUsers(
+            CancellationToken cancellationToken)
+        {
+            var query = new Application.User.Queries.GetAllUsers.GetAllUsersQuery();
+            var result = await _sender.Send(query, cancellationToken);
+            if (result.IsFailure)
+            {
+                return HandleFailure(result);
+            }
+            return Ok(result.Value);
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPut("admin-reset-password/{UserId}")]
+        public async Task<IActionResult> AdminResetUserPassword(
+            [FromRoute] Guid UserId,
+            CancellationToken cancellationToken)
+        {
+            var command = new ResetUserPasswordCommand(UserId);
+            var result = await _sender.Send(command, cancellationToken);
+            if (result.IsFailure)
+            {
+                return HandleFailure(result);
+            }
+            return Ok();
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{UserId}")]
+        public async Task<IActionResult> DeleteUserById(
+            [FromRoute] Guid UserId,
+            CancellationToken cancellationToken)
+        {
+            var command = new BanUserCommand(UserId);
+            var result = await _sender.Send(command, cancellationToken);
+            if (result.IsFailure)
+            {
+                return HandleFailure(result);
+            }
             return Ok();
         }
     }

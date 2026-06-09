@@ -1,3 +1,4 @@
+import { User } from "lucide-react";
 import axios from "../configs/axios";
 
 export async function getUserProfileApi() {
@@ -5,13 +6,17 @@ export async function getUserProfileApi() {
     return response.data;
 }
 
+export async function getProfileOfAUserApi({ userId }) {
+    const response = await axios.get(`/user/${userId}`);
+    return response.data;
+}
 export async function updateUserProfileApi({ fullName, dateOfBirth, phoneNumber, address, email }) {
     const response = await axios.put("/user", { fullName, dateOfBirth, phoneNumber, address, email });
     return response.data;
 }
 
-export async function requestSellerApi({ userId }) {
-    const response = await axios.post("/user/request-seller", { userId })
+export async function requestSellerApi() {
+    const response = await axios.post("/user/request-seller");
     return response.data;
 }
 
@@ -35,4 +40,27 @@ export async function getSellerRequestsAsAdminApi(searchQuery = "", createdDecse
 
     const response = await axios.get(`/user/request-seller/all?${params.toString()}`);
     return response.data;
+}
+
+export async function getAllUsersApi() {
+    const response = await axios.get("/user/all");
+    return response.data;
+}
+
+export async function resetPasswordAsAdminAPi({ UserId }) {
+    console.log(UserId);
+
+    const response = await axios.put(`/user/admin-reset-password/${UserId}`, {});
+    return response.data;
+}
+
+export async function banUserApi({ UserId }) {
+    await axios.delete(`/user/${UserId}`);
+}
+
+export async function changePasswordApi({ newPassword, oldPassword }) {
+    await axios.put(`/user/password-change`, {
+        newPassword,
+        oldPassword
+    });
 }

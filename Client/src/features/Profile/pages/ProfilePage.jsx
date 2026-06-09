@@ -1,34 +1,65 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ProfileInfo } from "../components/ProfileInfo"
 import { ProfileRatings } from "../components/ProfileRatings"
 import { ProfileWishlist } from "../components/ProfileWishlist"
 import { ProfileAuctions } from "../components/ProfileAuction"
-import { UserIcon, Star, Heart, Gavel, Settings } from "lucide-react"
+import { UserIcon, Star, Heart, Gavel, MessageCircle, CheckCircle2 } from "lucide-react"
 import { useAuth } from "../../../contexts/AuthContext"
+import { useChat } from "../../../contexts/chatContext"
+import { useParams, useNavigate } from "react-router-dom"
+import { useUserView } from "../../../hooks/useUserViewing"
 
 export default function ProfilePage() {
-  const [activeSection, setActiveSection] = useState("info")
+  const { userId } = useParams();
+  const navigate = useNavigate();
+  const { profile, ratings, updateRating, products } = useUserView(userId);
   const { user, updateInfo } = useAuth();
-  if (user == null) return null;
+
+  const { openChatWithUser } = useChat();
+
+  const [activeSection, setActiveSection] = useState("info");
+
+  const isOwnProfile = user != null && String(user.userId) === String(userId);
+
+  useEffect(() => {
+    if (!isOwnProfile && activeSection === "wishlist") {
+      setActiveSection("info");
+    }
+  }, [isOwnProfile, activeSection]);
+
+  const handleStartChat = async () => {
+    if (!user) {
+      navigate("/signin");
+      return;
+    }
+    openChatWithUser(userId);
+  };
+
+  if (user == null && profile == null) return null;
+
   const menuItems = [
     { id: "info", label: "Thông tin", icon: <UserIcon className="h-5 w-5" /> },
     { id: "ratings", label: "Đánh giá", icon: <Star className="h-5 w-5" /> },
-    { id: "wishlist", label: "Yêu thích", icon: <Heart className="h-5 w-5" /> },
+    { id: "wishlist", label: "Yêu thích", icon: <Heart className="h-5 w-5" />, private: true },
     { id: "auctions", label: "Đấu giá", icon: <Gavel className="h-5 w-5" /> },
-  ]
+  ].filter(item => !item.private || isOwnProfile);
 
   const renderContent = () => {
     switch (activeSection) {
       case "info":
-        return <ProfileInfo user={user} updateInfo={updateInfo} />
+        return <ProfileInfo
+          user={isOwnProfile ? user : profile}
+          IsYou={isOwnProfile}
+          updateInfo={updateInfo}
+        />
       case "ratings":
-        return <ProfileRatings />
+        return <ProfileRatings ratings={ratings} user={user} updateRating={updateRating} isYou={isOwnProfile} />
       case "wishlist":
-        return <ProfileWishlist />
+        return isOwnProfile ? <ProfileWishlist /> : null;
       case "auctions":
-        return <ProfileAuctions />
+        return <ProfileAuctions products={products} isYou={isOwnProfile} user={user} />
       default:
         return null
     }
@@ -41,12 +72,53 @@ export default function ProfilePage() {
         <aside className="w-64 bg-white rounded-lg shadow p-4 flex flex-col gap-2">
           <div className="flex flex-col items-center mb-6">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-500">
-              <UserIcon className="h-10 w-10 text-white" />
+              {profile?.avatarUrl ? (
+                <img src={profile.avatarUrl} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <UserIcon className="h-10 w-10 text-white" />
+              )}
             </div>
-            <h2 className="mt-2 text-lg font-bold text-gray-900">Hồ Sơ Cá Nhân</h2>
-            <p className="text-gray-500 text-sm text-center">Quản lý thông tin và hoạt động đấu giá của bạn</p>
-          </div>
+            <h2 className="mt-2 text-lg font-bold text-gray-900">
+              {isOwnProfile ? "Hồ Sơ Cá Nhân" : (profile?.fullName || "Người dùng")}
+            </h2>
+            <p className="text-gray-500 text-sm text-center">
+              {isOwnProfile
+                ? "Quản lý thông tin và hoạt động của bạn"
+                : `Xem thông tin của ${profile?.fullName || 'người dùng'}`}
+            </p>
 
+            {/* --- NÚT NHẮN TIN (Chỉ hiện khi user != null và không phải chính mình) --- */}
+            {!isOwnProfile && user && (
+              <button
+                onClick={handleStartChat}
+                className="mt-4 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-full font-semibold transition-all shadow-md active:scale-95"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Nhắn tin
+              </button>
+            )}
+          </div>
+          {
+            profile?.averageRating != null && (<>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-500 font-medium">Đánh giá tích cực</span>
+                  <span className={`font-bold ${profile.averageRating >= 80 ? "text-green-600" : "text-orange-500"}`}>
+                    {profile.averageRating}%
+                  </span>
+                </div>
+
+                {/* Thanh Progress Bar */}
+                <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-500 ${profile.averageRating >= 80 ? "bg-green-500" : "bg-orange-400"
+                      }`}
+                    style={{ width: `${profile.averageRating}%` }}
+                  />
+                </div>
+              </div>
+            </>)
+          }
           <nav className="flex flex-col gap-2">
             {menuItems.map((item) => (
               <button
@@ -65,7 +137,9 @@ export default function ProfilePage() {
         </aside>
 
         {/* Content */}
-        <div className="flex-1 bg-white rounded-lg shadow p-6">{renderContent()}</div>
+        <div className="flex-1 bg-white rounded-lg shadow p-6">
+          {renderContent()}
+        </div>
       </div>
     </div>
   )

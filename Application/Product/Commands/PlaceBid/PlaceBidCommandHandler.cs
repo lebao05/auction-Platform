@@ -66,7 +66,7 @@ namespace Application.Product.Commands.PlaceBid
                 request.productId,
                 cancellationToken
             );
-
+            Console.WriteLine("My auto bid: " + (myAutoBid is null ? "null" : myAutoBid.MaxBidAmount.ToString()));
             var newMaxAutoBid = request.maxBidAmount;
 
             // Validate auto bid
@@ -102,12 +102,19 @@ namespace Application.Product.Commands.PlaceBid
                 long bidAmount = startPrice;
                 if (buyNowPrice.HasValue)
                     bidAmount = Math.Min(maxBixAmount, buyNowPrice.Value);
-                var bidding = new BiddingHistory(bidAmount, productId, userId);
                 if (buyNowPrice.HasValue && bidAmount == buyNowPrice)
+                {
                     product.EndDate = DateTime.UtcNow;
+                }
+                var bidding = new BiddingHistory((buyNowPrice.HasValue &&
+                    bidAmount == buyNowPrice.Value ? buyNowPrice.Value : product.StartPrice), productId, userId);
                 product.BiddingCount++;
+                product.Winnerid = userId;
                 _productRepository.AddAutoBidding(auto);
                 _productRepository.AddBiddingHistory(bidding);
+                product.PlaceBid(bidAmount, null, userId);
+                if (buyNowPrice.HasValue && bidAmount == buyNowPrice)
+                    product.EndByBuyNow(userId);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result.Success();
             }
@@ -119,6 +126,8 @@ namespace Application.Product.Commands.PlaceBid
                 //case1
                 if (maxBidding!.BidAmount >= maxBixAmount)
                 {
+                    product.BiddingCount++;
+
                     var bidding = new BiddingHistory(maxBixAmount, productId, userId);
                     _productRepository.AddBiddingHistory(bidding);
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -129,9 +138,13 @@ namespace Application.Product.Commands.PlaceBid
                 {
                     if (maxBidding.BidAmount != maxBixAmount)
                     {
+                        product.BiddingCount++;
+
                         var topBidding = new BiddingHistory(maxBixAmount, productId, maxAuto.BidderId);
                         _productRepository.AddBiddingHistory(topBidding);
                     }
+                    product.BiddingCount++;
+
                     var bidding = new BiddingHistory(maxBixAmount, productId, userId);
                     _productRepository.AddBiddingHistory(bidding);
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -142,15 +155,23 @@ namespace Application.Product.Commands.PlaceBid
                 {
                     if (maxBidding.BidAmount != maxAuto.MaxBidAmount)
                     {
+                        product.BiddingCount++;
+
                         var other = new BiddingHistory(maxAuto.MaxBidAmount, productId, maxAuto.BidderId);
                         _productRepository.AddBiddingHistory(other);
                     }
+                    product.BiddingCount++;
+
                     long bidAmount = maxAuto.MaxBidAmount + product.StepPrice;
                     if (buyNowPrice.HasValue) bidAmount = Math.Min(maxBixAmount, buyNowPrice.Value);
                     if (buyNowPrice.HasValue && buyNowPrice.Value == bidAmount)
+                    {
                         product.EndDate = DateTime.UtcNow;
+                        product.EndByBuyNow(userId);
+                    }
                     var bidding = new BiddingHistory(bidAmount, productId, userId);
                     _productRepository.AddBiddingHistory(bidding);
+                    product.Winnerid = userId;
                     //extra time
                     if (product.IsAutoRenewal)
                     {
@@ -161,6 +182,7 @@ namespace Application.Product.Commands.PlaceBid
                             product.EndDate.AddMinutes(extraTime!.SystemValue);
                         }
                     }
+                    product.PlaceBid(bidAmount, maxBidding.BidderId, userId);
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
                     return Result.Success();
                 }
@@ -173,10 +195,13 @@ namespace Application.Product.Commands.PlaceBid
                 maxAuto.MaxBidAmount = maxBixAmount;
                 if (buyNowPrice.HasValue && buyNowPrice.Value <= maxAuto.MaxBidAmount)
                 {
+                    product.BiddingCount++;
+
                     var bidding = new BiddingHistory(buyNowPrice.Value, productId, userId);
                     product.EndDate = DateTime.UtcNow;
                     _productRepository.AddBiddingHistory(bidding);
-
+                    product.PlaceBid(buyNowPrice.Value, null, userId);
+                    product.EndByBuyNow(userId);
                 }
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result.Success();
@@ -186,6 +211,8 @@ namespace Application.Product.Commands.PlaceBid
             myAutoBid!.MaxBidAmount = maxBixAmount;
             if (maxBixAmount <= maxBidding!.BidAmount)
             {
+                product.BiddingCount++;
+
                 var bidding = new BiddingHistory(maxBixAmount, productId, userId);
                 _productRepository.AddBiddingHistory(bidding);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -194,13 +221,19 @@ namespace Application.Product.Commands.PlaceBid
             //Case3  Current maxdding keep top
             if (maxBixAmount <= maxAuto.MaxBidAmount)
             {
+                Console.WriteLine("Case 3");
                 if (maxBidding.BidAmount != maxBixAmount)
                 {
+                    product.BiddingCount++;
+
                     var topBidding = new BiddingHistory(maxBixAmount, productId, maxBidding.BidderId);
                     _productRepository.AddBiddingHistory(topBidding);
                 }
+                product.BiddingCount++;
+
                 var bidding = new BiddingHistory(maxBixAmount, productId, userId);
                 _productRepository.AddBiddingHistory(bidding);
+                product.PlaceBid(maxBixAmount, null, maxBidding.BidderId);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result.Success();
             }
@@ -208,20 +241,27 @@ namespace Application.Product.Commands.PlaceBid
             //Case4 user win
             if (maxAuto.MaxBidAmount != maxBidding!.BidAmount)
             {
+                product.BiddingCount++;
+
                 var other = new BiddingHistory(maxAuto.MaxBidAmount, productId, maxAuto.BidderId);
                 _productRepository.AddBiddingHistory(other);
             }
 
-            if (buyNowPrice.HasValue & buyNowPrice!.Value <= maxBixAmount)
+            if (buyNowPrice.HasValue && buyNowPrice!.Value <= maxBixAmount)
             {
+                product.BiddingCount++;
                 var bidding = new BiddingHistory(buyNowPrice.Value, productId, userId);
                 _productRepository.AddBiddingHistory(bidding);
                 product.EndDate = DateTime.UtcNow;
+                product.PlaceBid(buyNowPrice.Value, maxBidding.BidderId, userId);
+                product.EndByBuyNow(userId);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result.Success();
             }
 
-            long myTopPrice = maxAuto.MaxBidAmount + product.StepPrice;
+            long myTopPrice = maxAuto.MaxBidAmount + product.StepPrice; 
+            product.BiddingCount++;
+
             var newBidding = new BiddingHistory(myTopPrice, productId, userId);
             if (product.IsAutoRenewal)
             {
@@ -232,6 +272,8 @@ namespace Application.Product.Commands.PlaceBid
                     product.EndDate.AddMinutes(extraTime!.SystemValue);
                 }
             }
+            product.PlaceBid(myTopPrice, maxBidding.BidderId, userId);
+            product.Winnerid = userId;
             _productRepository.AddBiddingHistory(newBidding);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

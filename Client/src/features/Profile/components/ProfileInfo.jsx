@@ -13,14 +13,14 @@ import { Input } from "../../../components/ui/Input";
 import { Label } from "../../../components/ui/Label";
 import { Edit2, Save, X } from "lucide-react";
 
-export function ProfileInfo({ user, updateInfo }) {
+export function ProfileInfo({ user, updateInfo, IsYou }) {
+  if (user == null) return null;
   const [isEditing, setIsEditing] = useState(false);
   const [tempData, setTempData] = useState(user);
-
   const handleEdit = () => setIsEditing(true);
   const handleCancel = () => {
     setTempData(user);
-    setIsEditing(false)
+    setIsEditing(false);
   };
   const handleSave = () => {
     updateInfo(tempData);
@@ -34,16 +34,19 @@ export function ProfileInfo({ user, updateInfo }) {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Thông Tin Cá Nhân</CardTitle>
             <CardDescription>
-              Quản lý thông tin tài khoản của bạn
+              {IsYou ? "Quản lý thông tin tài khoản của bạn" : "Thông tin chi tiết người dùng"}
             </CardDescription>
           </div>
-          {!isEditing && (
+          {/* Chỉ hiển thị nút Chỉnh sửa nếu IsYou là true và không trong chế độ edit */}
+          {IsYou && !isEditing && (
             <Button variant="outline" onClick={handleEdit}>
-              <Edit2 className="mr-2 h-4 w-4" /> Chỉnh sửa
+              <span className="flex items-center">
+                <Edit2 className="mr-2 h-4 w-4" /> Chỉnh sửa
+              </span>
             </Button>
           )}
         </CardHeader>
@@ -87,7 +90,8 @@ export function ProfileInfo({ user, updateInfo }) {
                 <Input
                   id="birthDate"
                   type="date"
-                  value={tempData.birthDate}
+                  // Đồng nhất key với dateOfBirth
+                  value={tempData.dateOfBirth?.split('T')[0] || ""}
                   onChange={(e) => handleChange("dateOfBirth", e.target.value)}
                 />
               ) : (
@@ -96,7 +100,6 @@ export function ProfileInfo({ user, updateInfo }) {
                     ? new Date(user.dateOfBirth).toLocaleDateString("vi-VN")
                     : "Chưa cập nhật"}
                 </p>
-
               )}
             </div>
 
@@ -125,7 +128,7 @@ export function ProfileInfo({ user, updateInfo }) {
                 />
               ) : (
                 <p className="mt-2 text-sm font-medium text-gray-900">
-                  {user.address}
+                  {user.address || "Chưa cập nhật"}
                 </p>
               )}
             </div>

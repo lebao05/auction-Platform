@@ -22,13 +22,13 @@ namespace Application.Product.Queries.GetTopBiddingCountProducts
             CancellationToken cancellationToken)
         {
             var query = _productRepository.GetTopProducts()
-                .OrderByDescending(p => p.BiddingCount);
-            query = query.OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
+                .OrderByDescending(p => p.EndDate >= DateTime.UtcNow);
+            query = query.ThenByDescending(p=>p.BiddingCount);
             var pageIndex = request.PageIndex < 1 ? 1 : request.PageIndex;
             var pageSize = request.PageSize < 1 ? 10 : request.PageSize;
             var skip = (pageIndex - 1) * pageSize;
             var timeForNew = await _systemSettingRepository.GetSystemSettingByKey(SystemSettingKey.NewProductTime, cancellationToken);
-            var newThreshold = DateTime.UtcNow.AddMinutes(timeForNew!.SystemValue);
+            var newThreshold = DateTime.UtcNow.AddMinutes(-timeForNew!.SystemValue);
             var items = await query
                 .Skip(skip)
                 .Take(pageSize)

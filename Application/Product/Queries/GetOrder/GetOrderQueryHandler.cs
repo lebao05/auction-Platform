@@ -73,7 +73,7 @@ namespace Application.Product.Queries.GetOrder
                     .FirstOrDefault()!,
 
                 // Buyer (nullable)
-                BuyerId = winningBid?.Id ?? Guid.Empty,
+                BuyerId = winningBid?.BidderId ?? Guid.Empty,
                 BuyerName = winningBid?.Bidder?.FullName ?? string.Empty,
                 BuyerAvatarUrl = winningBid?.Bidder?.AvatarUrl ?? string.Empty,
 

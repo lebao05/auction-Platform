@@ -7,6 +7,7 @@ import { useAdmin } from '../../../contexts/AdminContext';
 import { formatPrice, parsePrice } from '../../../utils/FormatPriceExtension';
 import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
+import { form } from 'framer-motion/client';
 
 export default function PostProductPage() {
     const { createProduct, loading } = useProduct();
@@ -52,7 +53,8 @@ export default function PostProductPage() {
         if (formData.buyNowPrice && parseFloat(formData.buyNowPrice) <= parseFloat(formData.startPrice)) {
             newErrors.buyNowPrice = 'Giá mua ngay phải lớn hơn giá khởi điểm';
         }
-
+        if (formData.buyNowPrice && (parseInt(formData.buyNowPrice) - parsePrice(formData.startPrice)) % parseInt(formData.stepPrice) != 0)
+            newErrors.buyNowPrice = 'Giá mua ngay trừ giá khởi điểm phải là bội của bước giá';
         const totalHours = duration.days * 24 + duration.hours;
         if (totalHours <= 0) newErrors.duration = 'Vui lòng nhập thời gian đấu giá';
         if (totalHours > 168) newErrors.duration = 'Không vượt quá 7 ngày (168h)';
@@ -81,8 +83,23 @@ export default function PostProductPage() {
                 isAutoRenewal: formData.autoExtend
             };
             await createProduct(payload);
-            toast.success("Đăng sản phẩm thành công!");
-            navigate("/product/manage");
+            toast.success("Đăng sản phẩm thành công!"); setFormData({
+                productName: '',
+                categoryId: '',
+                startPrice: '',
+                stepPrice: '',
+                buyNowPrice: '',
+                description: '',
+                autoExtend: false,
+                allowNewBidders: true
+            });
+            setDuration({ days: 0, hours: 0 });
+            setImages([]);
+            setErrors({});
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // navigate("/product/manage");
         } catch (err) {
             toast.error('Đăng sản phẩm thất bại.');
         }
@@ -94,13 +111,13 @@ export default function PostProductPage() {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
                     <div>
-                        <button 
+                        {/* <button 
                             onClick={() => navigate("/product/manage")}
                             className="group flex cursor-pointer items-center text-slate-500 hover:text-slate-800 transition-colors mb-2 text-sm font-medium"
                         >
                             <ChevronLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1" />
                             Quay lại quản lý
-                        </button>
+                        </button> */}
                         <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Đăng Sản Phẩm Mới</h1>
                         <p className="text-slate-500 mt-1">Bắt đầu phiên đấu giá mới với vài bước đơn giản.</p>
                     </div>
@@ -109,7 +126,7 @@ export default function PostProductPage() {
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column: Form Details */}
                     <div className="lg:col-span-2 space-y-6">
-                        
+
                         {/* Basic Info Card */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                             <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
@@ -132,17 +149,43 @@ export default function PostProductPage() {
 
                                 <div>
                                     <label className="block text-sm font-bold text-slate-700 mb-1.5">Danh mục *</label>
-                                    <select
-                                        name="categoryId"
-                                        value={formData.categoryId}
-                                        onChange={handleInputChange}
-                                        className={`w-full px-4 py-3 rounded-xl border transition-all outline-none focus:ring-4 focus:ring-indigo-50 appearance-none bg-white ${errors.categoryId ? 'border-red-500' : 'border-slate-200 focus:border-indigo-500'}`}
-                                    >
-                                        <option value="">Chọn một danh mục</option>
-                                        {categories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                        ))}
-                                    </select>
+                                    <div className="relative">
+                                        <select
+                                            name="categoryId"
+                                            value={formData.categoryId}
+                                            onChange={handleInputChange}
+                                            className={`w-full px-4 py-3 rounded-xl border transition-all outline-none focus:ring-4 focus:ring-indigo-50 appearance-none bg-white ${errors.categoryId ? 'border-red-500' : 'border-slate-200 focus:border-indigo-500'}`}
+                                        >
+                                            <option value="">Chọn một danh mục</option>
+                                            {categories
+                                                .filter(cat => cat.parent === null) // Lấy danh mục gốc (Depth 1)
+                                                .map(parentCat => (
+                                                    <React.Fragment key={parentCat.id}>
+                                                        {/* Danh mục CHA - Có thể chọn được */}
+                                                        <option value={parentCat.id} className="font-bold text-slate-900">
+                                                            {parentCat.name}
+                                                        </option>
+
+                                                        {/* Danh mục CON (Depth 2) - Thụt lề vào trong */}
+                                                        {categories
+                                                            .filter(subCat => subCat.parent?.id === parentCat.id)
+                                                            .map(subCat => (
+                                                                <option key={subCat.id} value={subCat.id} className="text-slate-600">
+                                                                    &nbsp;&nbsp;&nbsp;└─ {subCat.name}
+                                                                </option>
+                                                            ))
+                                                        }
+                                                    </React.Fragment>
+                                                ))
+                                            }
+                                        </select>
+                                        {/* Icon mũi tên xuống vì dùng appearance-none */}
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                                            <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                     {errors.categoryId && <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.categoryId}</p>}
                                 </div>
                             </div>
@@ -180,8 +223,8 @@ export default function PostProductPage() {
                                         <div key={img.id} className="relative group aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                                             <img src={img.preview} alt="Preview" className="w-full h-full object-cover" />
                                             {idx === 0 && <span className="absolute top-1.5 left-1.5 bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full uppercase font-black">Main</span>}
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 onClick={() => removeImage(img.id)}
                                                 className="absolute top-1 right-1 bg-white/90 text-red-500 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                                             >
@@ -206,7 +249,7 @@ export default function PostProductPage() {
 
                     {/* Right Column: Pricing & Options */}
                     <div className="space-y-6">
-                        
+
                         {/* Pricing Card */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden sticky top-24">
                             <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
@@ -263,22 +306,22 @@ export default function PostProductPage() {
                                     <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-3">Thời gian kết thúc</label>
                                     <div className="grid grid-cols-2 gap-3 text-center">
                                         <div className="space-y-1">
-                                            <input 
-                                                type="number" 
-                                                value={duration.days} 
+                                            <input
+                                                type="number"
+                                                value={duration.days}
                                                 min="0" max="7"
                                                 onChange={(e) => setDuration(p => ({ ...p, days: Math.min(7, parseInt(e.target.value) || 0) }))}
-                                                className="w-full py-3 bg-slate-50 rounded-xl border border-slate-200 text-center font-bold" 
+                                                className="w-full py-3 bg-slate-50 rounded-xl border border-slate-200 text-center font-bold"
                                             />
                                             <span className="text-[10px] text-slate-400 font-bold uppercase">Ngày</span>
                                         </div>
                                         <div className="space-y-1">
-                                            <input 
-                                                type="number" 
-                                                value={duration.hours} 
+                                            <input
+                                                type="number"
+                                                value={duration.hours}
                                                 min="0" max="23"
                                                 onChange={(e) => setDuration(p => ({ ...p, hours: Math.min(23, parseInt(e.target.value) || 0) }))}
-                                                className="w-full py-3 bg-slate-50 rounded-xl border border-slate-200 text-center font-bold" 
+                                                className="w-full py-3 bg-slate-50 rounded-xl border border-slate-200 text-center font-bold"
                                             />
                                             <span className="text-[10px] text-slate-400 font-bold uppercase">Giờ</span>
                                         </div>
@@ -289,12 +332,12 @@ export default function PostProductPage() {
                                 <div className="space-y-4 pt-4 border-t border-slate-100">
                                     <label className="flex items-center gap-3 cursor-pointer group">
                                         <div className="relative flex items-center">
-                                            <input 
-                                                type="checkbox" 
-                                                checked={formData.autoExtend} 
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.autoExtend}
                                                 name="autoExtend"
-                                                onChange={handleInputChange} 
-                                                className="w-5 h-5 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500" 
+                                                onChange={handleInputChange}
+                                                className="w-5 h-5 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500"
                                             />
                                         </div>
                                         <div>
@@ -304,12 +347,12 @@ export default function PostProductPage() {
                                     </label>
 
                                     <label className="flex items-center gap-3 cursor-pointer">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={formData.allowNewBidders} 
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.allowNewBidders}
                                             name="allowNewBidders"
-                                            onChange={handleInputChange} 
-                                            className="w-5 h-5 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500" 
+                                            onChange={handleInputChange}
+                                            className="w-5 h-5 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500"
                                         />
                                         <div>
                                             <p className="text-sm font-bold text-slate-700">Người mua mới</p>
@@ -319,15 +362,15 @@ export default function PostProductPage() {
                                 </div>
 
                                 <div className="pt-2">
-                                    <button 
-                                        type="submit" 
+                                    <button
+                                        type="submit"
                                         disabled={loading}
                                         className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:bg-slate-300"
                                     >
                                         {loading ? "Đang xử lý..." : <><Check className="w-5 h-5" /> Đăng sản phẩm</>}
                                     </button>
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         onClick={() => navigate("/product/manage")}
                                         className="w-full mt-3 py-3 text-slate-500 font-bold text-sm hover:text-slate-800 transition-colors"
                                     >

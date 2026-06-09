@@ -8,7 +8,7 @@ import { ChevronLeft, Mail, Lock, AlertCircle, Loader2 } from "lucide-react";
 export const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState  (null);
+  const [error, setError] = useState(null);
 
   const { login, user, loading } = useAuth();
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ export const Signin = () => {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err.message || "Email hoặc mật khẩu không chính xác");
+      setError("Email hoặc mật khẩu không chính xác");
     }
   };
 
@@ -81,7 +81,7 @@ export const Signin = () => {
               <label className="text-sm font-semibold text-slate-700" htmlFor="password">
                 Mật khẩu
               </label>
-              <a href="#" className="text-xs text-blue-600 hover:underline">Quên mật khẩu?</a>
+              <a href="/forgot-password" className="text-xs text-blue-600 hover:underline">Quên mật khẩu?</a>
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />

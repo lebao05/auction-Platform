@@ -2,12 +2,13 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import {
+    changePasswordApi,
     getMySellerRequestApi,
     getUserProfileApi,
     requestSellerApi,
     updateUserProfileApi,
 } from "../services/user.service";
-import { loginApi } from "../services/auth.service";
+import { loginApi, registerApi, resetPasswordApi, triggerRestoringPasswordApi } from "../services/auth.service";
 import Spinner from "../components/ui/Spinner";
 
 const AuthContext = createContext(null);
@@ -72,12 +73,10 @@ export function AuthProvider({ children }) {
             const jwt = await loginApi(email, password);
             localStorage.setItem("token", jwt);
             setToken(jwt);
-
             const profile = await getUserProfileApi();
             setUser(profile);
-            return true;
-        } catch {
-            return false;
+        } catch (err) {
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -121,15 +120,82 @@ export function AuthProvider({ children }) {
         setUser(null);
         setToken(null);
     };
-
     /* ===========================
-       🔒 BLOCK RENDERING HERE
+       REGISTER
        =========================== */
-    if (loading) {
-        return (
-            <Spinner />
-        );
-    }
+    const register = async ({
+        fullname,
+        email,
+        password,
+        address,
+        recaptchaToken,
+    }) => {
+        setLoading(true);
+        try {
+            await registerApi({
+                fullname,
+                email,
+                password,
+                address,
+                recaptchaToken,
+            });
+
+            // optional: auto-login after register
+            const jwt = await loginApi(email, password);
+            localStorage.setItem("token", jwt);
+            setToken(jwt);
+
+            const profile = await getUserProfileApi();
+            setUser(profile);
+
+        } catch (err) {
+            throw err
+        } finally {
+            setLoading(false);
+        }
+    };
+    const forgotPassword = async (email) => {
+        setLoading(true);
+        try {
+            await triggerRestoringPasswordApi({ email });
+            return true;
+        } catch {
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+    const resetPassword = async ({ email, otp, newPassword }) => {
+        setLoading(true);
+        try {
+            await resetPasswordApi({
+                email,
+                otp,
+                newPassword,
+            });
+            return true;
+        } catch {
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+    const changePassword = async ({ oldPassword, newPassword }) => {
+        setLoading(true);
+        try {
+            await changePasswordApi({ oldPassword, newPassword });
+
+            // optional: refresh profile
+            const profile = await getUserProfileApi();
+            setUser(profile);
+
+            return true;
+        } catch {
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <AuthContext.Provider
@@ -142,6 +208,10 @@ export function AuthProvider({ children }) {
                 logout,
                 updateInfo,
                 requestSeller,
+                register,
+                forgotPassword,   // 👈 ADD
+                resetPassword,
+                changePassword
             }}
         >
             {children}

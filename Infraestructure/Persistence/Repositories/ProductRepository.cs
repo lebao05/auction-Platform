@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using Domain.Repositories;
 using Infraestructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,20 @@ namespace Infraestructure.Persistence.Repositories
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync(cancellationToken);
         }
+        public async Task<List<Product>> GetProductParticipating(Guid bidderId, CancellationToken cancellationToken)
+        {
+            return await _appDbContext.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images.Where(i => i.IsMain == true))
+                .Include(p => p.BiddingHistories
+                    .Where(bh => bh.BidderId == bidderId)
+                    .OrderByDescending(bh => bh.BidAmount)
+                    .ThenBy(bh => bh.CreatedAt)
+                    .Take(1))
+                .Where(p => p.BiddingHistories.Any(bh => bh.BidderId == bidderId))
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync(cancellationToken);
+        }
 
         public async Task<Product?> GetProductWithImagesAsync(Guid id, CancellationToken cancellationToken)
         {
@@ -76,7 +91,6 @@ namespace Infraestructure.Persistence.Repositories
         public async Task<AutomatedBidding?> GetAutoBidding(Guid userId, Guid productId, CancellationToken cancellationToken)
         {
             return await _appDbContext.AutomatedBiddings
-                .AsNoTracking()
                 .FirstOrDefaultAsync(ab =>
                     ab.BidderId == userId &&
                     ab.ProductId == productId,
@@ -239,5 +253,33 @@ namespace Infraestructure.Persistence.Repositories
         {
             return await _appDbContext.Ratings.FindAsync(new object[] { id }, cancellationToken);
         }
+        public IQueryable<Product> GetProducts()
+        {
+            return _appDbContext.Products.Where(p=>!p.IsDeleted).AsNoTracking();
+        }
+        public IQueryable<Rating> GetRatings()
+        {
+            return _appDbContext.Ratings.AsNoTracking();
+        }
+
+        public async Task<double> GetUserRatingPercentAsync(
+            Guid ratedUserId,
+            CancellationToken cancellationToken)
+        {
+            var query = _appDbContext.Ratings
+                .AsNoTracking()
+                .Where(r => r.RatedUserId == ratedUserId);
+
+            var total = await query.CountAsync(cancellationToken);
+
+            if (total == 0)
+                return 0;
+
+            var positive = await query
+                .CountAsync(r => r.RatingType == RatingType.Positive, cancellationToken);
+
+            return Math.Round((double)positive * 100 / total, 0);
+        }
+
     }
 }

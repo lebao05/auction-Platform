@@ -37,8 +37,6 @@ export function AdminProvider({ children }) {
         setLoading(true);
         try {
             await updateSystemSettingApi({ systemKey, systemValue });
-            setSystemSetting(pre => pre.map(item => item.systemKey == systemKey ? { systemKey, systemValue } : item));
-
         }
         catch (err) {
             console.error(err);

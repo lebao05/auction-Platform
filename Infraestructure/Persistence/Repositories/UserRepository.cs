@@ -80,6 +80,30 @@ namespace Infraestructure.Persistence.Repositories
         {
             return await _context.Users.Include(u => u.SellerRequests).FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         }
+        public IQueryable<AppUser> GetUser()
+        {
+            return _context.Users.AsQueryable();
+        }
 
+        public Task<bool> IsUserSeller(
+            Guid userId,
+            CancellationToken cancellationToken = default)
+        {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+
+            return _context.SellerRequests
+                .AnyAsync(
+                    rq => rq.UserId == userId
+                       && rq.Status == Domain.Enums.RequestStatus.Approved
+                       && rq.UpdatedAt.HasValue
+                       && rq.UpdatedAt.Value >= sevenDaysAgo,
+                    cancellationToken
+                );
+        }
+
+        public Task<List<AppUser>> GetAllUsers(CancellationToken cancellationToken)
+        {
+            return _context.Users.ToListAsync(cancellationToken);
+        }
     }
 }

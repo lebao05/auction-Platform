@@ -1,6 +1,6 @@
 ﻿using Domain.Common;
 
-public class SystemSetting : BaseEntity
+    public class SystemSetting : BaseEntity
 {
     public string SystemKey { get; set; } = null!;
     public int SystemValue { get; set; }
@@ -10,5 +10,11 @@ public class SystemSetting : BaseEntity
         SystemKey = systemKey;
         SystemValue = systemValue;
     }
+
+    public void UpdateSystemValue(int newValue)
+    {
+        SystemValue = newValue;
+    }
+
     public SystemSetting() { }
 }

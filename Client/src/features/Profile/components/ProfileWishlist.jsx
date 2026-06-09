@@ -11,6 +11,7 @@ import { Heart } from "lucide-react";
 import { useWatchList } from "../../../contexts/WatchListContext";
 import Unknow from "../../../utils/Unknow";
 import { useNavigate } from "react-router-dom";
+import { formatTime } from "../../../utils/DateTimeExtension";
 
 const formatPrice = (v) =>
   v ? v.toLocaleString("vi-VN") + " VND" : "Chưa có bid";
@@ -73,8 +74,7 @@ export function ProfileWishlist() {
                     }
 
                     <p className="text-xs text-muted-foreground">
-                      Kết thúc: {formatDate(item.endDate)} (
-                      {getRemaining(item.endDate)})
+                      Kết thúc: {formatTime(item.endDate)}
                     </p>
 
                     <div className="flex items-center gap-2 pt-1">
@@ -84,7 +84,7 @@ export function ProfileWishlist() {
                         alt={item.sellerName}
                       />
                       <span className="text-sm">
-                        Người bán: {item.sellerName}
+                        {item.sellerName}
                       </span>
                     </div>
                   </div>

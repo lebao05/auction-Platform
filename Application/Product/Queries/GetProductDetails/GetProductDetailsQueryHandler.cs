@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.Messaging;
+using Domain.Entities;
 using Domain.Repositories;
 using Domain.Shared;
 namespace Application.Product.Queries.GetProductDetails
@@ -26,9 +27,11 @@ namespace Application.Product.Queries.GetProductDetails
                 {
                     UserId = b.BidderId,
                     BidAmount = b.BidAmount,
-                    FullName = request.userId.HasValue && b.BidderId == request.userId.Value ? b.Bidder.FullName : MaskName(b.Bidder.FullName),
+                    FullName = request.userId.HasValue && ( b.BidderId == request.userId.Value || request.userId.Value == product.SellerId )? b.Bidder.FullName : MaskName(b.Bidder.FullName),
                 })
                 .FirstOrDefault();
+            double averageRatingOfSeller = await _productRepository.GetUserRatingPercentAsync(product.SellerId,cancellationToken);
+
             var response = new GetProductDetailsResponse
             {
                 Id = product.Id,
@@ -50,6 +53,7 @@ namespace Application.Product.Queries.GetProductDetails
 
                 SellerId = product.SellerId,
                 SellerFullName = product.Seller.FullName,
+                averageRatingOfSeller= averageRatingOfSeller,
                 BlackList = product.Blacklists
                 .Select(b => new BlackListDto
                 {
@@ -72,7 +76,7 @@ namespace Application.Product.Queries.GetProductDetails
             {
                 Id = b.Id,
                 UserId = b.BidderId,
-                UserName = request.userId.HasValue && b.BidderId == request.userId.Value
+                UserName = request.userId.HasValue && (b.BidderId == request.userId.Value || request.userId == product.SellerId)
                         ? b.Bidder.FullName
                         : MaskName(b.Bidder.FullName),
                 BidAmount = b.BidAmount,

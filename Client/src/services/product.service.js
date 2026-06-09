@@ -123,3 +123,13 @@ export async function editCommentApi({ commentId, content }) {
     const response = await axios.put("/product/comment", { CommentId: commentId, Content: content });
     return response.data;
 }
+
+export async function getProductRelatedtoUserApi({ userId }) {
+    const response = await axios.get(`/product/products-user/${userId}`);
+    return response.data;
+}
+
+export async function getRatingsRelatedToUserApi({ userId }) {
+    const response = await axios.get(`/product/rating/user/${userId}`);
+    return response.data;
+}

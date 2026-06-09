@@ -32,6 +32,7 @@
         // Seller
         public Guid SellerId { get; set; }
         public string SellerFullName { get; set; } = string.Empty;
+        public double averageRatingOfSeller{ get; set; }
         public TopBidding? TopBidding { get; set; }
 
         public List<ProductImageDto> Images { get; set; } = new();

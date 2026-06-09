@@ -25,7 +25,7 @@ namespace Application.SystemSetting.Commands.AdjustSetting
             {
                 return Result.Failure(new Error("SystemSetting.NotFound", "There is no setting with this key"));
             }
-            setting!.SystemValue = request.SystemValue;
+            setting.UpdateSystemValue(request.SystemValue);
             await _unitOfWork.SaveChangesAsync();
             return Result.Success();
         }

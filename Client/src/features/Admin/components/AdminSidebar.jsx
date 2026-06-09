@@ -5,7 +5,6 @@ export function AdminSidebar({ activeSection, onSectionChange }) {
     const navItems = [
         { id: "overview", label: "Hệ thống", icon: LayoutDashboard },
         { id: "categories", label: "Danh Mục", icon: Grid },
-        { id: "products", label: "Sản Phẩm", icon: Package },
         { id: "users", label: "Người Dùng", icon: Users },
     ];
 

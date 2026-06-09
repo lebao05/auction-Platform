@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import WatchListProvider from "./contexts/WatchListContext.jsx";
+import { ChatProvider } from "./contexts/chatContext.jsx";
 
 const queryClient = new QueryClient();
 
@@ -22,18 +23,20 @@ createRoot(document.getElementById("root")).render(
         <AdminProvider>
           <ProductProvider>
             <WatchListProvider>
-              <App />
-              <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-              />
+              <ChatProvider>
+                <App />
+                <ToastContainer
+                  position="top-right"
+                  autoClose={3000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                />
+              </ChatProvider>
             </WatchListProvider>
           </ProductProvider>
         </AdminProvider>

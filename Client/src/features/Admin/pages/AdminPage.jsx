@@ -62,8 +62,7 @@ export default function AdminPage() {
                 <div className="p-6">
                     {activeSection === "overview" && (
                         <div className="grid gap-6">
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                                {/* Card Thống kê */}
+                            {/* <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                                 <Card>
                                     <CardHeader className="pb-3">
                                         <CardTitle className="text-sm font-medium text-muted-foreground">Tổng Danh Mục</CardTitle>
@@ -96,7 +95,7 @@ export default function AdminPage() {
                                         <p className="text-3xl font-bold text-primary">8</p>
                                     </CardContent>
                                 </Card>
-                            </div>
+                            </div> */}
 
                             {/* System Setting */}
                             <div className="bg-card border border-border rounded-lg p-6">
