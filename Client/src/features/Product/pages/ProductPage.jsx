@@ -116,7 +116,6 @@ export default function ProductPage() {
     
     if (error) return <p className="text-center text-red-500 mt-10">{error}</p>;
     if (loading || !product) return <Spinner />;
-
     const sortedImages = [...(product.images || [])].sort(
         (a, b) => (b.isMain === true) - (a.isMain === true)
     );
@@ -130,7 +129,6 @@ export default function ProductPage() {
     const isTopBidder = user && product.topBidding && product.topBidding.userId === user.userId;
     const prevImage = () => setCurrentImageIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
     const nextImage = () => setCurrentImageIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
-
     if (product == null) return;
     const handleRemoveFromBlacklist = async ({ blacklistId }) => {
         try {

@@ -1,7 +1,7 @@
 ﻿using Application.Abstractions.Messaging;
+using Application.Conversation.Queries.GetMessages;
 using Domain.Repositories;
 using Domain.Shared;
-
 
 namespace Application.Conversation.Queries.GetMessages
 {

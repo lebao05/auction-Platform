@@ -2,7 +2,7 @@
 {
     public class ConversationDetailDto
     {
-        public Guid Id { get; init; }
+        public Guid Id { get; init; }              // EMPTY if virtual
         public bool IsOneOnOne { get; init; }
         public IReadOnlyList<ConversationParticipantDto> Participants { get; init; } = [];
     }

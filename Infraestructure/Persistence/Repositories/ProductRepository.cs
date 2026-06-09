@@ -280,6 +280,5 @@ namespace Infraestructure.Persistence.Repositories
 
             return Math.Round((double)positive * 100 / total, 0);
         }
-
     }
 }

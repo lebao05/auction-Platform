@@ -4,7 +4,7 @@ using System.Net.Mime;
 
 namespace Domain.Entities
 {
-    public class MessageAttachment : BaseEntity    
+    public class MessageAttachment : BaseEntity
     {
         public Guid MessageId { get; set; }
         public Message Message { get; set; } = null!;

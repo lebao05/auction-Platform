@@ -5,7 +5,7 @@ import { ProfileInfo } from "../components/ProfileInfo"
 import { ProfileRatings } from "../components/ProfileRatings"
 import { ProfileWishlist } from "../components/ProfileWishlist"
 import { ProfileAuctions } from "../components/ProfileAuction"
-import { UserIcon, Star, Heart, Gavel, MessageCircle, CheckCircle2 } from "lucide-react"
+import { UserIcon, Star, Heart, Gavel, MessageCircle } from "lucide-react"
 import { useAuth } from "../../../contexts/AuthContext"
 import { useChat } from "../../../contexts/chatContext"
 import { useParams, useNavigate } from "react-router-dom"
@@ -16,7 +16,6 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { profile, ratings, updateRating, products } = useUserView(userId);
   const { user, updateInfo } = useAuth();
-
   const { openChatWithUser } = useChat();
 
   const [activeSection, setActiveSection] = useState("info");
@@ -98,27 +97,26 @@ export default function ProfilePage() {
               </button>
             )}
           </div>
-          {
-            profile?.averageRating != null && (<>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500 font-medium">Đánh giá tích cực</span>
-                  <span className={`font-bold ${profile.averageRating >= 80 ? "text-green-600" : "text-orange-500"}`}>
-                    {profile.averageRating}%
-                  </span>
-                </div>
 
-                {/* Thanh Progress Bar */}
-                <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-500 ${profile.averageRating >= 80 ? "bg-green-500" : "bg-orange-400"
-                      }`}
-                    style={{ width: `${profile.averageRating}%` }}
-                  />
-                </div>
+          {/* Average Rating */}
+          {profile?.averageRating != null && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500 font-medium">Đánh giá tích cực</span>
+                <span className={`font-bold ${profile.averageRating >= 80 ? "text-green-600" : "text-orange-500"}`}>
+                  {profile.averageRating}%
+                </span>
               </div>
-            </>)
-          }
+              {/* Thanh Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-500 ${profile.averageRating >= 80 ? "bg-green-500" : "bg-orange-400"}`}
+                  style={{ width: `${profile.averageRating}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <nav className="flex flex-col gap-2">
             {menuItems.map((item) => (
               <button

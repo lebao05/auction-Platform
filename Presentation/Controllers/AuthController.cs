@@ -134,6 +134,5 @@ namespace Presentation.Controllers
         {
             public bool success { get; set; }
         }
-
     }
 }

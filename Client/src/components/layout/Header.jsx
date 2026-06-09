@@ -233,6 +233,40 @@ export function Header() {
                   </div>
 
                   {/* Menu Items */}
+                  <div className="py-3">
+                    <p className="px-5 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cá nhân</p>
+                    <MenuItem icon={<Heart size={18} className="text-rose-500" />} label="Tin đăng đã lưu" />
+                    <MenuItem icon={<History size={18} className="text-blue-500" />} label="Lịch sử giao dịch" />
+                  </div>
+
+                  {/* seller Logic */}
+                  <div className="py-3 bg-slate-50/50">
+                    <p className="px-5 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cửa hàng</p>
+                    <div className="px-4 mt-1">
+                      {(!sellerRequest || (sellerRequest?.status === 2)) && (
+                        <button onClick={() => setRequestModal(true)} className="w-full flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all group">
+                          <div className="flex items-center gap-3">
+                            <Store className="w-4 h-4 text-slate-400 group-hover:text-primary" />
+                            <span className="text-sm font-bold text-slate-700 group-hover:text-primary">Trở thành Seller</span>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary" />
+                        </button>
+                      )}
+                      {sellerRequest?.status === 0 && (
+                        <div className="w-full text-center px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl text-amber-700 text-xs font-bold italic">Đang chờ duyệt Seller...</div>
+                      )}
+                      {sellerRequest?.status === 1 && (
+                        <button onClick={() => setRequestModal(true)} className="w-full flex items-center justify-between px-4 py-3 bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-emerald-100 transition-all group">
+                          <div className="flex items-center gap-3">
+                            <Store className="w-4 h-4 text-emerald-600" />
+                            <span className="text-sm font-bold text-emerald-700">Quản lý bán hàng</span>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-emerald-400" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="py-3 mb-2">
                     <p className="px-5 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">Hệ thống</p>
                     <MenuItem icon={<Settings size={18} />} label="Cài đặt tài khoản" onClick={() => navigate("/user/setting")} />

@@ -12,6 +12,7 @@ namespace Application.Conversation.Commands.SendMessage
         public MessageType MessageType { get; init; }
 
         public IReadOnlyList<MessageAttachmentDto> Attachments { get; init; } = [];
+
         public static MessageDto CreateMessageDto(Domain.Entities.Message message)
         {
             return new MessageDto

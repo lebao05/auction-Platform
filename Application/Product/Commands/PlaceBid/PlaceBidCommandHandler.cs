@@ -259,7 +259,7 @@ namespace Application.Product.Commands.PlaceBid
                 return Result.Success();
             }
 
-            long myTopPrice = maxAuto.MaxBidAmount + product.StepPrice; 
+            long myTopPrice = maxAuto.MaxBidAmount + product.StepPrice;
             product.BiddingCount++;
 
             var newBidding = new BiddingHistory(myTopPrice, productId, userId);
