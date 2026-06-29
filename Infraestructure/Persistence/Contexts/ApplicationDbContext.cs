@@ -68,24 +68,9 @@ namespace Infraestructure.Persistence.Contexts
                 new IdentityRole<Guid> { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Name = "Admin", NormalizedName = "ADMIN" }
             );
             builder.Entity<SystemSetting>().HasData(
-                new SystemSetting
-                {
-                    Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-                    SystemKey = "NewProductTime",
-                    SystemValue = 5
-                },
-                new SystemSetting
-                {
-                    Id = Guid.Parse("13333333-3333-3333-3333-333333333333"),
-                    SystemKey = "ExtraRenewalTime",
-                    SystemValue = 10
-                },
-                new SystemSetting
-                {
-                    Id = Guid.Parse("23333333-3333-3333-3333-333333333333"),
-                    SystemKey = "RenewalTriggerTime",
-                    SystemValue = 5
-                }
+                new SystemSetting("NewProductTime", 5, Guid.Parse("33333333-3333-3333-3333-333333333333")),
+                new SystemSetting("ExtraRenewalTime", 10, Guid.Parse("13333333-3333-3333-3333-333333333333")),
+                new SystemSetting("RenewalTriggerTime", 5, Guid.Parse("23333333-3333-3333-3333-333333333333"))
             );
             builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }

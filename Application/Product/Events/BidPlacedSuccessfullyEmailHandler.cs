@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions;
 using Domain.DomainEvents;
 using Domain.Repositories;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Product.Events

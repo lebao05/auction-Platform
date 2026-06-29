@@ -11,16 +11,19 @@ namespace Infraestructure
     {
         public static IServiceCollection AddInfrastructureDependencies(this IServiceCollection services)
         {
-         
+
             services.AddScoped<IUserHelper, UserHelper>();
             services.AddScoped<IUserRepository,UserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+
+            // Cloudinary is the active file storage provider
+            services.AddScoped<IFileStorageService, CloudinaryService>();
+
             services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
             services.AddScoped<IConversationRepository, ConversationRepository>();
-            services.AddTransient<IEmailService, EmailService>();
+            services.AddScoped<IEmailService, EmailService>();
             return services;
         }
     }
